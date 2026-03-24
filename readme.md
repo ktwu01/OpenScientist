@@ -10,30 +10,7 @@
 
 > A living repository where the world's leading scientists encode the deepest knowledge of their fields — so that AI can stand on the shoulders of giants.
 
-```mermaid
-graph TD
-    ROOT(("🌍 OpenScientist"))
-
-    ROOT --> NAT("🔬 Natural Sciences")
-    ROOT --> FORM("📐 Formal Sciences")
-
-    NAT --> BIOLOGY("🧬 Biology")
-    NAT --> CHEMISTRY("⚗️ Chemistry")
-    FORM --> COMPUTER_SCIENCE("💻 Computer Science")
-    ROOT --> CROSS_DOMAIN("🔀 Cross Domain")
-    FORM --> MATHEMATICS("➗ Mathematics")
-    NAT --> NEUROSCIENCE("🧠 Neuroscience")
-    NAT --> PHYSICS("⚛️ Physics")
-
-    classDef root    fill:#1a1a2e,stroke:#4A90D9,stroke-width:3px,color:#fff,font-weight:bold
-    classDef group   fill:#16213e,stroke:#4A90D9,stroke-width:2px,color:#7eb8f7,font-weight:bold
-    classDef domain  fill:#0f3460,stroke:#4A90D9,stroke-width:1.5px,color:#a8d4ff
-    classDef subdomain fill:#ffffff,stroke:#d0d7de,stroke-width:1px,color:#24292f
-
-    class ROOT root
-    class NAT,FORM group
-    class BIOLOGY,CHEMISTRY,COMPUTER_SCIENCE,CROSS_DOMAIN,MATHEMATICS,NEUROSCIENCE,PHYSICS domain
-```
+![Knowledge Tree](assets/knowledge-tree.png)
 
 ---
 

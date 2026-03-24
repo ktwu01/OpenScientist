@@ -6,9 +6,16 @@
 
 # 🌍 OpenScientist
 
-**Our mission: to distill the world's most advanced scientific know-how into AI — and build the AI Scientist.**
+> *„Wer nicht von dreitausend Jahren sich weiß Rechenschaft zu geben, bleibt im Dunkeln unerfahren, mag von Tag zu Tage leben."*
+> — Johann Wolfgang von Goethe
+>
+> 不能汲取三千年历史经验的人，没有未来可言。
+>
+> *He who cannot draw on three thousand years of history is living hand to mouth.*
 
-> A living repository where the world's leading scientists encode the deepest knowledge of their fields — so that AI can stand on the shoulders of giants.
+**Our mission:** Unite the knowledge of the world's top experts across every domain — to accelerate AI-driven scientific discovery.
+
+**🚀 Share your research expertise. Together, we create the AI-era Einstein, Da Vinci, and Kant.**
 
 ![Knowledge Tree](assets/knowledge-tree.png)
 
@@ -69,7 +76,15 @@ Every pull request touching a skill file triggers CI (`tools/validate.py`) that 
 
 We welcome contributions from domain experts. See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide.
 
-**5 steps:**
+### Contributor Requirements
+
+| Requirement | Details |
+|---|---|
+| **Academic credential** | PhD degree or equivalent research position (postdoc, research scientist, professor, etc.) is **required** |
+| **Real-name identity** | Contributors must use their real name and institutional affiliation in the `author` field (e.g., `"Dr. Jane Smith (MIT Physics)"`) |
+| **Domain expertise** | You may only contribute skills within your area of professional expertise |
+
+### 5 steps:
 
 1. **Fork** this repo
 2. **Copy the template** into the right domain folder:
@@ -142,9 +157,9 @@ MIT
 <details>
 <summary><h2 id="中文版本">🇨🇳 中文版本</h2></summary>
 
-**我们的使命：将人类最前沿的科学知识与 know-how 注入 AI，打造真正的 AI 科学家。**
+**我们的使命：** 汇集全人类各领域顶尖专家的知识，加速 AI 驱动的科学进步。
 
-> 汇聚全球各领域顶尖科学家的毕生所学，让 AI 站在巨人的肩膀上。
+**🚀 共享你的研究知识，创造 AI 时代的爱因斯坦、达芬奇与康德。**
 
 ---
 
@@ -203,7 +218,15 @@ cp OpenScientist/skills/physics/quantum-mechanics.md ~/.claude/skills/
 
 我们欢迎各领域专家贡献知识。请参阅 [CONTRIBUTING.md](CONTRIBUTING.md) 了解完整流程。
 
-**5 个步骤：**
+### 贡献者要求
+
+| 要求 | 说明 |
+|---|---|
+| **学术资质** | 必须持有博士学位或同等研究岗位（博士后、研究员、教授等） |
+| **实名认证** | 贡献者必须在 `author` 字段使用真实姓名和所属机构（如 `"张三 (北京大学物理学院)"`) |
+| **领域专长** | 只能在自己的专业领域内贡献 Skill |
+
+### 5 个步骤：
 
 1. **Fork** 本仓库
 2. **复制模板** 到对应领域文件夹：

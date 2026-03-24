@@ -4,28 +4,40 @@
 
 </div>
 
+<div align="center">
+
 # 🌍 OpenScientist
 
-> *„Wer nicht von dreitausend Jahren sich weiß Rechenschaft zu geben, bleibt im Dunkeln unerfahren, mag von Tag zu Tage leben."*
-> — Johann Wolfgang von Goethe
+> *„Wer nicht von dreitausend Jahren sich weiß Rechenschaft zu geben,*
+> *bleibt im Dunkeln unerfahren, mag von Tag zu Tage leben."*
 >
 > 不能汲取三千年历史经验的人，没有未来可言。
 >
 > *He who cannot draw on three thousand years of history is living hand to mouth.*
+>
+> — **Johann Wolfgang von Goethe**
+
+<br>
 
 **Our mission:** Unite the knowledge of the world's top experts across every domain — to accelerate AI-driven scientific discovery.
 
-**🚀 Share your research expertise. Together, we create the AI-era Einstein, Da Vinci, and Kant.**
+🚀 **Share your research expertise. Together, we create the AI-era Einstein, Da Vinci, and Kant.**
 
-![Knowledge Tree](assets/knowledge-tree.png)
+</div>
+
+<br>
+
+<p align="center">
+  <img src="assets/knowledge-tree.png" alt="Knowledge Tree" width="100%">
+</p>
 
 ---
 
 ## What is OpenScientist?
 
-OpenScientist is a curated library of **Claude Code Skills** — structured Markdown files that give AI agents deep, expert-level reasoning capabilities in specific scientific domains. Each skill is written by a domain expert and encodes the knowledge, tools, reasoning protocols, and common pitfalls of their field.
+OpenScientist is a curated library of **Claude Code Skills** — structured Markdown files that give AI agents deep, expert-level reasoning capabilities in specific scientific domains.
 
-**The goal:** Point your AI agent at a skill, and it reasons like a domain expert.
+Each skill is written by a domain expert and encodes the knowledge, tools, reasoning protocols, and common pitfalls of their field. Point your AI agent at a skill, and it reasons like a domain expert.
 
 ---
 
@@ -45,7 +57,8 @@ cp OpenScientist/skills/physics/quantum-mechanics.md ~/.claude/skills/
 /quantum-mechanics  →  Claude reasons as a quantum physics expert
 ```
 
-### What's inside a skill file?
+<details>
+<summary><strong>What's inside a skill file?</strong></summary>
 
 | Section | Purpose |
 |---|---|
@@ -58,7 +71,10 @@ cp OpenScientist/skills/physics/quantum-mechanics.md ~/.claude/skills/
 | `## Examples` | Worked examples |
 | `## References` | Key papers and textbooks |
 
-### Quality tiers
+</details>
+
+<details>
+<summary><strong>Quality tiers</strong></summary>
 
 | Status | Meaning |
 |---|---|
@@ -66,9 +82,9 @@ cp OpenScientist/skills/physics/quantum-mechanics.md ~/.claude/skills/
 | `reviewed` | Approved by a domain expert maintainer |
 | `verified` | Tested in real AI-scientist workflows |
 
-### Automated validation
-
 Every pull request touching a skill file triggers CI (`tools/validate.py`) that checks required fields and section structure. A PR cannot be merged if validation fails.
+
+</details>
 
 ---
 
@@ -78,13 +94,13 @@ We welcome contributions from domain experts. See [CONTRIBUTING.md](CONTRIBUTING
 
 ### Contributor Requirements
 
-| Requirement | Details |
-|---|---|
-| **Academic credential** | PhD degree or equivalent research position (postdoc, research scientist, professor, etc.) is **required** |
-| **Real-name identity** | Contributors must use their real name and institutional affiliation in the `author` field (e.g., `"Dr. Jane Smith (MIT Physics)"`) |
-| **Domain expertise** | You may only contribute skills within your area of professional expertise |
+> **Who can contribute?** We maintain a high bar for scientific accuracy.
 
-### 5 steps:
+- **Academic credential** — PhD degree or equivalent research position (postdoc, research scientist, professor, etc.) is **required**
+- **Real-name identity** — Contributors must use their real name and institutional affiliation in the `author` field (e.g., `"Dr. Jane Smith (MIT Physics)"`)
+- **Domain expertise** — You may only contribute skills within your area of professional expertise
+
+### 5 Steps
 
 1. **Fork** this repo
 2. **Copy the template** into the right domain folder:
@@ -104,15 +120,27 @@ A domain maintainer listed in [CODEOWNERS](CODEOWNERS) will be automatically ass
 
 ---
 
-## How the Repository is Managed
+## Domains
+
+| Domain | Skills | Maintainer(s) |
+|---|---|---|
+| ⚛️ Physics | — | *Seeking maintainer* |
+| 🧬 Biology | — | *Seeking maintainer* |
+| ⚗️ Chemistry | — | *Seeking maintainer* |
+| ➗ Mathematics | — | *Seeking maintainer* |
+| 🧠 Neuroscience | — | *Seeking maintainer* |
+| 💻 Computer Science | — | *Seeking maintainer* |
+
+---
+
+<details>
+<summary><strong>Repository Management</strong></summary>
 
 ### Domain ownership
 
-Each `skills/<domain>/` folder is owned by a domain expert maintainer, defined in [CODEOWNERS](CODEOWNERS). When a PR touches that folder, GitHub automatically requests their review. The maintainer approves or requests changes — repository owner (@HHHHHejia) only needs to intervene at the root level.
+Each `skills/<domain>/` folder is owned by a domain expert maintainer, defined in [CODEOWNERS](CODEOWNERS). When a PR touches that folder, GitHub automatically requests their review.
 
 ### Updating the skills index
-
-After any skill is merged, regenerate the browsable index:
 
 ```bash
 python tools/build_index.py   # writes SKILLS_INDEX.md
@@ -129,22 +157,10 @@ skills/physics/    @their-github-handle
 
 ### Promoting a skill's status
 
-After a maintainer reviews a skill, manually update the `status` field in that file:
 - `draft` → `reviewed` (maintainer approves)
 - `reviewed` → `verified` (tested in a real workflow)
 
----
-
-## Domains
-
-| Domain | Skills | Maintainer(s) |
-|---|---|---|
-| ⚛️ Physics | — | *Seeking maintainer* |
-| 🧬 Biology | — | *Seeking maintainer* |
-| ⚗️ Chemistry | — | *Seeking maintainer* |
-| ➗ Mathematics | — | *Seeking maintainer* |
-| 🧠 Neuroscience | — | *Seeking maintainer* |
-| 💻 Computer Science | — | *Seeking maintainer* |
+</details>
 
 ---
 
@@ -157,17 +173,21 @@ MIT
 <details>
 <summary><h2 id="中文版本">🇨🇳 中文版本</h2></summary>
 
+<div align="center">
+
 **我们的使命：** 汇集全人类各领域顶尖专家的知识，加速 AI 驱动的科学进步。
 
-**🚀 共享你的研究知识，创造 AI 时代的爱因斯坦、达芬奇与康德。**
+🚀 **共享你的研究知识，创造 AI 时代的爱因斯坦、达芬奇与康德。**
+
+</div>
 
 ---
 
 ## 这是什么？
 
-OpenScientist 是一个精心策划的 **Claude Code Skills 库** —— 每个 Skill 是一个结构化的 Markdown 文件，赋予 AI 智能体特定科学领域的专家级推理能力。每个 Skill 由该领域的专家撰写，编码了领域知识、工具、推理协议和常见陷阱。
+OpenScientist 是一个精心策划的 **Claude Code Skills 库** —— 每个 Skill 是一个结构化的 Markdown 文件，赋予 AI 智能体特定科学领域的专家级推理能力。
 
-**目标：** 让 AI 调用一个 Skill，就能像领域专家一样思考。
+每个 Skill 由该领域的专家撰写，编码了领域知识、工具、推理协议和常见陷阱。让 AI 调用一个 Skill，就能像领域专家一样思考。
 
 ---
 
@@ -187,7 +207,8 @@ cp OpenScientist/skills/physics/quantum-mechanics.md ~/.claude/skills/
 /quantum-mechanics  →  Claude 以量子物理专家身份推理
 ```
 
-### Skill 文件的结构
+<details>
+<summary><strong>Skill 文件的结构</strong></summary>
 
 | 部分 | 作用 |
 |---|---|
@@ -200,7 +221,10 @@ cp OpenScientist/skills/physics/quantum-mechanics.md ~/.claude/skills/
 | `## Examples` | 示范性例题 |
 | `## References` | 关键论文和教材 |
 
-### 质量等级
+</details>
+
+<details>
+<summary><strong>质量等级</strong></summary>
 
 | 状态 | 含义 |
 |---|---|
@@ -208,9 +232,9 @@ cp OpenScientist/skills/physics/quantum-mechanics.md ~/.claude/skills/
 | `reviewed` | 已由领域专家审核通过 |
 | `verified` | 已在真实 AI 科学家工作流中验证 |
 
-### 自动化校验
-
 每次 PR 修改 Skill 文件时，CI 会自动运行 `tools/validate.py` 检查必填字段和章节结构。校验不通过则无法合并。
+
+</details>
 
 ---
 
@@ -220,13 +244,13 @@ cp OpenScientist/skills/physics/quantum-mechanics.md ~/.claude/skills/
 
 ### 贡献者要求
 
-| 要求 | 说明 |
-|---|---|
-| **学术资质** | 必须持有博士学位或同等研究岗位（博士后、研究员、教授等） |
-| **实名认证** | 贡献者必须在 `author` 字段使用真实姓名和所属机构（如 `"张三 (北京大学物理学院)"`) |
-| **领域专长** | 只能在自己的专业领域内贡献 Skill |
+> **谁可以贡献？** 我们对科学准确性有严格要求。
 
-### 5 个步骤：
+- **学术资质** — 必须持有博士学位或同等研究岗位（博士后、研究员、教授等）
+- **实名认证** — 贡献者必须在 `author` 字段使用真实姓名和所属机构（如 `"张三 (北京大学物理学院)"`）
+- **领域专长** — 只能在自己的专业领域内贡献 Skill
+
+### 5 个步骤
 
 1. **Fork** 本仓库
 2. **复制模板** 到对应领域文件夹：
@@ -243,39 +267,6 @@ cp OpenScientist/skills/physics/quantum-mechanics.md ~/.claude/skills/
 [CODEOWNERS](CODEOWNERS) 中的领域维护者会自动收到 review 请求，负责审核科学内容的准确性。
 
 **没有你的研究方向？** 可以提议新的子领域或顶层领域 —— 参阅 [CONTRIBUTING.md § 提议新领域或子领域](CONTRIBUTING.md#提议新领域或子领域)。
-
----
-
-## 如何管理这个仓库
-
-### 领域所有权
-
-每个 `skills/<domain>/` 文件夹由对应的领域专家维护，定义在 [CODEOWNERS](CODEOWNERS)。PR 触碰该文件夹时，GitHub 自动指派他们 review。仓库管理员（@HHHHHejia）只需处理根目录级别的事务。
-
-### 更新 Skills 索引
-
-每次有新 Skill 合并后，重新生成索引：
-
-```bash
-python tools/build_index.py   # 生成 SKILLS_INDEX.md
-git add SKILLS_INDEX.md && git commit -m "chore: update skills index"
-```
-
-### 招募新的领域专家
-
-编辑 [CODEOWNERS](CODEOWNERS)，替换对应行的占位符：
-
-```
-skills/physics/    @专家的GitHub用户名
-```
-
-之后该领域的所有 PR 都会自动指派给他们 review。
-
-### 提升 Skill 的状态
-
-维护者审核通过后，手动修改文件中的 `status` 字段：
-- `draft` → `reviewed`（维护者批准后）
-- `reviewed` → `verified`（在真实工作流中验证后）
 
 ---
 

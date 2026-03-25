@@ -8,18 +8,20 @@
 
 # 🌍 OpenScientist
 
-> **[DE]** *„Wer nicht von dreitausend Jahren sich weiß Rechenschaft zu geben,*
-> *bleibt im Dunkeln unerfahren, mag von Tag zu Tage leben."*
->
-> **[CN]** 不能汲取三千年历史经验的人，没有未来可言。
->
-> **[EN]** *He who cannot draw on three thousand years of history is living hand to mouth.*
->
-> — **Johann Wolfgang von Goethe**<br>
+*"Wer nicht von dreitausend Jahren sich weiß Rechenschaft zu geben,*
+*bleibt im Dunkeln unerfahren, mag von Tag zu Tage leben."*
+
+不能汲取三千年历史经验的人，没有未来可言。
+
+*He who cannot draw on three thousand years of history is living hand to mouth.*
+
+— **Johann Wolfgang von Goethe**
+
+<br>
 
 **Our mission:** Unite the knowledge of the world's top experts across every domain — to accelerate AI-driven scientific discovery.
 
-**Share your research expertise. Together, we create the AI-era Einstein, Da Vinci, and Kant.**<br>
+### Share your research expertise. Together, we create the AI-era Einstein, Da Vinci, and Kant.
 
 <p align="center">
   <img src="assets/knowledge-tree.png" alt="Knowledge Tree" width="100%">
@@ -31,17 +33,37 @@
 
 </div>
 
-**What is it:** OpenScientist is a curated library of **Claude Code Skills** — structured Markdown files that give AI agents deep, expert-level reasoning capabilities in specific scientific domains.
+<details open>
+<summary><strong>What is it</strong></summary>
 
-**How it works:** Each skill is written by a domain expert and encodes the knowledge, tools, reasoning protocols, and common pitfalls of their field. Point your AI agent at a skill, and it reasons like a domain expert.
+OpenScientist is a curated library of **Claude Code Skills** — structured Markdown files that give AI agents deep, expert-level reasoning capabilities in specific scientific domains.
 
-**What can you do?** Contribute your expertise, or use this repo to supercharge your AI agent's scientific discovery.
+</details>
 
-**Why should you contribute?** Turning your know-how into AI-reusable knowledge means:
+<details open>
+<summary><strong>How it works</strong></summary>
+
+Each skill is written by a domain expert and encodes the knowledge, tools, reasoning protocols, and common pitfalls of their field. Point your AI agent at a skill, and it reasons like a domain expert.
+
+</details>
+
+<details open>
+<summary><strong>What can you do?</strong></summary>
+
+Contribute your expertise, or use this repo to supercharge your AI agent's scientific discovery.
+
+</details>
+
+<details open>
+<summary><strong>Why should you contribute?</strong></summary>
+
+Turning your know-how into AI-reusable knowledge means:
 
 1. **Boost your own research efficiency** — your AI agent gains your expertise and works alongside you
 2. **Boost humanity's research efficiency** — every scientist benefits from the collective knowledge
 3. **Survive the Singularity** — when ASI takes over, your contribution to this repo might just save your life
+
+</details>
 
 ---
 
@@ -140,7 +162,7 @@ A domain maintainer listed in [CODEOWNERS](CODEOWNERS) will be automatically ass
 
 ---
 
-<details>
+<details open>
 <summary><strong>5. Repository Management</strong></summary>
 
 ### 5.1 Domain ownership
@@ -298,5 +320,36 @@ cp OpenScientist/skills/physics/quantum-mechanics.md ~/.claude/skills/
 | ➗ Mathematics 数学        | —          | *招募中* |
 | 🧠 Neuroscience 神经科学   | —          | *招募中* |
 | 💻 Computer Science 计算机 | —          | *招募中* |
+
+---
+
+<details open>
+<summary><strong>5. 仓库管理</strong></summary>
+
+### 5.1 领域归属
+
+每个 `skills/<domain>/` 文件夹由一位领域专家维护者负责，定义在 [CODEOWNERS](CODEOWNERS) 中。当 PR 涉及该文件夹时，GitHub 会自动请求其 review。
+
+### 5.2 更新 Skills 索引
+
+```bash
+python tools/build_index.py   # 生成 SKILLS_INDEX.md
+git add SKILLS_INDEX.md && git commit -m "chore: update skills index"
+```
+
+### 5.3 添加新的领域专家
+
+编辑 [CODEOWNERS](CODEOWNERS)，将占位符替换为其 GitHub 用户名：
+
+```
+skills/physics/    @their-github-handle
+```
+
+### 5.4 提升 Skill 状态
+
+- `draft` → `reviewed`（维护者审核通过）
+- `reviewed` → `verified`（在真实工作流中验证）
+
+</details>
 
 </details>

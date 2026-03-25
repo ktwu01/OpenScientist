@@ -50,39 +50,13 @@ python utils/tools/validate.py skills/<domain>/<subdomain>/<your-skill-name>.md
 - Title format: `[<domain>/<subdomain>] Add <skill-name> skill`
 - The PR template will prompt you for a checklist
 
-A domain maintainer listed in [CODEOWNERS](../.github/CODEOWNERS) will review your submission for scientific accuracy.
+A domain reviewer listed in [CODEOWNERS](../.github/CODEOWNERS) will review your submission for scientific accuracy.
 
 ---
 
 ## 3. Propose a New Area
 
-Don't see your field represented? You can propose a new **subdomain** (a folder within an existing domain) or an entirely new **top-level domain**.
-
-### 3.1 New subdomain
-
-All 131 arXiv-aligned subdomain folders are pre-created under `skills/`. If you believe a subdomain is missing, create it directly in your PR alongside your first skill:
-
-```bash
-mkdir skills/physics/your-new-subdomain
-cp skills/_template.md skills/physics/your-new-subdomain/your-skill.md
-```
-
-### 3.2 New top-level domain (e.g. `skills/earth-science/`)
-
-A new top-level domain requires broader consensus. Open a **GitHub Issue** first using the *Propose New Area* template before submitting a PR:
-
-1. [Open an issue](https://github.com/HHHHHejia/OpenScientist/issues/new?template=propose-new-area.md) with the *Propose New Area* template
-2. Describe the domain, why it belongs here, and who will maintain it
-3. Once the core team approves (label: `area: accepted`), submit a PR that includes:
-   - `skills/<new-domain>/README.md` — domain overview and maintainer info
-   - At least one initial skill file
-   - An updated `CODEOWNERS` entry for the new folder
-
-### 3.3 What makes a good area proposal?
-
-- Clear scope: skills in this area are distinct and non-overlapping with existing domains
-- An identified expert willing to serve as maintainer
-- At least 3–5 skills that could realistically be contributed
+All 155 arXiv-aligned subcategory folders are pre-created under `skills/`. If you believe a subdomain is missing or want to propose a new top-level domain, [**open an issue →**](https://github.com/HHHHHejia/OpenScientist/issues/new?template=propose-new-area.md)
 
 ---
 
@@ -91,10 +65,10 @@ A new top-level domain requires broader consensus. Open a **GitHub Issue** first
 | Stage | Who | What they check |
 |---|---|---|
 | CI (automated) | GitHub Actions | Frontmatter schema validity |
-| Domain review | Domain maintainer | Scientific accuracy, completeness |
-| Merge | Domain maintainer | Approve + merge |
+| Domain review | Domain reviewer | Scientific accuracy, completeness |
+| Merge | Domain reviewer | Approve + merge |
 
-After merge, `status` starts as `draft`. It becomes `reviewed` once a maintainer signs off, and `verified` after real-world testing.
+After merge, `status` starts as `draft`. It becomes `reviewed` once a reviewer signs off, and `verified` after real-world testing.
 
 ---
 
@@ -172,33 +146,7 @@ python utils/tools/validate.py skills/<领域>/<子领域>/<你的skill名称>.m
 
 ## 3. 提议新领域或子领域
 
-没有看到你的研究方向？你可以提议新的**子领域**（在已有领域下新建文件夹）或全新的**顶层领域**。
-
-### 3.1 新子领域
-
-所有 131 个 arXiv 对齐的子领域文件夹已预创建在 `skills/` 下。如果你认为缺少某个子领域，可以直接在 PR 中新建：
-
-```bash
-mkdir skills/physics/your-new-subdomain
-cp skills/_template.md skills/physics/your-new-subdomain/your-skill.md
-```
-
-### 3.2 新顶层领域（例如 `skills/earth-science/`）
-
-新顶层领域需要更广泛的共识。请先通过 **GitHub Issue** 提议，再提交 PR：
-
-1. [创建 Issue](https://github.com/HHHHHejia/OpenScientist/issues/new?template=propose-new-area.md)，使用 *Propose New Area* 模板
-2. 描述该领域、为什么适合加入本仓库、谁来担任维护者
-3. 核心团队批准后（标签：`area: accepted`），提交 PR，包含：
-   - `skills/<新领域>/README.md` —— 领域概述与维护者信息
-   - 至少一个初始 Skill 文件
-   - 更新 `CODEOWNERS` 中对应的条目
-
-### 3.3 好的领域提议应具备
-
-- 明确的范围：与现有领域不重叠
-- 已确定愿意担任维护者的专家
-- 至少可以预见贡献 3–5 个 Skill
+所有 155 个 arXiv 对齐的子领域文件夹已预创建在 `skills/` 下。如果你认为缺少某个子领域或想提议新的顶层领域，[**提交 Issue →**](https://github.com/HHHHHejia/OpenScientist/issues/new?template=propose-new-area.md)
 
 ---
 

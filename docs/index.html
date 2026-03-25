@@ -13,180 +13,231 @@
     color: #c8d0e0;
     min-height: 100vh;
     padding: 40px 20px 80px;
+    overflow-x: auto;
   }
 
-  header {
-    text-align: center;
-    margin-bottom: 48px;
-  }
-  header h1 {
-    font-size: 2.2rem;
-    font-weight: 700;
-    color: #e8ecf4;
-    margin-bottom: 8px;
-  }
+  header { text-align: center; margin-bottom: 32px; }
+  header h1 { font-size: 2.2rem; font-weight: 700; color: #e8ecf4; margin-bottom: 8px; }
   header h1 .emoji { font-size: 2.4rem; }
-  header p {
-    font-size: 1rem;
-    color: #7888a8;
-    max-width: 520px;
-    margin: 0 auto;
-  }
-  header a {
-    color: #5a9cf5;
-    text-decoration: none;
-  }
+  header p { font-size: 1rem; color: #7888a8; max-width: 520px; margin: 0 auto; }
+  header a { color: #5a9cf5; text-decoration: none; }
   header a:hover { text-decoration: underline; }
 
-  .tree {
-    max-width: 880px;
-    margin: 0 auto;
+  /* ── stats banner ── */
+  .stats-banner {
+    display: flex; justify-content: center; align-items: center; gap: 32px;
+    margin: 0 auto 24px; padding: 20px 32px; max-width: 680px;
+    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px;
   }
+  .stat-item { text-align: center; }
+  .stat-number { font-size: 2rem; font-weight: 700; color: #e8ecf4; line-height: 1.2; }
+  .stat-number.highlight { color: #34d399; }
+  .stat-label { font-size: 0.82rem; color: #5a7090; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }
+  .stat-divider { width: 1px; height: 40px; background: rgba(255,255,255,0.08); }
 
-  /* ── node ── */
-  .node {
+  /* ── search bar ── */
+  .search-container { max-width: 680px; margin: 0 auto 40px; position: relative; }
+  .search-input {
+    width: 100%; padding: 12px 44px 12px 16px;
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px; color: #dce2f0; font-size: 0.95rem; outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .search-input::placeholder { color: #4a5a78; }
+  .search-input:focus { border-color: rgba(90,156,245,0.4); box-shadow: 0 0 0 3px rgba(90,156,245,0.1); }
+  .search-clear {
+    position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+    background: none; border: none; color: #5a7090; font-size: 1.2rem;
+    cursor: pointer; display: none; padding: 4px; line-height: 1;
+  }
+  .search-clear.visible { display: block; }
+  .search-clear:hover { color: #8898b8; }
+
+  /* ── tree graph layout ── */
+  .tree-graph { display: flex; flex-direction: column; align-items: center; min-width: fit-content; }
+
+  .tnode {
+    display: flex; flex-direction: column; align-items: center;
     position: relative;
-    margin-left: 24px;
-    padding-left: 20px;
-    border-left: 1px solid rgba(74, 144, 217, 0.15);
-  }
-  .node:last-child { border-left-color: transparent; }
-  .node:last-child::before {
-    content: '';
-    position: absolute;
-    left: -1px; top: 0;
-    width: 1px; height: 20px;
-    background: rgba(74, 144, 217, 0.15);
   }
 
-  .node-label {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    padding: 8px 16px;
-    margin: 4px 0;
-    border-radius: 8px;
-    cursor: pointer;
-    user-select: none;
-    transition: background 0.2s, box-shadow 0.2s;
-  }
-  .node-label:hover {
-    background: rgba(255,255,255,0.04);
-  }
-  .node-label::before {
-    content: '';
-    position: absolute;
-    left: -20px; top: 50%;
-    width: 20px; height: 1px;
-    background: rgba(74, 144, 217, 0.2);
-  }
-
-  .node-label .arrow {
-    display: inline-block;
-    width: 18px; height: 18px;
-    text-align: center;
-    font-size: 11px;
-    line-height: 18px;
-    color: #5878a0;
-    transition: transform 0.25s ease;
-    flex-shrink: 0;
-  }
-  .node-label .arrow.open { transform: rotate(90deg); }
-  .node-label .arrow.leaf { visibility: hidden; }
-
-  .node-label .icon { font-size: 1.3em; flex-shrink: 0; }
-
-  .node-label .name {
-    font-weight: 600;
+  .tnode-box {
+    padding: 10px 20px; border-radius: 10px; font-weight: 600; font-size: 0.95rem;
+    cursor: pointer; user-select: none; white-space: nowrap; position: relative;
+    transition: transform 0.15s, box-shadow 0.2s;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.05);
     color: #dce2f0;
-    font-size: 0.95rem;
   }
-  .node-label .code {
-    font-size: 0.78rem;
-    color: #5a7090;
-    font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
-    opacity: 0.85;
-  }
-  .node-label .count {
-    font-size: 0.72rem;
-    color: #4a6080;
-    background: rgba(74,144,217,0.08);
-    padding: 1px 8px;
-    border-radius: 10px;
+  .tnode-box:hover { transform: translateY(-2px); }
+  .tnode-box .icon { margin-right: 6px; }
+  .tnode-box .code { font-size: 0.72rem; color: #5a7090; margin-left: 8px; font-family: 'SF Mono','Fira Code','Consolas',monospace; }
+  .tnode-box .badge-count {
+    font-size: 0.68rem; background: rgba(255,255,255,0.08); color: #7888a8;
+    padding: 1px 7px; border-radius: 8px; margin-left: 8px;
   }
 
-  /* children container */
-  .children {
-    overflow: hidden;
-    max-height: 0;
-    opacity: 0;
+  /* Root node */
+  .tnode-root > .tnode-box {
+    font-size: 1.4rem; padding: 14px 32px;
+    background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.15);
+    color: #f0f2f8;
+  }
+
+  /* Group nodes (Natural Sciences, Formal Sciences) */
+  .tnode-group > .tnode-box {
+    font-size: 1.05rem; padding: 10px 24px;
+    background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.12);
+    color: #e0e4f0;
+  }
+
+  /* Domain nodes — colored, fixed width */
+  .tnode-domain {
+    width: 300px; align-items: stretch;
+  }
+  .tnode-domain > .tnode-box {
+    font-size: 0.88rem; padding: 10px 16px;
+    cursor: pointer; white-space: normal; text-align: center;
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+  }
+  .tnode-domain.active > .tnode-box {
+    box-shadow: 0 0 20px var(--dcolor, rgba(255,255,255,0.2));
+  }
+  .dbox-top {
+    display: flex; align-items: center; gap: 6px;
+  }
+  .dbox-top .icon { font-size: 1.2em; }
+  .dbox-name {
+    font-size: 0.85rem; color: #e8ecf4; line-height: 1.3;
+  }
+
+  /* ── tree connector lines ── */
+  .tnode-kids {
+    display: flex; justify-content: center; align-items: flex-start;
+    padding-top: 40px; position: relative;
+  }
+
+  /* Vertical line from parent label down to children's horizontal bar */
+  .tnode-kids::before {
+    content: ''; position: absolute; top: 0; left: 50%;
+    width: 1px; height: 20px; background: rgba(74,144,217,0.25);
+  }
+
+  /* Each child: vertical line up + horizontal bar segment */
+  .tnode-kids > .tnode { padding: 0 12px; position: relative; }
+
+  .tnode-kids > .tnode::before {
+    content: ''; position: absolute; top: -20px; left: 50%;
+    width: 1px; height: 20px; background: rgba(74,144,217,0.25);
+  }
+  .tnode-kids > .tnode::after {
+    content: ''; position: absolute; top: -20px; left: 0; right: 0;
+    height: 1px; background: rgba(74,144,217,0.25);
+  }
+  .tnode-kids > .tnode:first-child::after { left: 50%; }
+  .tnode-kids > .tnode:last-child::after { right: 50%; }
+  .tnode-kids > .tnode:only-child::after { display: none; }
+
+  /* ── subdomain panel ── */
+  .subdomain-panel {
+    width: 100%; margin-top: 8px;
+    border-left: 2px solid var(--dcolor, rgba(255,255,255,0.1));
+    padding: 4px 0 4px 10px;
+    max-height: 0; overflow: hidden; opacity: 0;
     transition: max-height 0.4s ease, opacity 0.3s ease;
   }
-  .children.open {
-    max-height: 5000px;
-    opacity: 1;
+  .subdomain-panel.open {
+    max-height: 8000px; opacity: 1;
   }
 
-  /* ── depth-specific colors ── */
-  .depth-0 > .node-label .name { font-size: 1.3rem; color: #f0f2f8; }
-  .depth-0 > .node-label { padding: 12px 20px; }
-  .depth-0 { border-left: none; margin-left: 0; padding-left: 0; }
-  .depth-0 > .node-label::before { display: none; }
 
-  .depth-1 > .node-label .name { font-size: 1.05rem; color: #c8d8f0; }
+  /* Sub-group header (Astrophysics, Condensed Matter, etc.) */
+  .sub-group-header {
+    padding: 6px 8px 3px; font-size: 0.8rem; font-weight: 600;
+    color: #b8c8e0; cursor: pointer; user-select: none;
+    display: flex; align-items: center; gap: 6px;
+    transition: color 0.15s;
+  }
+  .sub-group-header:hover { color: #dce4f0; }
+  .sub-group-header .sg-arrow {
+    font-size: 9px; transition: transform 0.2s; display: inline-block;
+  }
+  .sub-group-header .sg-arrow.open { transform: rotate(90deg); }
+  .sub-group-header .sg-code { font-size: 0.72rem; color: #7888a8; font-family: 'SF Mono','Fira Code','Consolas',monospace; }
+  .sub-group-header .sg-count { font-size: 0.68rem; color: #4a6080; background: rgba(74,144,217,0.08); padding: 1px 6px; border-radius: 8px; margin-left: auto; }
 
-  .leaf-node > .node-label {
-    cursor: default;
-  }
-  .leaf-node > .node-label .name {
-    font-weight: 400;
-    color: #98a8c0;
-    font-size: 0.88rem;
-  }
+  .sub-group-kids { overflow: hidden; max-height: 0; transition: max-height 0.3s ease; }
+  .sub-group-kids.open { max-height: 2000px; }
 
-  .maintainer-badge {
-    font-size: 0.73rem;
-    font-weight: 600;
-    background: linear-gradient(135deg, rgba(52, 211, 153, 0.2), rgba(16, 185, 129, 0.12));
-    color: #34d399;
-    padding: 3px 10px;
-    border-radius: 12px;
-    margin-left: 8px;
-    border: 1px solid rgba(52, 211, 153, 0.3);
-    letter-spacing: 0.02em;
-    animation: maintainer-glow 3s ease-in-out infinite alternate;
+  /* Leaf subdomain item */
+  .sub-item {
+    padding: 3px 6px; font-size: 0.78rem; color: #d0d8e8;
+    transition: background 0.15s; border-radius: 4px;
+    line-height: 1.4; padding-left: 16px; position: relative;
   }
-  @keyframes maintainer-glow {
-    from { box-shadow: 0 0 4px rgba(52, 211, 153, 0.15); }
-    to   { box-shadow: 0 0 12px rgba(52, 211, 153, 0.3); }
+  .sub-item::before {
+    content: '\2022'; position: absolute; left: 4px; color: #6878a0;
   }
-  .has-maintainer > .node-label {
-    background: rgba(52, 211, 153, 0.04);
-    border-left: 2px solid rgba(52, 211, 153, 0.4);
-    padding-left: 14px;
-    border-radius: 6px;
+  .sub-item:hover { background: rgba(255,255,255,0.03); }
+  .sub-item.search-match { background: rgba(90,156,245,0.08); }
+  .sub-item.search-match .sub-name { color: #dce2f0; }
+  .sub-item .sub-name { }
+  .sub-item .sub-code { font-size: 0.7rem; color: #8898b8; font-family: 'SF Mono','Fira Code','Consolas',monospace; }
+
+  /* Reviewer badge in list */
+  .sub-reviewer {
+    display: block; margin-top: 2px;
+    font-size: 0.7rem; font-weight: 600; padding: 2px 8px;
+    border-radius: 10px; cursor: pointer;
+    transition: box-shadow 0.2s;
+    white-space: nowrap; width: fit-content;
   }
-  .has-maintainer > .node-label .name {
-    color: #d0e8dc !important;
+  .sub-reviewer:hover { box-shadow: 0 0 10px var(--dcolor, rgba(52,211,153,0.3)); }
+
+  /* Reviewer detail card (inside panel) */
+  .reviewer-card {
+    margin: 4px 0 8px 16px; padding: 10px 14px;
+    background: rgba(255,255,255,0.03); border: 1px solid rgba(52,211,153,0.2);
+    border-radius: 8px; animation: card-in 0.2s ease;
+  }
+  @keyframes card-in {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .reviewer-card .rc-name { font-size: 0.92rem; font-weight: 600; color: #e8ecf4; margin-bottom: 3px; }
+  .reviewer-card .rc-role { font-size: 0.82rem; color: #8898b8; margin-bottom: 6px; }
+  .reviewer-card .rc-link { display: block; font-size: 0.78rem; color: #5a9cf5; text-decoration: none; margin-bottom: 2px; }
+  .reviewer-card .rc-link:hover { text-decoration: underline; }
+
+  /* ── tooltip ── */
+  .desc-tooltip {
+    display: none; position: fixed; z-index: 1000; max-width: 420px;
+    padding: 10px 14px; background: rgba(14,18,32,0.96);
+    border: 1px solid rgba(255,255,255,0.12); border-radius: 8px;
+    color: #c8d0e0; font-size: 0.78rem; line-height: 1.5;
+    pointer-events: none; box-shadow: 0 4px 20px rgba(0,0,0,0.5);
   }
 
   /* ── responsive ── */
+  @media (max-width: 900px) {
+    .tnode-kids > .tnode { padding: 0 6px; }
+    .tnode-box { font-size: 0.82rem; padding: 8px 12px; }
+    .tnode-root > .tnode-box { font-size: 1.1rem; padding: 12px 24px; }
+  }
   @media (max-width: 600px) {
-    body { padding: 24px 8px 60px; }
-    .node { margin-left: 16px; padding-left: 14px; }
-    header h1 { font-size: 1.6rem; }
+    body { padding: 20px 8px 60px; }
+    .stats-banner { gap: 16px; padding: 14px 16px; }
+    .stat-number { font-size: 1.4rem; }
+    .tnode-box { font-size: 0.75rem; padding: 6px 10px; }
+    .tnode-box .code { display: none; }
+    .tnode-box .badge-count { display: none; }
+    .tnode-root > .tnode-box { font-size: 1rem; }
+    .tnode-kids > .tnode { padding: 0 3px; }
+    .subdomain-panel { min-width: 280px; max-width: 90vw; }
+    .desc-tooltip { max-width: 280px; }
   }
 
-  /* ── footer ── */
-  footer {
-    text-align: center;
-    margin-top: 64px;
-    color: #3a4a68;
-    font-size: 0.82rem;
-  }
-  footer a { color: #4a7ab8; text-decoration: none; }
-  footer a:hover { text-decoration: underline; }
+
 </style>
 </head>
 <body>
@@ -195,7 +246,7 @@
   <h1><span class="emoji">🌍</span> OpenScientist</h1>
   <p>Interactive knowledge tree — aligned with the
     <a href="https://arxiv.org/category_taxonomy" target="_blank">arXiv category taxonomy</a>.
-    Click any domain to expand.
+    Click a domain to explore its subcategories.
   </p>
   <div style="margin-top:20px; text-align:center;">
     <input type="text" id="searchInput" placeholder="Search skills (e.g. quantum)..." style="padding: 12px 20px; width: 100%; max-width: 400px; border-radius: 8px; border: 1px solid rgba(74, 144, 217, 0.4); background: rgba(0,0,0,0.2); color: white; font-size: 1rem; outline: none; box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: box-shadow 0.2s;">
@@ -203,17 +254,20 @@
   <div id="searchResults" style="margin-top: 15px; max-width: 600px; margin-left: auto; margin-right: auto; text-align: left;"></div>
 </header>
 
-<div class="tree" id="tree"></div>
+<div class="stats-banner" id="stats-banner"></div>
 
-<footer>
-  <a href="https://github.com/HHHHHejia/OpenScientist">GitHub Repository</a>
-  &nbsp;·&nbsp; 8 domains &nbsp;·&nbsp; 155 subcategories
-</footer>
+<div class="search-container">
+  <input type="text" class="search-input" id="search-input" placeholder="Search subcategories... (e.g. Machine Learning, cs.LG)">
+  <button class="search-clear" id="search-clear">&times;</button>
+</div>
+
+<div id="tree-container" style="display:flex;justify-content:center;overflow-x:auto;padding:0 20px;"></div>
+
 
 <script>
-const DATA = [
-  { name: "Natural Sciences", icon: "🔬", children: [
-    { name: "Physics", icon: "⚛️", code: "", children: [
+var DATA = [
+  { name: "Natural Sciences", icon: "\ud83d\udd2c", children: [
+    { name: "Physics", icon: "\u269b\ufe0f", code: "", color: "#f87171", children: [
       { name: "Astrophysics", code: "astro-ph", children: [
         { name: "Cosmology and Nongalactic Astrophysics", code: "astro-ph.CO" },
         { name: "Earth and Planetary Astrophysics", code: "astro-ph.EP" },
@@ -253,28 +307,31 @@ const DATA = [
       ]},
       { name: "Physics", code: "physics", children: [
         { name: "Accelerator Physics", code: "physics.acc-ph" },
-        { name: "Atmospheric and Oceanic Physics", code: "physics.ao-ph" },
+        { name: "Atmospheric and Oceanic Physics", code: "physics.ao-ph", maintainer: [{ name: "\u5434\u53e9\u5929", nameEn: "Koutian Wu", github: "ktwu01", affiliation: "UT Austin", role: "PhD Student", homepage: "https://www.linkedin.com/in/ktwu01/" }] },
         { name: "Applied Physics", code: "physics.app-ph" },
         { name: "Atomic and Molecular Clusters", code: "physics.atm-clus" },
         { name: "Atomic Physics", code: "physics.atom-ph" },
         { name: "Biological Physics", code: "physics.bio-ph" },
-        { name: "Chemical Physics", code: "physics.chem-ph", maintainer: "@Alexandrina-Chen (Flatiron)" },
+        { name: "Chemical Physics", code: "physics.chem-ph", maintainer: [{ name: "\u9648\u601d\u4f73", nameEn: "Sijia Chen", github: "Alexandrina-Chen", affiliation: "Flatiron Institute", role: "Research Fellow", homepage: "https://www.linkedin.com/in/sijia-chen-897a201b9/" }] },
         { name: "Classical Physics", code: "physics.class-ph" },
         { name: "Computational Physics", code: "physics.comp-ph" },
         { name: "Data Analysis, Statistics and Probability", code: "physics.data-an" },
+        { name: "Physics Education", code: "physics.ed-ph" },
         { name: "Fluid Dynamics", code: "physics.flu-dyn" },
         { name: "General Physics", code: "physics.gen-ph" },
-        { name: "Earth System Modeling", code: "physics.esm", maintainer: "@ktwu01 (UT Austin)" },
         { name: "Geophysics", code: "physics.geo-ph" },
+        { name: "History and Philosophy of Physics", code: "physics.hist-ph" },
         { name: "Instrumentation and Detectors", code: "physics.ins-det" },
         { name: "Medical Physics", code: "physics.med-ph" },
         { name: "Optics", code: "physics.optics" },
         { name: "Plasma Physics", code: "physics.plasm-ph" },
-        { name: "Space Physics", code: "physics.space-ph", maintainer: "@huangzesen (UCLA)" },
+        { name: "Popular Physics", code: "physics.pop-ph" },
+        { name: "Physics and Society", code: "physics.soc-ph" },
+        { name: "Space Physics", code: "physics.space-ph", maintainer: [{ name: "\u9ec4\u6cfd\u68ee", nameEn: "Zesen Huang", github: "huangzesen", affiliation: "UCLA", role: "Postdoc", homepage: "https://www.linkedin.com/in/zesen-huang-839b6a109/" }] },
       ]},
     ]},
-    { name: "Quantitative Biology", icon: "🧬", code: "q-bio", children: [
-      { name: "Biomolecules", code: "q-bio.BM" },
+    { name: "Quantitative Biology", icon: "\ud83e\uddec", code: "q-bio", color: "#fb923c", children: [
+      { name: "Biomolecules", code: "q-bio.BM", maintainer: [{ name: "武添彧", nameEn: "Terry Wu", github: "forxhunter", affiliation: "UIUC", role: "PhD Student", homepage: "https://forxhunter.github.io/" }]  },
       { name: "Cell Behavior", code: "q-bio.CB" },
       { name: "Genomics", code: "q-bio.GN" },
       { name: "Molecular Networks", code: "q-bio.MN" },
@@ -285,15 +342,15 @@ const DATA = [
       { name: "Subcellular Processes", code: "q-bio.SC" },
       { name: "Tissues and Organs", code: "q-bio.TO" },
     ]},
-    { name: "Electrical Engineering and Systems Science", icon: "⚡", code: "eess", children: [
+    { name: "Electrical Engineering and Systems Science", icon: "\u26a1", code: "eess", color: "#fbbf24", children: [
       { name: "Audio and Speech Processing", code: "eess.AS" },
       { name: "Image and Video Processing", code: "eess.IV" },
       { name: "Signal Processing", code: "eess.SP" },
       { name: "Systems and Control", code: "eess.SY" },
     ]},
   ]},
-  { name: "Formal Sciences", icon: "📐", children: [
-    { name: "Mathematics", icon: "➗", code: "math", children: [
+  { name: "Formal Sciences", icon: "\ud83d\udcd0", children: [
+    { name: "Mathematics", icon: "\u2797", code: "math", color: "#34d399", children: [
       { name: "Commutative Algebra", code: "math.AC" },
       { name: "Algebraic Geometry", code: "math.AG" },
       { name: "Analysis of PDEs", code: "math.AP" },
@@ -327,14 +384,14 @@ const DATA = [
       { name: "Spectral Theory", code: "math.SP" },
       { name: "Statistics Theory", code: "math.ST" },
     ]},
-    { name: "Computer Science", icon: "💻", code: "cs", children: [
-      { name: "Artificial Intelligence", code: "cs.AI" },
-      { name: "Hardware Architecture", code: "cs.AR", maintainer: "@Zhichenzzz (UW)" },
+    { name: "Computer Science", icon: "\ud83d\udcbb", code: "cs", color: "#22d3ee", children: [
+      { name: "Artificial Intelligence", code: "cs.AI", maintainer: [{ name: "耿鹤嘉", nameEn: "Hejia Geng", github: "HHHHHejia", affiliation: "Oxford", role: "Other", homepage: "https://www.linkedin.com/in/hejia-geng/" }, { name: "\u7ae0\u5f66\u535a", nameEn: "Yanbo Zhang", github: "Zhangyanbo", affiliation: "Tufts University", role: "Postdoc", homepage: "https://www.linkedin.com/in/zhang-yanbo-57b690101/" }] },
+      { name: "Hardware Architecture", code: "cs.AR", maintainer: [{ name: "\u66fe\u90c5\u7428", nameEn: "Zhichen Zeng", github: "Zhichenzzz", affiliation: "University of Washington", role: "PhD Student", homepage: "https://zhichenzzz.github.io/" }] },
       { name: "Computational Complexity", code: "cs.CC" },
       { name: "Computational Engineering, Finance, and Science", code: "cs.CE" },
       { name: "Computational Geometry", code: "cs.CG" },
-      { name: "Computation and Language", code: "cs.CL" },
-      { name: "Cryptography and Security", code: "cs.CR" },
+      { name: "Computation and Language", code: "cs.CL", maintainer: [{ name: "Ethan", nameEn: "Ethan", github: "hengzzzhou", affiliation: "USTC", role: "PhD Student", homepage: "https://henggg.cn" }]  },
+      { name: "Cryptography and Security", code: "cs.CR", maintainer: [{ name: "\u4f59\u6653\u822a", nameEn: "Xiaohang Yu", github: "xhyumiracle", affiliation: "Imperial College London", role: "PhD Student", homepage: "https://scholar.google.com/citations?user=WURsNDYAAAAJ&hl=en" }] },
       { name: "Computer Vision and Pattern Recognition", code: "cs.CV" },
       { name: "Computers and Society", code: "cs.CY" },
       { name: "Databases", code: "cs.DB" },
@@ -352,7 +409,7 @@ const DATA = [
       { name: "Information Theory", code: "cs.IT" },
       { name: "Machine Learning", code: "cs.LG" },
       { name: "Logic in Computer Science", code: "cs.LO" },
-      { name: "Multiagent Systems", code: "cs.MA" },
+      { name: "Multiagent Systems", code: "cs.MA", maintainer: [{ name: "\u82cf\u542f\u6668", nameEn: "Qisheng Su", github: "suqisheng", affiliation: "USTC", role: "PhD Student", homepage: "https://www.linkedin.com/in/suqisheng/" }, { name: "江蕾", nameEn: "Lei Jiang", github: "Joe-J", affiliation: "USTC PhD / NVIDIA Intern", role: "PhD Student", homepage: "https://scholar.google.cz/citations?user=K9xw5OsAAAAJ&hl=zh-CN" }] },
       { name: "Multimedia", code: "cs.MM" },
       { name: "Mathematical Software", code: "cs.MS" },
       { name: "Numerical Analysis", code: "cs.NA" },
@@ -369,7 +426,7 @@ const DATA = [
       { name: "Social and Information Networks", code: "cs.SI" },
       { name: "Systems and Control", code: "cs.SY" },
     ]},
-    { name: "Statistics", icon: "📊", code: "stat", children: [
+    { name: "Statistics", icon: "\ud83d\udcca", code: "stat", color: "#60a5fa", children: [
       { name: "Applications", code: "stat.AP" },
       { name: "Computation", code: "stat.CO" },
       { name: "Methodology", code: "stat.ME" },
@@ -377,12 +434,12 @@ const DATA = [
       { name: "Other Statistics", code: "stat.OT" },
       { name: "Statistics Theory", code: "stat.TH" },
     ]},
-    { name: "Economics", icon: "📈", code: "econ", children: [
+    { name: "Economics", icon: "\ud83d\udcc8", code: "econ", color: "#818cf8", children: [
       { name: "Econometrics", code: "econ.EM" },
-      { name: "General Economics", code: "econ.GN" },
+      { name: "General Economics", code: "econ.GN", maintainer: [{ name: "慕天瑞", nameEn: "Tianrui Mu", github: "GalacEqua", affiliation: "UCL", role: "PhD Student", homepage: "https://uk.linkedin.com/in/tianrui-edwin-mu" }]  },
       { name: "Theoretical Economics", code: "econ.TH" },
     ]},
-    { name: "Quantitative Finance", icon: "💹", code: "q-fin", children: [
+    { name: "Quantitative Finance", icon: "\ud83d\udcb9", code: "q-fin", color: "#c084fc", children: [
       { name: "Computational Finance", code: "q-fin.CP" },
       { name: "Economics", code: "q-fin.EC" },
       { name: "General Finance", code: "q-fin.GN" },
@@ -396,95 +453,487 @@ const DATA = [
   ]},
 ];
 
-function countLeaves(node) {
-  if (!node.children || node.children.length === 0) return 1;
-  return node.children.reduce((s, c) => s + countLeaves(c), 0);
+/* ── arXiv category descriptions (shown on hover) ── */
+var DESCRIPTIONS = {
+  /* Astrophysics */
+  "astro-ph.CO": "Phenomenology of early universe, cosmic microwave background, cosmological parameters, primordial element abundances, extragalactic distance scale, large-scale structure of the universe. Dark energy, dark matter, inflationary models, cosmic strings, primordial black holes, cosmological gravitational radiation.",
+  "astro-ph.EP": "Interplanetary medium, planetary physics, planetary astrobiology, extrasolar planets, comets, asteroids, meteorites. Structure and formation of the solar system.",
+  "astro-ph.GA": "Phenomena pertaining to galaxies or the Milky Way. Star clusters, HII regions and planetary nebulae, the interstellar medium, atomic and molecular clouds, dust. Stellar populations. Galactic structure, formation, dynamics. Active Galactic Nuclei, supermassive black holes, quasars.",
+  "astro-ph.HE": "Cosmic ray production, acceleration, propagation, detection. Gamma ray astronomy and bursts, X-rays, charged particles, supernovae and other explosive phenomena, stellar remnants and accretion systems, jets, microquasars, neutron stars, pulsars, black holes.",
+  "astro-ph.IM": "Detector and telescope design, experiment proposals. Laboratory Astrophysics. Methods for data analysis, statistical methods. Software, database design.",
+  "astro-ph.SR": "White dwarfs, brown dwarfs, cataclysmic variables. Star formation and protostellar systems, stellar astrobiology, binary and multiple systems of stars, stellar evolution and structure, coronas. Central stars of planetary nebulae. Helioseismology, solar neutrinos, production and detection of gravitational radiation from stellar systems.",
+  /* Condensed Matter */
+  "cond-mat.dis-nn": "Glasses and spin glasses; properties of random, aperiodic and quasiperiodic systems; transport in disordered media; localization; phenomena mediated by defects and disorder; neural networks.",
+  "cond-mat.mes-hall": "Semiconducting nanostructures: quantum dots, wires, and wells. Single electronics, spintronics, 2d electron gases, quantum Hall effect, nanotubes, graphene, plasmonic nanostructures.",
+  "cond-mat.mtrl-sci": "Techniques, synthesis, characterization, structure. Structural phase transitions, mechanical properties, phonons. Defects, adsorbates, interfaces.",
+  "cond-mat.other": "Work in condensed matter that does not fit into the other cond-mat classifications.",
+  "cond-mat.quant-gas": "Ultracold atomic and molecular gases, Bose-Einstein condensation, Feshbach resonances, spinor condensates, optical lattices, quantum simulation with cold atoms and molecules, macroscopic interference phenomena.",
+  "cond-mat.soft": "Membranes, polymers, liquid crystals, glasses, colloids, granular matter.",
+  "cond-mat.stat-mech": "Phase transitions, thermodynamics, field theory, non-equilibrium phenomena, renormalization group and scaling, integrable models, turbulence.",
+  "cond-mat.str-el": "Quantum magnetism, non-Fermi liquids, spin liquids, quantum criticality, charge density waves, metal-insulator transitions.",
+  "cond-mat.supr-con": "Superconductivity: theory, models, experiment. Superflow in helium.",
+  /* High Energy Physics */
+  "hep-ex": "Results from high-energy/particle physics experiments and prospects for future experimental results, including tests of the standard model, measurements of standard model parameters, searches for physics beyond the standard model, and astroparticle physics experimental results.",
+  "hep-lat": "Lattice field theory. Phenomenology from lattice field theory. Algorithms for lattice field theory. Hardware for lattice field theory.",
+  "hep-ph": "Theoretical particle physics and its interrelation with experiment. Prediction of particle physics observables: models, effective field theories, calculation techniques. Particle physics: analysis of theory through experimental results.",
+  "hep-th": "Formal aspects of quantum field theory. String theory, supersymmetry and supergravity.",
+  /* Standalone Physics */
+  "gr-qc": "Areas of gravitational physics, including experiments and observations related to the detection and interpretation of gravitational waves, experimental tests of gravitational theories, computational general relativity, relativistic astrophysics, alternative theories of gravity, classical and quantum cosmology, and quantum gravity.",
+  "math-ph": "Application of mathematics to problems in physics, develop mathematical methods for such applications, or provide mathematically rigorous formulations of existing physical theories. Of interest to both physically oriented mathematicians and mathematically oriented physicists.",
+  "nucl-ex": "Results from experimental nuclear physics including the areas of fundamental interactions, measurements at low- and medium-energy, as well as relativistic heavy-ion collisions.",
+  "nucl-th": "Theory of nuclear structure covering wide area from models of hadron structure to neutron stars. Nuclear equation of states at different external conditions. Theory of nuclear reactions including heavy-ion reactions at low and high energies.",
+  "quant-ph": "Quantum physics including quantum information, quantum computation, quantum foundations, quantum optics, and quantum many-body systems.",
+  /* Nonlinear Sciences */
+  "nlin.AO": "Adaptation, self-organizing systems, statistical physics, fluctuating systems, stochastic processes, interacting particle systems, machine learning.",
+  "nlin.CD": "Dynamical systems, chaos, quantum chaos, topological dynamics, cycle expansions, turbulence, propagation.",
+  "nlin.CG": "Computational methods, time series analysis, signal processing, wavelets, lattice gases.",
+  "nlin.PS": "Pattern formation, coherent structures, solitons.",
+  "nlin.SI": "Exactly solvable systems, integrable PDEs, integrable ODEs, Painlev\u00e9 analysis, integrable discrete maps, solvable lattice models, integrable quantum systems.",
+  /* Physics */
+  "physics.acc-ph": "Accelerator theory and simulation. Accelerator technology. Accelerator experiments. Beam Physics. Accelerator design and optimization. Advanced accelerator concepts. Radiation sources including synchrotron light sources and free electron lasers. Applications of accelerators.",
+  "physics.ao-ph": "Atmospheric and oceanic physics and physical chemistry, biogeophysics, and climate science.",
+  "physics.app-ph": "Applications of physics to new technology, including electronic devices, optics, photonics, microwaves, spintronics, advanced materials, metamaterials, nanotechnology, and energy sciences.",
+  "physics.atm-clus": "Atomic and molecular clusters, nanoparticles: geometric, electronic, optical, chemical, magnetic properties, shell structure, phase transitions, optical spectroscopy, mass spectrometry, photoelectron spectroscopy, ionization potential, electron affinity, interaction with intense light pulses, electron diffraction, light scattering, ab initio calculations, DFT theory, fragmentation, Coulomb explosion, hydrodynamic expansion.",
+  "physics.atom-ph": "Atomic and molecular structure, spectra, collisions, and data. Atoms and molecules in external fields. Molecular dynamics and coherent and optical control. Cold atoms and molecules. Cold collisions. Optical lattices.",
+  "physics.bio-ph": "Molecular biophysics, cellular biophysics, neurological biophysics, membrane biophysics, single-molecule biophysics, ecological biophysics, quantum phenomena in biological systems (quantum biophysics), theoretical biophysics, molecular dynamics/modeling and simulation, game theory, biomechanics, bioinformatics, microorganisms, virology, evolution, biophysical methods.",
+  "physics.chem-ph": "Experimental, computational, and theoretical physics of atoms, molecules, and clusters \u2014 Classical and quantum description of states, processes, and dynamics; spectroscopy, electronic structure, conformations, reactions, interactions, and phases. Chemical thermodynamics. Disperse systems. High pressure chemistry. Solid state chemistry. Surface and interface chemistry.",
+  "physics.class-ph": "Newtonian and relativistic dynamics; many particle systems; planetary motions; chaos in classical dynamics. Maxwell\u2019s equations and dynamics of charged systems and electromagnetic forces in materials. Vibrating systems such as membranes and cantilevers; optomechanics. Classical waves, including acoustics and elasticity; physics of music and musical instruments. Classical thermodynamics and heat flow problems.",
+  "physics.comp-ph": "All aspects of computational science applied to physics.",
+  "physics.data-an": "Methods, software and hardware for physics data analysis: data processing and storage; measurement methodology; statistical and mathematical aspects such as parametrization and uncertainties.",
+  "physics.ed-ph": "Report of results of a research study, laboratory experience, assessment or classroom practice that represents a way to improve teaching and learning in physics. Also, report on misconceptions of students, textbook errors, and other similar information relative to promoting physics understanding.",
+  "physics.flu-dyn": "Turbulence, instabilities, incompressible/compressible flows, reacting flows. Aero/hydrodynamics, fluid-structure interactions, acoustics. Biological fluid dynamics, micro/nanofluidics, interfacial phenomena. Complex fluids, suspensions and granular flows, porous media flows. Geophysical flows, thermoconvective and stratified flows. Mathematical and computational methods for fluid dynamics, fluid flow models, experimental techniques.",
+  "physics.gen-ph": "General physics.",
+  "physics.geo-ph": "Atmospheric physics. Biogeosciences. Computational geophysics. Geographic location. Geoinformatics. Geophysical techniques. Hydrospheric geophysics. Magnetospheric physics. Mathematical geophysics. Planetology. Solar system. Solid earth geophysics. Space plasma physics. Mineral physics. High pressure physics.",
+  "physics.hist-ph": "History and philosophy of all branches of physics, astrophysics, and cosmology, including appreciations of physicists.",
+  "physics.ins-det": "Instrumentation and Detectors for research in natural science, including optical, molecular, atomic, nuclear and particle physics instrumentation and the associated electronics, services, infrastructure and control equipment.",
+  "physics.med-ph": "Radiation therapy. Radiation dosimetry. Biomedical imaging modelling. Reconstruction, processing, and analysis. Biomedical system modelling and analysis. Health physics. New imaging or therapy modalities.",
+  "physics.optics": "Adaptive optics. Astronomical optics. Atmospheric optics. Biomedical optics. Fiber optics. Fourier optics. Geometrical optics. Holography. Infrared optics. Integrated optics. Lasers. Nano optics. Ocean optics. Optical computing. Optical devices. Optical imaging. Optical materials. Optical metrology. Optical microscopy. Quantum optics. Ultrafast optics. Wave optics. X-ray optics.",
+  "physics.plasm-ph": "Fundamental plasma physics. Magnetically Confined Plasmas (includes magnetic fusion energy research). High Energy Density Plasmas (inertial confinement plasmas, laser-plasma interactions). Ionospheric, Heliophysical, and Astrophysical plasmas. Lasers, Accelerators, and Radiation Generation. Low temperature plasmas and plasma applications (includes dusty plasmas, semiconductor etching, plasma-based nanotechnology, medical applications). Plasma Diagnostics, Engineering and Enabling Technologies.",
+  "physics.pop-ph": "Popular physics.",
+  "physics.soc-ph": "Structure, dynamics and collective behavior of societies and groups (human or otherwise). Quantitative analysis of social networks and other complex networks. Physics and engineering of infrastructure and systems of broad societal impact (e.g., energy grids, transportation networks).",
+  "physics.space-ph": "Space plasma physics. Heliophysics. Space weather. Planetary magnetospheres, ionospheres and magnetotail. Auroras. Interplanetary space. Cosmic rays. Synchrotron radiation. Radio astronomy.",
+  /* Quantitative Biology */
+  "q-bio.BM": "DNA, RNA, proteins, lipids, etc.; molecular structures and folding kinetics; molecular interactions; single-molecule manipulation.",
+  "q-bio.CB": "Cell-cell signaling and interaction; morphogenesis and development; apoptosis; bacterial conjugation; viral-host interaction; immunology.",
+  "q-bio.GN": "DNA sequencing and assembly; gene and motif finding; RNA editing and alternative splicing; genomic structure and processes (replication, transcription, methylation, etc); mutational processes.",
+  "q-bio.MN": "Gene regulation, signal transduction, proteomics, metabolomics, gene and enzymatic networks.",
+  "q-bio.NC": "Synapse, cortex, neuronal dynamics, neural network, sensorimotor control, behavior, attention.",
+  "q-bio.OT": "Work in quantitative biology that does not fit into the other q-bio classifications.",
+  "q-bio.PE": "Population dynamics, spatio-temporal and epidemiological models, dynamic speciation, co-evolution, biodiversity, foodwebs, aging; molecular evolution and phylogeny; directed evolution; origin of life.",
+  "q-bio.QM": "All experimental, numerical, statistical and mathematical contributions of value to biology.",
+  "q-bio.SC": "Assembly and control of subcellular structures (channels, organelles, cytoskeletons, capsules, etc.); molecular motors, transport, subcellular localization; mitosis and meiosis.",
+  "q-bio.TO": "Blood flow in vessels, biomechanics of bones, electrical waves, endocrine system, tumor growth.",
+  /* EESS */
+  "eess.AS": "Theory and methods for processing signals representing audio, speech, and language, and their applications. This includes analysis, synthesis, enhancement, transformation, classification and interpretation of such signals as well as the design, development, and evaluation of associated signal processing systems. Machine learning and pattern analysis applied to any of the above areas is also welcome.",
+  "eess.IV": "Theory, algorithms, and architectures for the formation, capture, processing, communication, analysis, and display of images, video, and multidimensional signals in a wide variety of applications. Topics of interest include: mathematical, statistical, and perceptual image and video modeling and representation; linear and nonlinear filtering, enhancement, restoration, and reconstruction from degraded, low-resolution or tomographic data; lossless and lossy compression and coding; segmentation, alignment, and recognition.",
+  "eess.SP": "Theory, algorithms, performance analysis and applications of signal and data analysis, including physical modeling, processing, detection and parameter estimation, learning, mining, retrieval, and information extraction. The term \u201csignal\u201d includes speech, audio, sonar, radar, geophysical, physiological, (bio-) medical, image, video, and multimodal natural and man-made signals, including communication signals and data.",
+  "eess.SY": "Theoretical and experimental research covering all facets of automatic control systems. The section is focused on methods of control system analysis and design using tools of modeling, simulation and optimization. Specific areas of research include nonlinear, distributed, adaptive, stochastic and robust control in addition to hybrid and discrete event systems. Application areas include automotive and aerospace control systems, network control, biological systems, multiagent and cooperative control, robotics, reinforcement learning, sensor networks, control of cyber-physical and energy-related systems, and control of computing systems.",
+  /* Mathematics */
+  "math.AC": "Commutative rings, modules, ideals, homological algebra, computational aspects, invariant theory, connections to algebraic geometry and combinatorics.",
+  "math.AG": "Algebraic varieties, stacks, sheaves, schemes, moduli spaces, complex geometry, quantum cohomology.",
+  "math.AP": "Existence and uniqueness, boundary conditions, linear and non-linear operators, stability, soliton theory, integrable PDEs, conservation laws, qualitative dynamics.",
+  "math.AT": "Homotopy theory, homological algebra, algebraic treatments of manifolds.",
+  "math.CA": "Special functions, orthogonal polynomials, harmonic analysis, ODEs, differential relations, calculus of variations, approximations, expansions, asymptotics.",
+  "math.CO": "Discrete mathematics, graph theory, enumeration, combinatorial optimization, Ramsey theory, combinatorial game theory.",
+  "math.CT": "Enriched categories, topoi, abelian categories, monoidal categories, homological algebra.",
+  "math.CV": "Holomorphic functions, automorphic group actions and forms, pseudoconvexity, complex geometry, analytic spaces, analytic sheaves.",
+  "math.DG": "Complex, contact, Riemannian, pseudo-Riemannian and Finsler geometry, relativity, gauge theory, global analysis.",
+  "math.DS": "Dynamics of differential equations and flows, mechanics, classical few-body problems, iterations, complex dynamics, delayed differential equations.",
+  "math.FA": "Banach spaces, function spaces, real functions, integral transforms, theory of distributions, measure theory.",
+  "math.GM": "Mathematical material of general interest, topics not covered elsewhere.",
+  "math.GN": "Continuum theory, point-set topology, spaces with algebraic structure, foundations, dimension theory, local and global properties.",
+  "math.GR": "Finite groups, topological groups, representation theory, cohomology, classification and structure.",
+  "math.GT": "Manifolds, orbifolds, polyhedra, cell complexes, foliations, geometric structures.",
+  "math.HO": "Biographies, philosophy of mathematics, mathematics education, recreational mathematics, communication of mathematics, ethics in mathematics.",
+  "math.IT": "Alias for cs.IT. Covers theoretical and experimental aspects of information theory and coding.",
+  "math.KT": "Algebraic and topological K-theory, relations with topology, commutative algebra, and operator algebras.",
+  "math.LO": "Logic, set theory, point-set topology, formal mathematics.",
+  "math.MG": "Euclidean, hyperbolic, discrete, convex, coarse geometry, comparisons in Riemannian geometry, symmetric spaces.",
+  "math.MP": "Alias for math-ph. Articles in this category focus on areas of research that illustrate the application of mathematics to problems in physics, develop mathematical methods for such applications, or provide mathematically rigorous formulations of existing physical theories.",
+  "math.NA": "Numerical algorithms for problems in analysis and algebra, scientific computation.",
+  "math.NT": "Prime numbers, diophantine equations, analytic number theory, algebraic number theory, arithmetic geometry, Galois theory.",
+  "math.OA": "Algebras of operators on Hilbert space, C*-algebras, von Neumann algebras, non-commutative geometry.",
+  "math.OC": "Operations research, linear programming, control theory, systems theory, optimal control, game theory.",
+  "math.PR": "Theory and applications of probability and stochastic processes: e.g. central limit theorems, large deviations, stochastic differential equations, models from statistical mechanics, queuing theory.",
+  "math.QA": "Quantum groups, skein theories, operadic and diagrammatic algebra, quantum field theory.",
+  "math.RA": "Non-commutative rings and algebras, non-associative algebras, universal algebra and lattice theory, linear algebra, semigroups.",
+  "math.RT": "Linear representations of algebras and groups, Lie theory, associative algebras, multilinear algebra.",
+  "math.SG": "Hamiltonian systems, symplectic flows, classical integrable systems.",
+  "math.SP": "Schr\u00f6dinger operators, operators on manifolds, general differential operators, numerical studies, integral operators, discrete models, resonances, non-self-adjoint operators, random operators/matrices.",
+  "math.ST": "Alias for stat.TH. Applied, computational and theoretical statistics: e.g. statistical inference, regression, time series, multivariate analysis, data analysis, Markov chain Monte Carlo, design of experiments, case studies.",
+  /* Computer Science */
+  "cs.AI": "Covers all areas of AI except Vision, Robotics, Machine Learning, Multiagent Systems, and Computation and Language (Natural Language Processing), which have separate subject areas. In particular, includes Expert Systems, Theorem Proving (although this may overlap with Logic in Computer Science), Knowledge Representation, Planning, and Uncertainty in AI.",
+  "cs.AR": "Covers systems organization and hardware architecture.",
+  "cs.CC": "Covers models of computation, complexity classes, structural complexity, complexity tradeoffs, upper and lower bounds.",
+  "cs.CE": "Covers applications of computer science to the mathematical modeling of complex systems in the fields of science, engineering, and finance. Papers here are interdisciplinary and applications-oriented, focusing on techniques and tools that enable challenging computational simulations to be performed, for which the use of supercomputers or distributed computing platforms is often required.",
+  "cs.CG": "Computational geometry.",
+  "cs.CL": "Covers natural language processing. Roughly includes material in ACM Subject Class I.2.7. Note that work on artificial languages (programming languages, logics, formal systems) that does not explicitly address natural-language issues broadly construed (natural-language processing, computational linguistics, speech, text retrieval, etc.) is not appropriate for this area.",
+  "cs.CR": "Covers all areas of cryptography and security including authentication, public key cryptosystems, proof-carrying code, etc.",
+  "cs.CV": "Covers image processing, computer vision, pattern recognition, and scene understanding.",
+  "cs.CY": "Covers impact of computers on society, computer ethics, information technology and public policy, legal aspects of computing, computers and education.",
+  "cs.DB": "Covers database management, datamining, and data processing.",
+  "cs.DC": "Covers fault-tolerance, distributed algorithms, stability, parallel computation, and cluster computing.",
+  "cs.DL": "Covers all aspects of the digital library design and document and text creation. Note that there will be some overlap with Information Retrieval (which is a separate subject area).",
+  "cs.DM": "Covers combinatorics, graph theory, applications of probability.",
+  "cs.DS": "Covers data structures and analysis of algorithms.",
+  "cs.ET": "Covers approaches to information processing (computing, communication, sensing) and bio-chemical analysis based on alternatives to silicon CMOS-based technologies, such as nanoscale electronic, photonic, spin-based, superconducting, mechanical, bio-chemical and quantum technologies.",
+  "cs.FL": "Covers automata theory, formal language theory, grammars, and combinatorics on words. Papers dealing with computational complexity should go to cs.CC; papers dealing with logic should go to cs.LO.",
+  "cs.GL": "Covers introductory material, survey material, predictions of future trends, biographies, and miscellaneous computer-science related material.",
+  "cs.GR": "Covers all aspects of computer graphics.",
+  "cs.GT": "Covers all theoretical and applied aspects at the intersection of computer science and game theory, including work in mechanism design, learning in games (which may overlap with Learning), foundations of agent modeling in games (which may overlap with Multiagent systems), coordination, specification and formal methods for non-cooperative computational environments. The area also deals with applications of game theory to areas such as electronic commerce.",
+  "cs.HC": "Covers human factors, user interfaces, and collaborative computing.",
+  "cs.IR": "Covers indexing, dictionaries, retrieval, content and analysis.",
+  "cs.IT": "Covers theoretical and experimental aspects of information theory and coding.",
+  "cs.LG": "Papers on all aspects of machine learning research (supervised, unsupervised, reinforcement learning, bandit problems, and so on) including also robustness, explanation, fairness, and methodology. cs.LG is also an appropriate primary category for applications of machine learning methods.",
+  "cs.LO": "Covers all aspects of logic in computer science, including finite model theory, logics of programs, modal logic, and program verification. Programming language semantics should have Programming Languages as the primary subject area.",
+  "cs.MA": "Covers multiagent systems, distributed artificial intelligence, intelligent agents, coordinated interactions. and practical applications.",
+  "cs.MM": "Multimedia.",
+  "cs.MS": "Mathematical software.",
+  "cs.NA": "cs.NA is an alias for math.NA. Numerical algorithms for problems in analysis and algebra, scientific computation.",
+  "cs.NE": "Covers neural networks, connectionism, genetic algorithms, artificial life, adaptive behavior.",
+  "cs.NI": "Covers all aspects of computer communication networks, including network architecture and design, network protocols, and internetwork standards (like TCP/IP). Also includes topics, such as web caching, that are directly relevant to Internet architecture and performance.",
+  "cs.OH": "This is the classification to use for documents that do not fit anywhere else.",
+  "cs.OS": "Operating systems.",
+  "cs.PF": "Covers performance measurement and evaluation, queueing, and simulation.",
+  "cs.PL": "Covers programming language semantics, language features, programming approaches (such as object-oriented programming, functional programming, logic programming). Also includes material on compilers oriented towards programming languages; other material on compilers may be more appropriate in Architecture (AR).",
+  "cs.RO": "Robotics.",
+  "cs.SC": "Symbolic computation.",
+  "cs.SD": "Covers all aspects of computing with sound, and sound as an information channel. Includes models of sound, analysis and synthesis, audio user interfaces, sonification of data, computer music, and sound signal processing.",
+  "cs.SE": "Covers design tools, software metrics, testing and debugging, programming environments, etc.",
+  "cs.SI": "Covers the design, analysis, and modeling of social and information networks, including their applications for on-line information access, communication, and interaction, and their roles as datasets in the exploration of questions in these and other domains, including connections to the social and biological sciences.",
+  "cs.SY": "cs.SY is an alias for eess.SY. This section includes theoretical and experimental research covering all facets of automatic control systems, including nonlinear, distributed, adaptive, stochastic and robust control in addition to hybrid and discrete event systems.",
+  /* Statistics */
+  "stat.AP": "Biology, Education, Epidemiology, Engineering, Environmental Sciences, Medical, Physical Sciences, Quality Control, Social Sciences.",
+  "stat.CO": "Algorithms, Simulation, Visualization.",
+  "stat.ME": "Design, Surveys, Model Selection, Multiple Testing, Multivariate Methods, Signal and Image Processing, Time Series, Smoothing, Spatial Statistics, Survival Analysis, Nonparametric and Semiparametric Methods.",
+  "stat.ML": "Covers machine learning papers (supervised, unsupervised, semi-supervised learning, graphical models, reinforcement learning, bandits, high dimensional inference, etc.) with a statistical or theoretical grounding.",
+  "stat.OT": "Work in statistics that does not fit into the other stat classifications.",
+  "stat.TH": "stat.TH is an alias for math.ST. Asymptotics, Bayesian Inference, Decision Theory, Estimation, Foundations, Inference, Testing.",
+  /* Economics */
+  "econ.EM": "Econometric Theory, Micro-Econometrics, Macro-Econometrics, Empirical Content of Economic Relations discovered via New Methods, Methodological Aspects of the Application of Statistical Inference to Economic Data.",
+  "econ.GN": "General methodological, applied, and empirical contributions to economics.",
+  "econ.TH": "Includes theoretical contributions to Contract Theory, Decision Theory, Game Theory, General Equilibrium, Growth, Learning and Evolution, Macroeconomics, Market and Mechanism Design, and Social Choice.",
+  /* Quantitative Finance */
+  "q-fin.CP": "Computational methods, including Monte Carlo, PDE, lattice and other numerical methods with applications to financial modeling.",
+  "q-fin.EC": "q-fin.EC is an alias for econ.GN. Economics, including micro and macro economics, international economics, theory of the firm, labor economics, and other economic topics outside finance.",
+  "q-fin.GN": "Development of general quantitative methodologies with applications in finance.",
+  "q-fin.MF": "Mathematical and analytical methods of finance, including stochastic, probabilistic and functional analysis, algebraic, geometric and other methods.",
+  "q-fin.PM": "Security selection and optimization, capital allocation, investment strategies and performance measurement.",
+  "q-fin.PR": "Valuation and hedging of financial securities, their derivatives, and structured products.",
+  "q-fin.RM": "Measurement and management of financial risks in trading, banking, insurance, corporate and other applications.",
+  "q-fin.ST": "Statistical, econometric and econophysics analyses with applications to financial markets and economic data.",
+  "q-fin.TR": "Market microstructure, liquidity, exchange and auction design, automated trading, agent-based modeling and market-making."
+};
+
+/* ── tooltip element ── */
+var tooltip = document.createElement('div');
+tooltip.className = 'desc-tooltip';
+document.body.appendChild(tooltip);
+var tooltipTimer = null;
+
+function showTooltip(el, text) {
+  clearTimeout(tooltipTimer);
+  tooltipTimer = setTimeout(function() {
+    tooltip.textContent = text;
+    tooltip.style.display = 'block';
+    var rect = el.getBoundingClientRect();
+    var left = rect.left;
+    var top = rect.bottom + 6;
+    tooltip.style.left = left + 'px';
+    tooltip.style.top = top + 'px';
+    /* adjust if off-screen */
+    var ttRect = tooltip.getBoundingClientRect();
+    if (left + ttRect.width > window.innerWidth - 16) {
+      tooltip.style.left = Math.max(8, window.innerWidth - ttRect.width - 16) + 'px';
+    }
+    if (top + ttRect.height > window.innerHeight - 16) {
+      tooltip.style.top = (rect.top - ttRect.height - 6) + 'px';
+    }
+  }, 300);
+}
+function hideTooltip() {
+  clearTimeout(tooltipTimer);
+  tooltip.style.display = 'none';
 }
 
-function renderNode(node, depth) {
-  const hasChildren = node.children && node.children.length > 0;
-  const isLeaf = !hasChildren;
-  const count = hasChildren ? countLeaves(node) : 0;
-
-  const el = document.createElement('div');
-  el.className = `node depth-${depth}` + (isLeaf ? ' leaf-node' : '') + (node.maintainer ? ' has-maintainer' : '');
-
-  const label = document.createElement('div');
-  label.className = 'node-label';
-
-  // arrow
-  const arrow = document.createElement('span');
-  arrow.className = 'arrow' + (isLeaf ? ' leaf' : '');
-  arrow.textContent = '▶';
-  label.appendChild(arrow);
-
-  // icon
-  if (node.icon) {
-    const icon = document.createElement('span');
-    icon.className = 'icon';
-    icon.textContent = node.icon;
-    label.appendChild(icon);
-  }
-
-  // name
-  const name = document.createElement('span');
-  name.className = 'name';
-  name.textContent = node.name;
-  label.appendChild(name);
-
-  // code
-  if (node.code) {
-    const code = document.createElement('span');
-    code.className = 'code';
-    code.textContent = node.code;
-    label.appendChild(code);
-  }
-
-  // count badge
-  if (hasChildren && depth >= 1) {
-    const badge = document.createElement('span');
-    badge.className = 'count';
-    badge.textContent = count;
-    label.appendChild(badge);
-  }
-
-  // maintainer badge
-  if (node.maintainer) {
-    const mt = document.createElement('span');
-    mt.className = 'maintainer-badge';
-    mt.textContent = '✅ ' + node.maintainer;
-    label.appendChild(mt);
-  }
-
-  el.appendChild(label);
-
-  // children container
-  if (hasChildren) {
-    const childrenEl = document.createElement('div');
-    childrenEl.className = 'children';
-    node.children.forEach(child => {
-      childrenEl.appendChild(renderNode(child, depth + 1));
-    });
-    el.appendChild(childrenEl);
-
-    label.addEventListener('click', () => {
-      const isOpen = childrenEl.classList.contains('open');
-      childrenEl.classList.toggle('open');
-      arrow.classList.toggle('open');
-    });
-  }
-
-  return el;
+/* ── helpers ── */
+function countLeaves(n) {
+  if (!n.children || !n.children.length) return 1;
+  return n.children.reduce(function(s,c){ return s + countLeaves(c); }, 0);
+}
+function countReviewers(arr) {
+  var n = 0;
+  arr.forEach(function(d) {
+    if (d.maintainer) n += d.maintainer.length;
+    if (d.children) n += countReviewers(d.children);
+  });
+  return n;
 }
 
-const tree = document.getElementById('tree');
-DATA.forEach(group => {
-  const el = renderNode(group, 0);
-  tree.appendChild(el);
-  // auto-expand top-level groups (Natural Sciences, Formal Sciences)
-  const children = el.querySelector('.children');
-  const arrow = el.querySelector('.arrow');
-  if (children) { children.classList.add('open'); arrow.classList.add('open'); }
+var totalDomains = 8;
+var totalSubs = DATA.reduce(function(s,g){ return s + countLeaves(g); }, 0);
+var totalReviewers = countReviewers(DATA);
+
+/* ── stats banner ── */
+function mkStat(val, label, hl) {
+  var d = document.createElement('div'); d.className = 'stat-item';
+  var n = document.createElement('div'); n.className = 'stat-number' + (hl ? ' highlight' : ''); n.textContent = val;
+  var l = document.createElement('div'); l.className = 'stat-label'; l.textContent = label;
+  d.appendChild(n); d.appendChild(l); return d;
+}
+function mkDiv(cls) { var d = document.createElement('div'); d.className = cls; return d; }
+
+var banner = document.getElementById('stats-banner');
+banner.appendChild(mkStat(totalDomains, 'Domains', false));
+banner.appendChild(mkDiv('stat-divider'));
+banner.appendChild(mkStat(totalSubs, 'Subcategories', false));
+banner.appendChild(mkDiv('stat-divider'));
+banner.appendChild(mkStat(totalReviewers, 'Reviewers', true));
+
+/* ── track state ── */
+var openCard = null;
+
+/* ── build subdomain panel content ── */
+function buildSubdomainPanel(domain, color) {
+  var panel = document.createElement('div');
+  panel.className = 'subdomain-panel';
+
+
+  function addLeafItem(sub, parent) {
+    var item = document.createElement('div');
+    item.className = 'sub-item';
+    item._name = (sub.name || '').toLowerCase();
+    item._code = (sub.code || '').toLowerCase();
+
+    var nm = document.createElement('span');
+    nm.className = 'sub-name';
+    nm.textContent = sub.name;
+    item.appendChild(nm);
+
+    if (sub.code) {
+      var cd = document.createElement('span');
+      cd.className = 'sub-code';
+      cd.textContent = '(' + sub.code + ')';
+      item.appendChild(cd);
+    }
+
+    if (sub.maintainer && sub.maintainer.length > 0) {
+      sub.maintainer.forEach(function(m) {
+        var badge = document.createElement('span');
+        badge.className = 'sub-reviewer';
+        badge.textContent = m.nameEn;
+        badge.style.background = 'linear-gradient(135deg, ' + color + '25, ' + color + '12)';
+        badge.style.color = color;
+        badge.style.border = '1px solid ' + color + '50';
+        badge.addEventListener('click', function(e) {
+          e.stopPropagation();
+          if (openCard) { var prev = openCard; openCard.remove(); openCard = null; if (prev._gh === m.github) return; }
+          var card = document.createElement('div');
+          card.className = 'reviewer-card';
+          card._gh = m.github;
+          card.style.borderColor = color + '40';
+
+          var rn = document.createElement('div'); rn.className = 'rc-name'; rn.textContent = m.name + ' / ' + m.nameEn; card.appendChild(rn);
+          var rr = document.createElement('div'); rr.className = 'rc-role'; rr.textContent = m.role + ' \u00b7 ' + m.affiliation; card.appendChild(rr);
+          var rl = document.createElement('a'); rl.className = 'rc-link'; rl.href = 'https://github.com/' + m.github; rl.target = '_blank'; rl.rel = 'noopener'; rl.textContent = '@' + m.github + ' \u2192'; card.appendChild(rl);
+          if (m.homepage) {
+            var rh = document.createElement('a'); rh.className = 'rc-link'; rh.href = m.homepage; rh.target = '_blank'; rh.rel = 'noopener'; rh.textContent = '\ud83d\udd17 ' + m.homepage.replace(/^https?:\/\//, ''); card.appendChild(rh);
+          }
+          item.insertAdjacentElement('afterend', card);
+          openCard = card;
+        });
+        item.appendChild(badge);
+      });
+    }
+
+    /* tooltip on hover */
+    var desc = DESCRIPTIONS[sub.code];
+    if (desc) {
+      item.addEventListener('mouseenter', function() { showTooltip(item, desc); });
+      item.addEventListener('mouseleave', hideTooltip);
+    }
+
+    parent.appendChild(item);
+  }
+
+  function addChildren(children, parentEl) {
+    children.forEach(function(sub) {
+      if (sub.children && sub.children.length > 0) {
+        /* Sub-group (e.g. Astrophysics, Condensed Matter) */
+        var hdr = document.createElement('div');
+        hdr.className = 'sub-group-header';
+        hdr._name = (sub.name || '').toLowerCase();
+        hdr._code = (sub.code || '').toLowerCase();
+
+        var arr = document.createElement('span'); arr.className = 'sg-arrow'; arr.textContent = '\u25b6'; hdr.appendChild(arr);
+        var hn = document.createElement('span'); hn.textContent = sub.name; hdr.appendChild(hn);
+        if (sub.code) { var hc = document.createElement('span'); hc.className = 'sg-code'; hc.textContent = '(' + sub.code + ')'; hdr.appendChild(hc); }
+        var cnt = document.createElement('span'); cnt.className = 'sg-count'; cnt.textContent = sub.children.length; hdr.appendChild(cnt);
+
+        var kids = document.createElement('div');
+        kids.className = 'sub-group-kids';
+
+        hdr.addEventListener('click', function() {
+          kids.classList.toggle('open');
+          arr.classList.toggle('open');
+        });
+
+        parentEl.appendChild(hdr);
+        addChildren(sub.children, kids);
+        parentEl.appendChild(kids);
+      } else {
+        addLeafItem(sub, parentEl);
+      }
+    });
+  }
+
+  addChildren(domain.children, panel);
+  return panel;
+}
+
+/* ── build tree graph ── */
+var container = document.getElementById('tree-container');
+var graph = document.createElement('div');
+graph.className = 'tree-graph';
+
+/* Root node */
+var rootNode = document.createElement('div');
+rootNode.className = 'tnode tnode-root';
+var rootBox = document.createElement('div');
+rootBox.className = 'tnode-box';
+rootBox.textContent = '\ud83c\udf0d OpenScientist';
+rootNode.appendChild(rootBox);
+graph.appendChild(rootNode);
+
+/* Groups level */
+var groupKids = document.createElement('div');
+groupKids.className = 'tnode-kids';
+
+DATA.forEach(function(group) {
+  var gNode = document.createElement('div');
+  gNode.className = 'tnode tnode-group';
+
+  var gBox = document.createElement('div');
+  gBox.className = 'tnode-box';
+  var gIcon = document.createElement('span'); gIcon.className = 'icon'; gIcon.textContent = group.icon; gBox.appendChild(gIcon);
+  var gName = document.createTextNode(group.name); gBox.appendChild(gName);
+  gNode.appendChild(gBox);
+
+  /* Domain level */
+  var domainKids = document.createElement('div');
+  domainKids.className = 'tnode-kids';
+
+  group.children.forEach(function(domain) {
+    var dNode = document.createElement('div');
+    dNode.className = 'tnode tnode-domain';
+    dNode.style.setProperty('--dcolor', domain.color);
+
+    var dBox = document.createElement('div');
+    dBox.className = 'tnode-box';
+    dBox.style.borderColor = domain.color + '60';
+    dBox.style.background = 'linear-gradient(135deg, ' + domain.color + '18, ' + domain.color + '08)';
+
+    var topRow = document.createElement('div'); topRow.className = 'dbox-top';
+    var dIcon = document.createElement('span'); dIcon.className = 'icon'; dIcon.textContent = domain.icon; topRow.appendChild(dIcon);
+    var leafCount = countLeaves(domain);
+    var bc = document.createElement('span'); bc.className = 'badge-count'; bc.textContent = leafCount; topRow.appendChild(bc);
+    dBox.appendChild(topRow);
+
+    var dName = document.createElement('div'); dName.className = 'dbox-name'; dName.textContent = domain.name;
+    dBox.appendChild(dName);
+
+    dNode.appendChild(dBox);
+
+    /* Subdomain panel */
+    var panel = buildSubdomainPanel(domain, domain.color);
+    dNode.appendChild(panel);
+
+    dBox.addEventListener('click', function() {
+      panel.classList.toggle('open');
+      dNode.classList.toggle('active');
+    });
+
+    domainKids.appendChild(dNode);
+  });
+
+  gNode.appendChild(domainKids);
+  groupKids.appendChild(gNode);
+});
+
+rootNode.appendChild(groupKids);
+container.appendChild(graph);
+
+/* ── search ── */
+var searchInput = document.getElementById('search-input');
+var searchClear = document.getElementById('search-clear');
+
+searchInput.addEventListener('input', function() {
+  var q = searchInput.value.trim().toLowerCase();
+  searchClear.classList.toggle('visible', q.length > 0);
+
+  /* Reset all search highlights */
+  document.querySelectorAll('.sub-item').forEach(function(el) { el.classList.remove('search-match'); });
+  document.querySelectorAll('.sub-group-kids').forEach(function(el) { el.classList.remove('open'); });
+  document.querySelectorAll('.sg-arrow').forEach(function(el) { el.classList.remove('open'); });
+
+  if (!q) {
+    /* Close all panels */
+    document.querySelectorAll('.subdomain-panel').forEach(function(p) { p.classList.remove('open'); });
+    document.querySelectorAll('.tnode-domain').forEach(function(d) { d.classList.remove('active'); });
+    return;
+  }
+
+  /* Search all domains and open matching ones */
+  document.querySelectorAll('.tnode-domain').forEach(function(dNode) {
+    var panel = dNode.querySelector('.subdomain-panel');
+    if (!panel) return;
+    var items = panel.querySelectorAll('.sub-item');
+    var headers = panel.querySelectorAll('.sub-group-header');
+    var hasMatch = false;
+
+    items.forEach(function(item) {
+      if ((item._name && item._name.includes(q)) || (item._code && item._code.includes(q))) {
+        item.classList.add('search-match');
+        hasMatch = true;
+        /* expand parent sub-group if any */
+        var parent = item.parentElement;
+        if (parent && parent.classList.contains('sub-group-kids')) {
+          parent.classList.add('open');
+          var hdr = parent.previousElementSibling;
+          if (hdr) {
+            var arrow = hdr.querySelector('.sg-arrow');
+            if (arrow) arrow.classList.add('open');
+          }
+        }
+      }
+    });
+
+    headers.forEach(function(hdr) {
+      if ((hdr._name && hdr._name.includes(q)) || (hdr._code && hdr._code.includes(q))) {
+        hasMatch = true;
+        var kids = hdr.nextElementSibling;
+        if (kids) {
+          kids.classList.add('open');
+          var arrow = hdr.querySelector('.sg-arrow');
+          if (arrow) arrow.classList.add('open');
+        }
+      }
+    });
+
+    if (hasMatch) {
+      dNode.classList.add('active');
+      panel.classList.add('open');
+    } else {
+      dNode.classList.remove('active');
+      panel.classList.remove('open');
+    }
+  });
+});
+
+searchClear.addEventListener('click', function() {
+  searchInput.value = '';
+  searchInput.dispatchEvent(new Event('input'));
+  searchInput.focus();
 });
 
 // -- Search Engine Logic --

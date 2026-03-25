@@ -72,27 +72,10 @@ body:
       required: true
 
   - type: dropdown
-    id: domain
-    attributes:
-      label: Domain
-      description: The top-level domain your subdomain belongs to
-      options:
-        - Physics
-        - Mathematics
-        - Computer Science
-        - Quantitative Biology
-        - Statistics
-        - EESS
-        - Economics
-        - Quantitative Finance
-    validations:
-      required: true
-
-  - type: dropdown
     id: subdomain
     attributes:
       label: Subdomain
-      description: The specific subdomain you want to maintain. Format is "Domain / Subdomain".
+      description: The subdomain you want to review. Type to search.
       options:
         # Physics (27)
         - "Physics / Accelerator Physics"

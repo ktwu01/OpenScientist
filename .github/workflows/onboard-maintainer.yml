@@ -59,8 +59,14 @@ jobs:
             const shortAffiliation = extractField('Short Affiliation');
             const role = extractField('Role');
             const homepage = extractField('Homepage');
-            const domain = extractField('Domain');
             const subdomainRaw = extractField('Subdomain');
+
+            // Extract domain from subdomain (format: "Domain / Subdomain")
+            if (!subdomainRaw.includes(' / ')) {
+              core.setFailed(`Invalid subdomain format (expected "Domain / Subdomain"): ${subdomainRaw}`);
+              return;
+            }
+            const domain = subdomainRaw.split(' / ')[0];
 
             // Validate free-text fields against JS/HTML injection characters
             const fieldsToValidate = {

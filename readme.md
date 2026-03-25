@@ -194,7 +194,7 @@ skills/physics/    @their-github-handle
 | 💻 Computer Science | Multiagent Systems | Qisheng Su [@suqisheng](https://github.com/suqisheng) | USTC PhD Student |
 | 💻 Computer Science | Cryptography and Security | Xiaohang Yu [@xhyumiracle](https://github.com/xhyumiracle) | Imperial College PhD Student |
 
-> Want to maintain a subdomain? Open an issue or reach out to [@HHHHHejia](https://github.com/HHHHHejia).
+> Want to maintain a subdomain? [**Apply here →**](https://github.com/HHHHHejia/OpenScientist/issues/new?template=maintainer-application.yml)
 
 ---
 
@@ -370,6 +370,6 @@ skills/physics/    @their-github-handle
 | 💻 Computer Science | Multiagent Systems | 苏启晟 [@suqisheng](https://github.com/suqisheng) | USTC PhD Student |
 | 💻 Computer Science | Cryptography and Security | 余晓航 [@xhyumiracle](https://github.com/xhyumiracle) | Imperial College PhD Student |
 
-> 想认领一个子领域？提交 Issue 或联系 [@HHHHHejia](https://github.com/HHHHHejia)。
+> 想认领一个子领域？[**点击申请 →**](https://github.com/HHHHHejia/OpenScientist/issues/new?template=maintainer-application.yml)
 
 </details>

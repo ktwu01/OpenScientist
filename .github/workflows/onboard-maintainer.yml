@@ -131,14 +131,6 @@ jobs:
           echo "Updated CODEOWNERS:"
           cat "$CODEOWNERS_PATH"
 
-      - name: Update readme.md reviewer count
-        run: |
-          # Count unique reviewers from CODEOWNERS (exclude repo owner @HHHHHejia)
-          COUNT=$(grep -oP '@[\w-]+' .github/CODEOWNERS | sort -u | grep -v '@HHHHHejia' | wc -l | tr -d ' ')
-          sed -i "s/\*\*[0-9]\+ reviewers\*\*/\*\*${COUNT} reviewers\*\*/" readme.md
-          sed -i "s/\*\*[0-9]\+ 位审稿人\*\*/\*\*${COUNT} 位审稿人\*\*/" readme.md
-          echo "Updated readme.md reviewer count to ${COUNT}"
-
       - name: Update docs/index.html
         uses: actions/github-script@v7
         env:
@@ -163,10 +155,13 @@ jobs:
             const role = process.env.ROLE;
             const homepage = process.env.HOMEPAGE || '';
 
+            // Escape special chars for safe JS string literal insertion
+            function escapeJS(s) { return s.replace(/\\/g, '\\\\').replace(/"/g, '\\"'); }
+
             // Build structured maintainer object as JS literal
-            let maintainerObj = `{ name: "${chineseName}", nameEn: "${englishName}", github: "${username}", affiliation: "${shortAffiliation}", role: "${role}"`;
+            let maintainerObj = `{ name: "${escapeJS(chineseName)}", nameEn: "${escapeJS(englishName)}", github: "${username}", affiliation: "${escapeJS(shortAffiliation)}", role: "${escapeJS(role)}"`;
             if (homepage && homepage !== '_No response_') {
-              maintainerObj += `, homepage: "${homepage}"`;
+              maintainerObj += `, homepage: "${escapeJS(homepage)}"`;
             }
             maintainerObj += ' }';
 
@@ -221,6 +216,78 @@ jobs:
 
             fs.writeFileSync(filePath, content);
 
+      - name: Update docs/reviewers.html
+        uses: actions/github-script@v7
+        env:
+          ENGLISH_NAME: ${{ steps.parse.outputs.english_name }}
+          CHINESE_NAME: ${{ steps.parse.outputs.chinese_name }}
+          USERNAME: ${{ steps.parse.outputs.github_username }}
+          SHORT_AFFILIATION: ${{ steps.parse.outputs.short_affiliation }}
+          ROLE: ${{ steps.parse.outputs.role }}
+          HOMEPAGE: ${{ steps.parse.outputs.homepage }}
+          DOMAIN: ${{ steps.parse.outputs.domain }}
+          SUBDOMAIN_DISPLAY: ${{ steps.parse.outputs.subdomain_display }}
+        with:
+          script: |
+            const fs = require('fs');
+            const filePath = 'docs/reviewers.html';
+            let content = fs.readFileSync(filePath, 'utf8');
+
+            const englishName = process.env.ENGLISH_NAME;
+            const chineseName = process.env.CHINESE_NAME;
+            const username = process.env.USERNAME;
+            const shortAffiliation = process.env.SHORT_AFFILIATION;
+            const role = process.env.ROLE;
+            const homepage = process.env.HOMEPAGE || '';
+            const domain = process.env.DOMAIN;
+            const subdomainDisplay = process.env.SUBDOMAIN_DISPLAY;
+
+            // Escape special chars for safe JS string literal insertion
+            function escapeJS(s) { return s.replace(/\\/g, '\\\\').replace(/"/g, '\\"'); }
+
+            // Domain color map (matches docs/index.html)
+            const colorMap = {
+              'Physics': '#f87171',
+              'Quantitative Biology': '#fb923c',
+              'EESS': '#fbbf24',
+              'Mathematics': '#34d399',
+              'Computer Science': '#22d3ee',
+              'Statistics': '#60a5fa',
+              'Economics': '#818cf8',
+              'Quantitative Finance': '#c084fc',
+            };
+            const color = colorMap[domain] || '#5a9cf5';
+
+            // Check if this reviewer already exists
+            if (content.includes(`github: "${username}"`)) {
+              console.log(`Reviewer @${username} already exists in reviewers.html, skipping`);
+              return;
+            }
+
+            // Build new reviewer entry
+            const fullSubdomain = domain + ' / ' + subdomainDisplay;
+            let entry = `  {\n`;
+            entry += `    name: "${escapeJS(englishName)}",\n`;
+            entry += `    nameCn: "${escapeJS(chineseName)}",\n`;
+            entry += `    role: "${escapeJS(role)}",\n`;
+            entry += `    affiliation: "${escapeJS(shortAffiliation)}",\n`;
+            entry += `    subdomain: "${escapeJS(fullSubdomain)}",\n`;
+            entry += `    github: "${username}",\n`;
+            if (homepage && homepage !== '_No response_') {
+              entry += `    homepage: "${escapeJS(homepage)}",\n`;
+            }
+            entry += `    color: "${color}"\n`;
+            entry += `  }`;
+
+            // Insert before the closing "];" of the REVIEWERS array
+            content = content.replace(
+              /(\n)\];/,
+              `,\n${entry}\n];`
+            );
+
+            fs.writeFileSync(filePath, content);
+            console.log(`Added ${englishName} to reviewers.html`);
+
       - name: Commit and push
         env:
           USERNAME: ${{ steps.parse.outputs.github_username }}
@@ -229,7 +296,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add .github/CODEOWNERS readme.md docs/index.html
+          git add .github/CODEOWNERS docs/index.html docs/reviewers.html
           git commit -m "chore: onboard @${USERNAME} as ${DOMAIN_FOLDER}/${SUBDOMAIN_FOLDER} reviewer"
           git push
 
@@ -256,8 +323,8 @@ jobs:
                 ``,
                 `**What was updated:**`,
                 `- \`.github/CODEOWNERS\` — PRs touching your subdomain will now request your review`,
-                `- \`readme.md\` — reviewer count updated`,
                 `- \`docs/index.html\` — your name appears on the interactive knowledge tree`,
+                `- \`docs/reviewers.html\` — your profile is listed on the reviewers page`,
                 ``,
                 `Thank you for contributing your expertise to OpenScientist!`,
               ].join('\n'),

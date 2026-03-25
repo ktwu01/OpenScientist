@@ -132,7 +132,7 @@ We welcome contributions from domain experts. See [CONTRIBUTING.md](utils/CONTRI
 
 A domain reviewer listed in CODEOWNERS will be automatically assigned to review your PR for scientific accuracy.
 
-**Don't see your field?** You can propose a new subdomain or top-level domain — see [CONTRIBUTING.md § Propose a New Area](utils/CONTRIBUTING.md#3-propose-a-new-area).
+**Don't see your field?** [**Propose a new area →**](https://github.com/HHHHHejia/OpenScientist/issues/new?template=propose-new-area.md)
 
 ---
 
@@ -333,7 +333,7 @@ cp OpenScientist/skills/physics/quantum-physics/quantum-entanglement.md ~/.claud
 
 CODEOWNERS 中的领域审稿人会自动收到 review 请求，负责审核科学内容的准确性。
 
-**没有你的研究方向？** 可以提议新的子领域或顶层领域 —— 参阅 [CONTRIBUTING.md § 提议新领域或子领域](utils/CONTRIBUTING.md#3-提议新领域或子领域)。
+**没有你的研究方向？** [**提议新领域 →**](https://github.com/HHHHHejia/OpenScientist/issues/new?template=propose-new-area.md)
 
 ---
 

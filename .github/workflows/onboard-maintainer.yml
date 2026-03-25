@@ -330,8 +330,12 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add .github/CODEOWNERS docs/index.html docs/reviewers.html
-          git commit -m "chore: onboard @${USERNAME} as ${DOMAIN_FOLDER}/${SUBDOMAIN_FOLDER} reviewer"
-          git push
+          if git diff --cached --quiet; then
+            echo "No changes to commit (reviewer may already exist)"
+          else
+            git commit -m "chore: onboard @${USERNAME} as ${DOMAIN_FOLDER}/${SUBDOMAIN_FOLDER} reviewer"
+            git push
+          fi
 
       - name: Close issue with comment
         uses: actions/github-script@v7

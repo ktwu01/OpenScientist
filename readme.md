@@ -184,11 +184,17 @@ skills/physics/    @their-github-handle
 
 <h2 align="center">6. Reviewers</h2>
 
-Reviewers are domain experts responsible for ensuring the scientific quality of skills in their subdomain.
+Reviewers are domain experts who ensure the scientific quality of skills in their subdomain.
 
-- **Review PRs** — approve or request changes on skill submissions in your subdomain
-- **Self-approve** — reviewers may approve their own PRs within their subdomain
-- **Promote status** — upgrade a skill from `draft` to `reviewed` after verification
+**Responsibilities**
+- Review skill PRs in your subdomain for scientific accuracy and completeness
+- Provide constructive feedback to contributors
+- Promote skill status from `draft` → `reviewed` after verification
+
+**Permissions**
+- Approve or request changes on PRs touching your subdomain
+- Self-approve and merge your own PRs within your subdomain
+- Auto-assigned as reviewer via [CODEOWNERS](.github/CODEOWNERS) when a PR touches your subdomain
 
 | Domain | Subdomain | Reviewer | Affiliation |
 |---|---|---|---|
@@ -368,9 +374,15 @@ skills/physics/    @their-github-handle
 
 审稿人是负责其子领域 Skill 科学质量的领域专家。
 
-- **审核 PR** — 对所属子领域的 Skill 提交进行审批或提出修改意见
-- **自审自批** — 审稿人在自己的子领域内可以审核并合并自己的 PR
-- **提升状态** — 验证后将 Skill 从 `draft` 升级为 `reviewed`
+**职责**
+- 审核所属子领域的 Skill PR，确保科学准确性和完整性
+- 为贡献者提供建设性反馈
+- 验证后将 Skill 状态从 `draft` 提升为 `reviewed`
+
+**权限**
+- 对所属子领域的 PR 进行审批或提出修改意见
+- 在自己的子领域内可以自审自批、合并自己的 PR
+- 通过 [CODEOWNERS](.github/CODEOWNERS) 自动分配为审稿人
 
 | 领域 | 子领域 | 审稿人 | 机构 |
 |---|---|---|---|

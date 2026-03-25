@@ -30,7 +30,16 @@ NATURAL_SCIENCES = {"physics", "quantitative-biology", "eess"}
 FORMAL_SCIENCES  = {"mathematics", "computer-science", "statistics", "economics", "quantitative-finance"}
 
 
+DISPLAY_NAMES = {
+    "eess": "Electrical Engineering & Systems Science",
+    "quantitative-biology": "Quantitative Biology",
+    "quantitative-finance": "Quantitative Finance",
+    "computer-science": "Computer Science",
+}
+
 def label(name: str) -> str:
+    if name in DISPLAY_NAMES:
+        return DISPLAY_NAMES[name]
     return name.replace("-", " ").title()
 
 

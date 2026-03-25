@@ -16,7 +16,7 @@ import yaml
 REPO   = Path(__file__).parent.parent
 SKILLS = REPO / "skills"
 ASSETS = REPO / "assets"
-OUT    = ASSETS / "knowledge-tree.png"
+OUT    = ASSETS / "knowledge-tree-v2.png"
 README = REPO / "readme.md"
 
 FONT   = "/System/Library/Fonts/HelveticaNeue.ttc"
@@ -95,7 +95,16 @@ class N:
         self.pal=make_palette(hue)
         self.children=[]; self.x=self.y=self.span=0.0
 
+DISPLAY_NAMES = {
+    "eess": "Electrical Engineering\n& Systems Science",
+    "quantitative-biology": "Quantitative\nBiology",
+    "quantitative-finance": "Quantitative\nFinance",
+    "computer-science": "Computer\nScience",
+}
+
 def fmt(name):
+    if name in DISPLAY_NAMES:
+        return DISPLAY_NAMES[name]
     return name.replace("-", " ").title()
 
 def build(data):

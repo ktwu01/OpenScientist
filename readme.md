@@ -19,10 +19,9 @@
 
 <br>
 
-> [!IMPORTANT]
-> **Our mission:** Unite the knowledge of the world's top experts across every domain — to accelerate AI-driven scientific discovery.
->
-> **Call for action:** Share your research expertise. Together, we create the AI-era Einstein, Da Vinci, and Kant.
+**Our mission:** Unite the knowledge of the world's top experts across every domain — to accelerate AI-driven scientific discovery.
+
+**Call for action:** Share your research expertise. Together, we create the AI-era Einstein, Da Vinci, and Kant.
 
 <p align="center">
   <img src="assets/knowledge-tree.png" alt="Knowledge Tree" width="100%">
@@ -203,10 +202,9 @@ MIT
 <details>
 <summary><h2 id="中文版本">🇨🇳 中文版本</h2></summary>
 
-> [!IMPORTANT]
-> **我们的使命：** 汇集全人类各领域顶尖专家的知识，加速 AI 驱动的科学进步。
->
-> **行动号召：** 共享你的研究知识，创造 AI 时代的爱因斯坦、达芬奇与康德。
+**我们的使命：** 汇集全人类各领域顶尖专家的知识，加速 AI 驱动的科学进步。
+
+**行动号召：** 共享你的研究知识，创造 AI 时代的爱因斯坦、达芬奇与康德。
 
 ---
 

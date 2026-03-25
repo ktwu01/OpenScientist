@@ -155,34 +155,7 @@ Aligned with the [arXiv category taxonomy](https://arxiv.org/category_taxonomy).
 
 ---
 
-<h2 align="center">5. Repository Management</h2>
-
-### 5.1 Domain ownership
-
-Each `skills/<domain>/` folder is owned by a domain expert reviewer, defined in [CODEOWNERS](.github/CODEOWNERS). When a PR touches that folder, GitHub automatically requests their review.
-
-### 5.2 Updating the skills index
-
-```bash
-python utils/tools/build_index.py   # writes utils/SKILLS_INDEX.md
-```
-
-### 5.3 Onboarding a new domain expert
-
-Edit [CODEOWNERS](.github/CODEOWNERS) and replace the placeholder with their GitHub handle:
-
-```
-skills/physics/    @their-github-handle
-```
-
-### 5.4 Promoting a skill's status
-
-- `draft` → `reviewed` (reviewer approves)
-- `reviewed` → `verified` (tested in a real workflow)
-
----
-
-<h2 align="center">6. Reviewers</h2>
+<h2 align="center">5. Reviewers</h2>
 
 Reviewers are domain experts who ensure the scientific quality of skills in their subdomain.
 
@@ -196,9 +169,36 @@ Reviewers are domain experts who ensure the scientific quality of skills in thei
 - Self-approve and merge your own PRs within your subdomain
 - Auto-assigned as reviewer via [CODEOWNERS](.github/CODEOWNERS) when a PR touches your subdomain
 
-🧑‍🔬 **7 reviewers** across 8 domains · [View all reviewers in the Knowledge Tree →](https://hhhhhejia.github.io/OpenScientist/)
+[**Apply to become a category reviewer →**](https://github.com/HHHHHejia/OpenScientist/issues/new?template=maintainer-application.yml)
 
-> Want to become a reviewer? [**Apply here →**](https://github.com/HHHHHejia/OpenScientist/issues/new?template=maintainer-application.yml)
+[**View all reviewers in the Knowledge Tree →**](https://hhhhhejia.github.io/OpenScientist/)
+
+---
+
+<h2 align="center">6. Repository Management</h2>
+
+### 6.1 Domain ownership
+
+Each `skills/<domain>/` folder is owned by a domain expert reviewer, defined in [CODEOWNERS](.github/CODEOWNERS). When a PR touches that folder, GitHub automatically requests their review.
+
+### 6.2 Updating the skills index
+
+```bash
+python utils/tools/build_index.py   # writes utils/SKILLS_INDEX.md
+```
+
+### 6.3 Onboarding a new domain expert
+
+Edit [CODEOWNERS](.github/CODEOWNERS) and replace the placeholder with their GitHub handle:
+
+```
+skills/physics/    @their-github-handle
+```
+
+### 6.4 Promoting a skill's status
+
+- `draft` → `reviewed` (reviewer approves)
+- `reviewed` → `verified` (tested in a real workflow)
 
 ---
 
@@ -241,82 +241,7 @@ OpenScientist 是一个精心策划的 **Claude Code Skills 库** —— 每个 
 
 ---
 
-<h2 align="center">2. 如何使用</h2>
-
-### 2.1 安装
-
-每个 Skill 是一个 `.md` 文件，安装一次，在 Claude Code 中随时调用：
-
-```bash
-# 1. 克隆仓库
-git clone https://github.com/HHHHHejia/OpenScientist.git
-
-# 2. 复制 Skill（或符号链接整个领域）
-cp OpenScientist/skills/physics/quantum-physics/quantum-entanglement.md ~/.claude/skills/
-# 或：ln -s $(pwd)/OpenScientist/skills/physics ~/.claude/skills/os-physics
-
-# 3. 在 Claude Code 中调用
-/quantum-entanglement  →  Claude 以量子物理专家身份推理
-```
-
-### 2.2 Skill 文件的结构
-
-| 部分                    | 作用                                           |
-| ------------------------- | ------------------------------------------------ |
-| YAML frontmatter        | 机器可读的元数据：name、domain、author、status |
-| `## Purpose`            | 何时调用此 Skill                               |
-| `## Domain Knowledge`   | 核心概念、公式、既定事实                       |
-| `## Reasoning Protocol` | AI 推理的分步指南                              |
-| `## Tools`              | 该领域常用的软件、库、数据库                   |
-| `## Common Pitfalls`    | 常见错误和边界情况                             |
-| `## Examples`           | 示范性例题                                     |
-| `## References`         | 关键论文和教材                                 |
-
-### 2.3 质量等级
-
-| 状态       | 含义                           |
-| ------------ | -------------------------------- |
-| `draft`    | 已撰写，尚未同行评审           |
-| `reviewed` | 已由领域专家审核通过           |
-| `verified` | 已在真实 AI 科学家工作流中验证 |
-
-每次 PR 修改 Skill 文件时，CI 会自动运行 `utils/tools/validate.py` 检查必填字段和章节结构。校验不通过则无法合并。
-
----
-
-<h2 align="center">3. 如何贡献</h2>
-
-我们欢迎各领域专家贡献知识。请参阅 [CONTRIBUTING.md](utils/CONTRIBUTING.md) 了解完整流程。
-
-### 3.1 贡献者要求
-
-> **谁可以贡献？** 我们对科学准确性有严格要求。
-
-- **学术资质** — 必须持有博士学位或同等研究岗位（博士后、研究员、教授等）
-- **实名认证** — 贡献者必须在 `author` 字段使用真实姓名和所属机构（如 `"Dr. Albert Einstein (ETH Zürich Physics)"`）
-- **领域专长** — 只能在自己的专业领域内贡献 Skill
-
-### 3.2 五个步骤
-
-- **Fork** 本仓库
-- **复制模板** 到对应领域文件夹：
-  ```bash
-  cp skills/_template.md skills/<领域>/<子领域>/<你的skill名称>.md
-  ```
-- **填写每个章节** —— Purpose、Domain Knowledge、Reasoning Protocol、Tools、Common Pitfalls
-- **本地验证**（推荐）：
-  ```bash
-  python utils/tools/validate.py skills/<领域>/<子领域>/<你的skill名称>.md
-  ```
-- **提交 Pull Request** —— 标题格式：`[physics/quantum-physics] Add quantum-entanglement skill`
-
-[CODEOWNERS](.github/CODEOWNERS) 中的领域审稿人会自动收到 review 请求，负责审核科学内容的准确性。
-
-**没有你的研究方向？** 可以提议新的子领域或顶层领域 —— 参阅 [CONTRIBUTING.md § 提议新领域或子领域](utils/CONTRIBUTING.md#3-提议新领域或子领域)。
-
----
-
-<h2 align="center">4. 领域列表</h2>
+<h2 align="center">2. 领域列表</h2>
 
 对齐 [arXiv 分类体系](https://arxiv.org/category_taxonomy)。8 个顶层领域，155 个子领域。
 
@@ -335,34 +260,82 @@ cp OpenScientist/skills/physics/quantum-physics/quantum-entanglement.md ~/.claud
 
 ---
 
-<h2 align="center">5. 仓库管理</h2>
+<h2 align="center">3. 如何使用</h2>
 
-### 5.1 领域归属
+### 3.1 安装
 
-每个 `skills/<domain>/` 文件夹由一位领域审稿人负责，定义在 [CODEOWNERS](.github/CODEOWNERS) 中。当 PR 涉及该文件夹时，GitHub 会自动请求其 review。
-
-### 5.2 更新 Skills 索引
+每个 Skill 是一个 `.md` 文件，安装一次，在 Claude Code 中随时调用：
 
 ```bash
-python utils/tools/build_index.py   # 生成 utils/SKILLS_INDEX.md
+# 1. 克隆仓库
+git clone https://github.com/HHHHHejia/OpenScientist.git
+
+# 2. 复制 Skill（或符号链接整个领域）
+cp OpenScientist/skills/physics/quantum-physics/quantum-entanglement.md ~/.claude/skills/
+# 或：ln -s $(pwd)/OpenScientist/skills/physics ~/.claude/skills/os-physics
+
+# 3. 在 Claude Code 中调用
+/quantum-entanglement  →  Claude 以量子物理专家身份推理
 ```
 
-### 5.3 添加新的领域专家
+### 3.2 Skill 文件的结构
 
-编辑 [CODEOWNERS](.github/CODEOWNERS)，将占位符替换为其 GitHub 用户名：
+| 部分                    | 作用                                           |
+| ------------------------- | ------------------------------------------------ |
+| YAML frontmatter        | 机器可读的元数据：name、domain、author、status |
+| `## Purpose`            | 何时调用此 Skill                               |
+| `## Domain Knowledge`   | 核心概念、公式、既定事实                       |
+| `## Reasoning Protocol` | AI 推理的分步指南                              |
+| `## Tools`              | 该领域常用的软件、库、数据库                   |
+| `## Common Pitfalls`    | 常见错误和边界情况                             |
+| `## Examples`           | 示范性例题                                     |
+| `## References`         | 关键论文和教材                                 |
 
-```
-skills/physics/    @their-github-handle
-```
+### 3.3 质量等级
 
-### 5.4 提升 Skill 状态
+| 状态       | 含义                           |
+| ------------ | -------------------------------- |
+| `draft`    | 已撰写，尚未同行评审           |
+| `reviewed` | 已由领域专家审核通过           |
+| `verified` | 已在真实 AI 科学家工作流中验证 |
 
-- `draft` → `reviewed`（审稿人审核通过）
-- `reviewed` → `verified`（在真实工作流中验证）
+每次 PR 修改 Skill 文件时，CI 会自动运行 `utils/tools/validate.py` 检查必填字段和章节结构。校验不通过则无法合并。
 
 ---
 
-<h2 align="center">6. 审稿人</h2>
+<h2 align="center">4. 如何贡献</h2>
+
+我们欢迎各领域专家贡献知识。请参阅 [CONTRIBUTING.md](utils/CONTRIBUTING.md) 了解完整流程。
+
+### 4.1 贡献者要求
+
+> **谁可以贡献？** 我们对科学准确性有严格要求。
+
+- **学术资质** — 必须持有博士学位或同等研究岗位（博士后、研究员、教授等）
+- **实名认证** — 贡献者必须在 `author` 字段使用真实姓名和所属机构（如 `"Dr. Albert Einstein (ETH Zürich Physics)"`)
+- **领域专长** — 只能在自己的专业领域内贡献 Skill
+
+### 4.2 五个步骤
+
+- **Fork** 本仓库
+- **复制模板** 到对应领域文件夹：
+  ```bash
+  cp skills/_template.md skills/<领域>/<子领域>/<你的skill名称>.md
+  ```
+- **填写每个章节** —— Purpose、Domain Knowledge、Reasoning Protocol、Tools、Common Pitfalls
+- **本地验证**（推荐）：
+  ```bash
+  python tools/validate.py skills/<领域>/<子领域>/<你的skill名称>.md
+  ```
+- **提交 Pull Request** —— 标题格式：`[physics/quantum-physics] Add quantum-entanglement skill`
+
+[CODEOWNERS](.github/CODEOWNERS) 中的领域审稿人会自动收到 review 请求，负责审核科学内容的准确性。
+
+**没有你的研究方向？** 可以提议新的子领域或顶层领域 —— 参阅 [CONTRIBUTING.md § 提议新领域或子领域](utils/CONTRIBUTING.md#3-提议新领域或子领域)。
+
+---
+
+<h2 align="center">5. 审稿人</h2>
 
 审稿人是负责其子领域 Skill 科学质量的领域专家。
 
@@ -376,8 +349,35 @@ skills/physics/    @their-github-handle
 - 在自己的子领域内可以自审自批、合并自己的 PR
 - 通过 [CODEOWNERS](.github/CODEOWNERS) 自动分配为审稿人
 
-🧑‍🔬 **7 位审稿人** 覆盖 8 大领域 · [查看全部审稿人（知识树）→](https://hhhhhejia.github.io/OpenScientist/)
+[**申请成为类别审稿人 →**](https://github.com/HHHHHejia/OpenScientist/issues/new?template=maintainer-application.yml)
 
-> 想成为审稿人？[**点击申请 →**](https://github.com/HHHHHejia/OpenScientist/issues/new?template=maintainer-application.yml)
+[**查看全部审稿人（知识树）→**](https://hhhhhejia.github.io/OpenScientist/)
+
+---
+
+<h2 align="center">6. 仓库管理</h2>
+
+### 6.1 领域归属
+
+每个 `skills/<domain>/` 文件夹由一位领域审稿人负责，定义在 [CODEOWNERS](.github/CODEOWNERS) 中。当 PR 涉及该文件夹时，GitHub 会自动请求其 review。
+
+### 6.2 更新 Skills 索引
+
+```bash
+python utils/tools/build_index.py   # 生成 utils/SKILLS_INDEX.md
+```
+
+### 6.3 添加新的领域专家
+
+编辑 [CODEOWNERS](.github/CODEOWNERS)，将占位符替换为其 GitHub 用户名：
+
+```
+skills/physics/    @their-github-handle
+```
+
+### 6.4 提升 Skill 状态
+
+- `draft` → `reviewed`（审稿人审核通过）
+- `reviewed` → `verified`（在真实工作流中验证）
 
 </details>

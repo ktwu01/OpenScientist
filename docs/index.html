@@ -209,6 +209,15 @@
   .reviewer-card .rc-link { display: block; font-size: 0.78rem; color: #5a9cf5; text-decoration: none; margin-bottom: 2px; }
   .reviewer-card .rc-link:hover { text-decoration: underline; }
 
+  /* ── tooltip ── */
+  .desc-tooltip {
+    display: none; position: fixed; z-index: 1000; max-width: 420px;
+    padding: 10px 14px; background: rgba(14,18,32,0.96);
+    border: 1px solid rgba(255,255,255,0.12); border-radius: 8px;
+    color: #c8d0e0; font-size: 0.78rem; line-height: 1.5;
+    pointer-events: none; box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  }
+
   /* ── responsive ── */
   @media (max-width: 900px) {
     .tnode-kids > .tnode { padding: 0 6px; }
@@ -225,6 +234,7 @@
     .tnode-root > .tnode-box { font-size: 1rem; }
     .tnode-kids > .tnode { padding: 0 3px; }
     .subdomain-panel { min-width: 280px; max-width: 90vw; }
+    .desc-tooltip { max-width: 280px; }
   }
 
 
@@ -293,23 +303,27 @@ var DATA = [
       ]},
       { name: "Physics", code: "physics", children: [
         { name: "Accelerator Physics", code: "physics.acc-ph" },
-        { name: "Atmospheric and Oceanic Physics", code: "physics.ao-ph", maintainer: { name: "\u5434\u53e9\u5929", nameEn: "Koutian Wu", github: "ktwu01", affiliation: "UT Austin", role: "PhD Student" } },
+        { name: "Atmospheric and Oceanic Physics", code: "physics.ao-ph", maintainer: { name: "\u5434\u53e9\u5929", nameEn: "Koutian Wu", github: "ktwu01", affiliation: "UT Austin", role: "PhD Student", homepage: "https://www.linkedin.com/in/ktwu01/" } },
         { name: "Applied Physics", code: "physics.app-ph" },
         { name: "Atomic and Molecular Clusters", code: "physics.atm-clus" },
         { name: "Atomic Physics", code: "physics.atom-ph" },
         { name: "Biological Physics", code: "physics.bio-ph" },
-        { name: "Chemical Physics", code: "physics.chem-ph", maintainer: { name: "\u9648\u601d\u4f73", nameEn: "Sijia Chen", github: "Alexandrina-Chen", affiliation: "Flatiron Institute", role: "Research Fellow" } },
+        { name: "Chemical Physics", code: "physics.chem-ph", maintainer: { name: "\u9648\u601d\u4f73", nameEn: "Sijia Chen", github: "Alexandrina-Chen", affiliation: "Flatiron Institute", role: "Research Fellow", homepage: "https://www.linkedin.com/in/sijia-chen-897a201b9/" } },
         { name: "Classical Physics", code: "physics.class-ph" },
         { name: "Computational Physics", code: "physics.comp-ph" },
         { name: "Data Analysis, Statistics and Probability", code: "physics.data-an" },
+        { name: "Physics Education", code: "physics.ed-ph" },
         { name: "Fluid Dynamics", code: "physics.flu-dyn" },
         { name: "General Physics", code: "physics.gen-ph" },
         { name: "Geophysics", code: "physics.geo-ph" },
+        { name: "History and Philosophy of Physics", code: "physics.hist-ph" },
         { name: "Instrumentation and Detectors", code: "physics.ins-det" },
         { name: "Medical Physics", code: "physics.med-ph" },
         { name: "Optics", code: "physics.optics" },
         { name: "Plasma Physics", code: "physics.plasm-ph" },
-        { name: "Space Physics", code: "physics.space-ph", maintainer: { name: "\u9ec4\u6cfd\u68ee", nameEn: "Zesen Huang", github: "huangzesen", affiliation: "UCLA", role: "Postdoc" } },
+        { name: "Popular Physics", code: "physics.pop-ph" },
+        { name: "Physics and Society", code: "physics.soc-ph" },
+        { name: "Space Physics", code: "physics.space-ph", maintainer: { name: "\u9ec4\u6cfd\u68ee", nameEn: "Zesen Huang", github: "huangzesen", affiliation: "UCLA", role: "Postdoc", homepage: "https://www.linkedin.com/in/zesen-huang-839b6a109/" } },
       ]},
     ]},
     { name: "Quantitative Biology", icon: "\ud83e\uddec", code: "q-bio", color: "#fb923c", children: [
@@ -367,13 +381,13 @@ var DATA = [
       { name: "Statistics Theory", code: "math.ST" },
     ]},
     { name: "Computer Science", icon: "\ud83d\udcbb", code: "cs", color: "#22d3ee", children: [
-      { name: "Artificial Intelligence", code: "cs.AI", maintainer: { name: "\u7ae0\u5f66\u535a", nameEn: "Yanbo Zhang", github: "Zhangyanbo", affiliation: "Tufts University", role: "Postdoc" } },
-      { name: "Hardware Architecture", code: "cs.AR", maintainer: { name: "\u66fe\u90c5\u7428", nameEn: "Zhichen Zeng", github: "Zhichenzzz", affiliation: "University of Washington", role: "PhD Student" } },
+      { name: "Artificial Intelligence", code: "cs.AI", maintainer: { name: "\u7ae0\u5f66\u535a", nameEn: "Yanbo Zhang", github: "Zhangyanbo", affiliation: "Tufts University", role: "Postdoc", homepage: "https://www.linkedin.com/in/zhang-yanbo-57b690101/" } },
+      { name: "Hardware Architecture", code: "cs.AR", maintainer: { name: "\u66fe\u90c5\u7428", nameEn: "Zhichen Zeng", github: "Zhichenzzz", affiliation: "University of Washington", role: "PhD Student", homepage: "https://zhichenzzz.github.io/" } },
       { name: "Computational Complexity", code: "cs.CC" },
       { name: "Computational Engineering, Finance, and Science", code: "cs.CE" },
       { name: "Computational Geometry", code: "cs.CG" },
       { name: "Computation and Language", code: "cs.CL" },
-      { name: "Cryptography and Security", code: "cs.CR", maintainer: { name: "\u4f59\u6653\u822a", nameEn: "Xiaohang Yu", github: "xhyumiracle", affiliation: "Imperial College London", role: "PhD Student" } },
+      { name: "Cryptography and Security", code: "cs.CR", maintainer: { name: "\u4f59\u6653\u822a", nameEn: "Xiaohang Yu", github: "xhyumiracle", affiliation: "Imperial College London", role: "PhD Student", homepage: "https://scholar.google.com/citations?user=WURsNDYAAAAJ&hl=en" } },
       { name: "Computer Vision and Pattern Recognition", code: "cs.CV" },
       { name: "Computers and Society", code: "cs.CY" },
       { name: "Databases", code: "cs.DB" },
@@ -391,7 +405,7 @@ var DATA = [
       { name: "Information Theory", code: "cs.IT" },
       { name: "Machine Learning", code: "cs.LG" },
       { name: "Logic in Computer Science", code: "cs.LO" },
-      { name: "Multiagent Systems", code: "cs.MA", maintainer: { name: "\u82cf\u542f\u6668", nameEn: "Qisheng Su", github: "suqisheng", affiliation: "USTC", role: "PhD Student" } },
+      { name: "Multiagent Systems", code: "cs.MA", maintainer: { name: "\u82cf\u542f\u6668", nameEn: "Qisheng Su", github: "suqisheng", affiliation: "USTC", role: "PhD Student", homepage: "https://www.linkedin.com/in/suqisheng/" } },
       { name: "Multimedia", code: "cs.MM" },
       { name: "Mathematical Software", code: "cs.MS" },
       { name: "Numerical Analysis", code: "cs.NA" },
@@ -435,6 +449,209 @@ var DATA = [
   ]},
 ];
 
+/* ── arXiv category descriptions (shown on hover) ── */
+var DESCRIPTIONS = {
+  /* Astrophysics */
+  "astro-ph.CO": "Phenomenology of early universe, cosmic microwave background, cosmological parameters, primordial element abundances, extragalactic distance scale, large-scale structure of the universe. Dark energy, dark matter, inflationary models, cosmic strings, primordial black holes, cosmological gravitational radiation.",
+  "astro-ph.EP": "Interplanetary medium, planetary physics, planetary astrobiology, extrasolar planets, comets, asteroids, meteorites. Structure and formation of the solar system.",
+  "astro-ph.GA": "Phenomena pertaining to galaxies or the Milky Way. Star clusters, HII regions and planetary nebulae, the interstellar medium, atomic and molecular clouds, dust. Stellar populations. Galactic structure, formation, dynamics. Active Galactic Nuclei, supermassive black holes, quasars.",
+  "astro-ph.HE": "Cosmic ray production, acceleration, propagation, detection. Gamma ray astronomy and bursts, X-rays, charged particles, supernovae and other explosive phenomena, stellar remnants and accretion systems, jets, microquasars, neutron stars, pulsars, black holes.",
+  "astro-ph.IM": "Detector and telescope design, experiment proposals. Laboratory Astrophysics. Methods for data analysis, statistical methods. Software, database design.",
+  "astro-ph.SR": "White dwarfs, brown dwarfs, cataclysmic variables. Star formation and protostellar systems, stellar astrobiology, binary and multiple systems of stars, stellar evolution and structure, coronas. Central stars of planetary nebulae. Helioseismology, solar neutrinos, production and detection of gravitational radiation from stellar systems.",
+  /* Condensed Matter */
+  "cond-mat.dis-nn": "Glasses and spin glasses; properties of random, aperiodic and quasiperiodic systems; transport in disordered media; localization; phenomena mediated by defects and disorder; neural networks.",
+  "cond-mat.mes-hall": "Semiconducting nanostructures: quantum dots, wires, and wells. Single electronics, spintronics, 2d electron gases, quantum Hall effect, nanotubes, graphene, plasmonic nanostructures.",
+  "cond-mat.mtrl-sci": "Techniques, synthesis, characterization, structure. Structural phase transitions, mechanical properties, phonons. Defects, adsorbates, interfaces.",
+  "cond-mat.other": "Work in condensed matter that does not fit into the other cond-mat classifications.",
+  "cond-mat.quant-gas": "Ultracold atomic and molecular gases, Bose-Einstein condensation, Feshbach resonances, spinor condensates, optical lattices, quantum simulation with cold atoms and molecules, macroscopic interference phenomena.",
+  "cond-mat.soft": "Membranes, polymers, liquid crystals, glasses, colloids, granular matter.",
+  "cond-mat.stat-mech": "Phase transitions, thermodynamics, field theory, non-equilibrium phenomena, renormalization group and scaling, integrable models, turbulence.",
+  "cond-mat.str-el": "Quantum magnetism, non-Fermi liquids, spin liquids, quantum criticality, charge density waves, metal-insulator transitions.",
+  "cond-mat.supr-con": "Superconductivity: theory, models, experiment. Superflow in helium.",
+  /* High Energy Physics */
+  "hep-ex": "Results from high-energy/particle physics experiments and prospects for future experimental results, including tests of the standard model, measurements of standard model parameters, searches for physics beyond the standard model, and astroparticle physics experimental results.",
+  "hep-lat": "Lattice field theory. Phenomenology from lattice field theory. Algorithms for lattice field theory. Hardware for lattice field theory.",
+  "hep-ph": "Theoretical particle physics and its interrelation with experiment. Prediction of particle physics observables: models, effective field theories, calculation techniques. Particle physics: analysis of theory through experimental results.",
+  "hep-th": "Formal aspects of quantum field theory. String theory, supersymmetry and supergravity.",
+  /* Standalone Physics */
+  "gr-qc": "Areas of gravitational physics, including experiments and observations related to the detection and interpretation of gravitational waves, experimental tests of gravitational theories, computational general relativity, relativistic astrophysics, alternative theories of gravity, classical and quantum cosmology, and quantum gravity.",
+  "math-ph": "Application of mathematics to problems in physics, develop mathematical methods for such applications, or provide mathematically rigorous formulations of existing physical theories. Of interest to both physically oriented mathematicians and mathematically oriented physicists.",
+  "nucl-ex": "Results from experimental nuclear physics including the areas of fundamental interactions, measurements at low- and medium-energy, as well as relativistic heavy-ion collisions.",
+  "nucl-th": "Theory of nuclear structure covering wide area from models of hadron structure to neutron stars. Nuclear equation of states at different external conditions. Theory of nuclear reactions including heavy-ion reactions at low and high energies.",
+  "quant-ph": "Quantum physics including quantum information, quantum computation, quantum foundations, quantum optics, and quantum many-body systems.",
+  /* Nonlinear Sciences */
+  "nlin.AO": "Adaptation, self-organizing systems, statistical physics, fluctuating systems, stochastic processes, interacting particle systems, machine learning.",
+  "nlin.CD": "Dynamical systems, chaos, quantum chaos, topological dynamics, cycle expansions, turbulence, propagation.",
+  "nlin.CG": "Computational methods, time series analysis, signal processing, wavelets, lattice gases.",
+  "nlin.PS": "Pattern formation, coherent structures, solitons.",
+  "nlin.SI": "Exactly solvable systems, integrable PDEs, integrable ODEs, Painlev\u00e9 analysis, integrable discrete maps, solvable lattice models, integrable quantum systems.",
+  /* Physics */
+  "physics.acc-ph": "Accelerator theory and simulation. Accelerator technology. Accelerator experiments. Beam Physics. Accelerator design and optimization. Advanced accelerator concepts. Radiation sources including synchrotron light sources and free electron lasers. Applications of accelerators.",
+  "physics.ao-ph": "Atmospheric and oceanic physics and physical chemistry, biogeophysics, and climate science.",
+  "physics.app-ph": "Applications of physics to new technology, including electronic devices, optics, photonics, microwaves, spintronics, advanced materials, metamaterials, nanotechnology, and energy sciences.",
+  "physics.atm-clus": "Atomic and molecular clusters, nanoparticles: geometric, electronic, optical, chemical, magnetic properties, shell structure, phase transitions, optical spectroscopy, mass spectrometry, photoelectron spectroscopy, ionization potential, electron affinity, interaction with intense light pulses, electron diffraction, light scattering, ab initio calculations, DFT theory, fragmentation, Coulomb explosion, hydrodynamic expansion.",
+  "physics.atom-ph": "Atomic and molecular structure, spectra, collisions, and data. Atoms and molecules in external fields. Molecular dynamics and coherent and optical control. Cold atoms and molecules. Cold collisions. Optical lattices.",
+  "physics.bio-ph": "Molecular biophysics, cellular biophysics, neurological biophysics, membrane biophysics, single-molecule biophysics, ecological biophysics, quantum phenomena in biological systems (quantum biophysics), theoretical biophysics, molecular dynamics/modeling and simulation, game theory, biomechanics, bioinformatics, microorganisms, virology, evolution, biophysical methods.",
+  "physics.chem-ph": "Experimental, computational, and theoretical physics of atoms, molecules, and clusters \u2014 Classical and quantum description of states, processes, and dynamics; spectroscopy, electronic structure, conformations, reactions, interactions, and phases. Chemical thermodynamics. Disperse systems. High pressure chemistry. Solid state chemistry. Surface and interface chemistry.",
+  "physics.class-ph": "Newtonian and relativistic dynamics; many particle systems; planetary motions; chaos in classical dynamics. Maxwell\u2019s equations and dynamics of charged systems and electromagnetic forces in materials. Vibrating systems such as membranes and cantilevers; optomechanics. Classical waves, including acoustics and elasticity; physics of music and musical instruments. Classical thermodynamics and heat flow problems.",
+  "physics.comp-ph": "All aspects of computational science applied to physics.",
+  "physics.data-an": "Methods, software and hardware for physics data analysis: data processing and storage; measurement methodology; statistical and mathematical aspects such as parametrization and uncertainties.",
+  "physics.ed-ph": "Report of results of a research study, laboratory experience, assessment or classroom practice that represents a way to improve teaching and learning in physics. Also, report on misconceptions of students, textbook errors, and other similar information relative to promoting physics understanding.",
+  "physics.flu-dyn": "Turbulence, instabilities, incompressible/compressible flows, reacting flows. Aero/hydrodynamics, fluid-structure interactions, acoustics. Biological fluid dynamics, micro/nanofluidics, interfacial phenomena. Complex fluids, suspensions and granular flows, porous media flows. Geophysical flows, thermoconvective and stratified flows. Mathematical and computational methods for fluid dynamics, fluid flow models, experimental techniques.",
+  "physics.gen-ph": "General physics.",
+  "physics.geo-ph": "Atmospheric physics. Biogeosciences. Computational geophysics. Geographic location. Geoinformatics. Geophysical techniques. Hydrospheric geophysics. Magnetospheric physics. Mathematical geophysics. Planetology. Solar system. Solid earth geophysics. Space plasma physics. Mineral physics. High pressure physics.",
+  "physics.hist-ph": "History and philosophy of all branches of physics, astrophysics, and cosmology, including appreciations of physicists.",
+  "physics.ins-det": "Instrumentation and Detectors for research in natural science, including optical, molecular, atomic, nuclear and particle physics instrumentation and the associated electronics, services, infrastructure and control equipment.",
+  "physics.med-ph": "Radiation therapy. Radiation dosimetry. Biomedical imaging modelling. Reconstruction, processing, and analysis. Biomedical system modelling and analysis. Health physics. New imaging or therapy modalities.",
+  "physics.optics": "Adaptive optics. Astronomical optics. Atmospheric optics. Biomedical optics. Fiber optics. Fourier optics. Geometrical optics. Holography. Infrared optics. Integrated optics. Lasers. Nano optics. Ocean optics. Optical computing. Optical devices. Optical imaging. Optical materials. Optical metrology. Optical microscopy. Quantum optics. Ultrafast optics. Wave optics. X-ray optics.",
+  "physics.plasm-ph": "Fundamental plasma physics. Magnetically Confined Plasmas (includes magnetic fusion energy research). High Energy Density Plasmas (inertial confinement plasmas, laser-plasma interactions). Ionospheric, Heliophysical, and Astrophysical plasmas. Lasers, Accelerators, and Radiation Generation. Low temperature plasmas and plasma applications (includes dusty plasmas, semiconductor etching, plasma-based nanotechnology, medical applications). Plasma Diagnostics, Engineering and Enabling Technologies.",
+  "physics.pop-ph": "Popular physics.",
+  "physics.soc-ph": "Structure, dynamics and collective behavior of societies and groups (human or otherwise). Quantitative analysis of social networks and other complex networks. Physics and engineering of infrastructure and systems of broad societal impact (e.g., energy grids, transportation networks).",
+  "physics.space-ph": "Space plasma physics. Heliophysics. Space weather. Planetary magnetospheres, ionospheres and magnetotail. Auroras. Interplanetary space. Cosmic rays. Synchrotron radiation. Radio astronomy.",
+  /* Quantitative Biology */
+  "q-bio.BM": "DNA, RNA, proteins, lipids, etc.; molecular structures and folding kinetics; molecular interactions; single-molecule manipulation.",
+  "q-bio.CB": "Cell-cell signaling and interaction; morphogenesis and development; apoptosis; bacterial conjugation; viral-host interaction; immunology.",
+  "q-bio.GN": "DNA sequencing and assembly; gene and motif finding; RNA editing and alternative splicing; genomic structure and processes (replication, transcription, methylation, etc); mutational processes.",
+  "q-bio.MN": "Gene regulation, signal transduction, proteomics, metabolomics, gene and enzymatic networks.",
+  "q-bio.NC": "Synapse, cortex, neuronal dynamics, neural network, sensorimotor control, behavior, attention.",
+  "q-bio.OT": "Work in quantitative biology that does not fit into the other q-bio classifications.",
+  "q-bio.PE": "Population dynamics, spatio-temporal and epidemiological models, dynamic speciation, co-evolution, biodiversity, foodwebs, aging; molecular evolution and phylogeny; directed evolution; origin of life.",
+  "q-bio.QM": "All experimental, numerical, statistical and mathematical contributions of value to biology.",
+  "q-bio.SC": "Assembly and control of subcellular structures (channels, organelles, cytoskeletons, capsules, etc.); molecular motors, transport, subcellular localization; mitosis and meiosis.",
+  "q-bio.TO": "Blood flow in vessels, biomechanics of bones, electrical waves, endocrine system, tumor growth.",
+  /* EESS */
+  "eess.AS": "Theory and methods for processing signals representing audio, speech, and language, and their applications. This includes analysis, synthesis, enhancement, transformation, classification and interpretation of such signals as well as the design, development, and evaluation of associated signal processing systems. Machine learning and pattern analysis applied to any of the above areas is also welcome.",
+  "eess.IV": "Theory, algorithms, and architectures for the formation, capture, processing, communication, analysis, and display of images, video, and multidimensional signals in a wide variety of applications. Topics of interest include: mathematical, statistical, and perceptual image and video modeling and representation; linear and nonlinear filtering, enhancement, restoration, and reconstruction from degraded, low-resolution or tomographic data; lossless and lossy compression and coding; segmentation, alignment, and recognition.",
+  "eess.SP": "Theory, algorithms, performance analysis and applications of signal and data analysis, including physical modeling, processing, detection and parameter estimation, learning, mining, retrieval, and information extraction. The term \u201csignal\u201d includes speech, audio, sonar, radar, geophysical, physiological, (bio-) medical, image, video, and multimodal natural and man-made signals, including communication signals and data.",
+  "eess.SY": "Theoretical and experimental research covering all facets of automatic control systems. The section is focused on methods of control system analysis and design using tools of modeling, simulation and optimization. Specific areas of research include nonlinear, distributed, adaptive, stochastic and robust control in addition to hybrid and discrete event systems. Application areas include automotive and aerospace control systems, network control, biological systems, multiagent and cooperative control, robotics, reinforcement learning, sensor networks, control of cyber-physical and energy-related systems, and control of computing systems.",
+  /* Mathematics */
+  "math.AC": "Commutative rings, modules, ideals, homological algebra, computational aspects, invariant theory, connections to algebraic geometry and combinatorics.",
+  "math.AG": "Algebraic varieties, stacks, sheaves, schemes, moduli spaces, complex geometry, quantum cohomology.",
+  "math.AP": "Existence and uniqueness, boundary conditions, linear and non-linear operators, stability, soliton theory, integrable PDEs, conservation laws, qualitative dynamics.",
+  "math.AT": "Homotopy theory, homological algebra, algebraic treatments of manifolds.",
+  "math.CA": "Special functions, orthogonal polynomials, harmonic analysis, ODEs, differential relations, calculus of variations, approximations, expansions, asymptotics.",
+  "math.CO": "Discrete mathematics, graph theory, enumeration, combinatorial optimization, Ramsey theory, combinatorial game theory.",
+  "math.CT": "Enriched categories, topoi, abelian categories, monoidal categories, homological algebra.",
+  "math.CV": "Holomorphic functions, automorphic group actions and forms, pseudoconvexity, complex geometry, analytic spaces, analytic sheaves.",
+  "math.DG": "Complex, contact, Riemannian, pseudo-Riemannian and Finsler geometry, relativity, gauge theory, global analysis.",
+  "math.DS": "Dynamics of differential equations and flows, mechanics, classical few-body problems, iterations, complex dynamics, delayed differential equations.",
+  "math.FA": "Banach spaces, function spaces, real functions, integral transforms, theory of distributions, measure theory.",
+  "math.GM": "Mathematical material of general interest, topics not covered elsewhere.",
+  "math.GN": "Continuum theory, point-set topology, spaces with algebraic structure, foundations, dimension theory, local and global properties.",
+  "math.GR": "Finite groups, topological groups, representation theory, cohomology, classification and structure.",
+  "math.GT": "Manifolds, orbifolds, polyhedra, cell complexes, foliations, geometric structures.",
+  "math.HO": "Biographies, philosophy of mathematics, mathematics education, recreational mathematics, communication of mathematics, ethics in mathematics.",
+  "math.IT": "Alias for cs.IT. Covers theoretical and experimental aspects of information theory and coding.",
+  "math.KT": "Algebraic and topological K-theory, relations with topology, commutative algebra, and operator algebras.",
+  "math.LO": "Logic, set theory, point-set topology, formal mathematics.",
+  "math.MG": "Euclidean, hyperbolic, discrete, convex, coarse geometry, comparisons in Riemannian geometry, symmetric spaces.",
+  "math.MP": "Alias for math-ph. Articles in this category focus on areas of research that illustrate the application of mathematics to problems in physics, develop mathematical methods for such applications, or provide mathematically rigorous formulations of existing physical theories.",
+  "math.NA": "Numerical algorithms for problems in analysis and algebra, scientific computation.",
+  "math.NT": "Prime numbers, diophantine equations, analytic number theory, algebraic number theory, arithmetic geometry, Galois theory.",
+  "math.OA": "Algebras of operators on Hilbert space, C*-algebras, von Neumann algebras, non-commutative geometry.",
+  "math.OC": "Operations research, linear programming, control theory, systems theory, optimal control, game theory.",
+  "math.PR": "Theory and applications of probability and stochastic processes: e.g. central limit theorems, large deviations, stochastic differential equations, models from statistical mechanics, queuing theory.",
+  "math.QA": "Quantum groups, skein theories, operadic and diagrammatic algebra, quantum field theory.",
+  "math.RA": "Non-commutative rings and algebras, non-associative algebras, universal algebra and lattice theory, linear algebra, semigroups.",
+  "math.RT": "Linear representations of algebras and groups, Lie theory, associative algebras, multilinear algebra.",
+  "math.SG": "Hamiltonian systems, symplectic flows, classical integrable systems.",
+  "math.SP": "Schr\u00f6dinger operators, operators on manifolds, general differential operators, numerical studies, integral operators, discrete models, resonances, non-self-adjoint operators, random operators/matrices.",
+  "math.ST": "Alias for stat.TH. Applied, computational and theoretical statistics: e.g. statistical inference, regression, time series, multivariate analysis, data analysis, Markov chain Monte Carlo, design of experiments, case studies.",
+  /* Computer Science */
+  "cs.AI": "Covers all areas of AI except Vision, Robotics, Machine Learning, Multiagent Systems, and Computation and Language (Natural Language Processing), which have separate subject areas. In particular, includes Expert Systems, Theorem Proving (although this may overlap with Logic in Computer Science), Knowledge Representation, Planning, and Uncertainty in AI.",
+  "cs.AR": "Covers systems organization and hardware architecture.",
+  "cs.CC": "Covers models of computation, complexity classes, structural complexity, complexity tradeoffs, upper and lower bounds.",
+  "cs.CE": "Covers applications of computer science to the mathematical modeling of complex systems in the fields of science, engineering, and finance. Papers here are interdisciplinary and applications-oriented, focusing on techniques and tools that enable challenging computational simulations to be performed, for which the use of supercomputers or distributed computing platforms is often required.",
+  "cs.CG": "Computational geometry.",
+  "cs.CL": "Covers natural language processing. Roughly includes material in ACM Subject Class I.2.7. Note that work on artificial languages (programming languages, logics, formal systems) that does not explicitly address natural-language issues broadly construed (natural-language processing, computational linguistics, speech, text retrieval, etc.) is not appropriate for this area.",
+  "cs.CR": "Covers all areas of cryptography and security including authentication, public key cryptosystems, proof-carrying code, etc.",
+  "cs.CV": "Covers image processing, computer vision, pattern recognition, and scene understanding.",
+  "cs.CY": "Covers impact of computers on society, computer ethics, information technology and public policy, legal aspects of computing, computers and education.",
+  "cs.DB": "Covers database management, datamining, and data processing.",
+  "cs.DC": "Covers fault-tolerance, distributed algorithms, stability, parallel computation, and cluster computing.",
+  "cs.DL": "Covers all aspects of the digital library design and document and text creation. Note that there will be some overlap with Information Retrieval (which is a separate subject area).",
+  "cs.DM": "Covers combinatorics, graph theory, applications of probability.",
+  "cs.DS": "Covers data structures and analysis of algorithms.",
+  "cs.ET": "Covers approaches to information processing (computing, communication, sensing) and bio-chemical analysis based on alternatives to silicon CMOS-based technologies, such as nanoscale electronic, photonic, spin-based, superconducting, mechanical, bio-chemical and quantum technologies.",
+  "cs.FL": "Covers automata theory, formal language theory, grammars, and combinatorics on words. Papers dealing with computational complexity should go to cs.CC; papers dealing with logic should go to cs.LO.",
+  "cs.GL": "Covers introductory material, survey material, predictions of future trends, biographies, and miscellaneous computer-science related material.",
+  "cs.GR": "Covers all aspects of computer graphics.",
+  "cs.GT": "Covers all theoretical and applied aspects at the intersection of computer science and game theory, including work in mechanism design, learning in games (which may overlap with Learning), foundations of agent modeling in games (which may overlap with Multiagent systems), coordination, specification and formal methods for non-cooperative computational environments. The area also deals with applications of game theory to areas such as electronic commerce.",
+  "cs.HC": "Covers human factors, user interfaces, and collaborative computing.",
+  "cs.IR": "Covers indexing, dictionaries, retrieval, content and analysis.",
+  "cs.IT": "Covers theoretical and experimental aspects of information theory and coding.",
+  "cs.LG": "Papers on all aspects of machine learning research (supervised, unsupervised, reinforcement learning, bandit problems, and so on) including also robustness, explanation, fairness, and methodology. cs.LG is also an appropriate primary category for applications of machine learning methods.",
+  "cs.LO": "Covers all aspects of logic in computer science, including finite model theory, logics of programs, modal logic, and program verification. Programming language semantics should have Programming Languages as the primary subject area.",
+  "cs.MA": "Covers multiagent systems, distributed artificial intelligence, intelligent agents, coordinated interactions. and practical applications.",
+  "cs.MM": "Multimedia.",
+  "cs.MS": "Mathematical software.",
+  "cs.NA": "cs.NA is an alias for math.NA. Numerical algorithms for problems in analysis and algebra, scientific computation.",
+  "cs.NE": "Covers neural networks, connectionism, genetic algorithms, artificial life, adaptive behavior.",
+  "cs.NI": "Covers all aspects of computer communication networks, including network architecture and design, network protocols, and internetwork standards (like TCP/IP). Also includes topics, such as web caching, that are directly relevant to Internet architecture and performance.",
+  "cs.OH": "This is the classification to use for documents that do not fit anywhere else.",
+  "cs.OS": "Operating systems.",
+  "cs.PF": "Covers performance measurement and evaluation, queueing, and simulation.",
+  "cs.PL": "Covers programming language semantics, language features, programming approaches (such as object-oriented programming, functional programming, logic programming). Also includes material on compilers oriented towards programming languages; other material on compilers may be more appropriate in Architecture (AR).",
+  "cs.RO": "Robotics.",
+  "cs.SC": "Symbolic computation.",
+  "cs.SD": "Covers all aspects of computing with sound, and sound as an information channel. Includes models of sound, analysis and synthesis, audio user interfaces, sonification of data, computer music, and sound signal processing.",
+  "cs.SE": "Covers design tools, software metrics, testing and debugging, programming environments, etc.",
+  "cs.SI": "Covers the design, analysis, and modeling of social and information networks, including their applications for on-line information access, communication, and interaction, and their roles as datasets in the exploration of questions in these and other domains, including connections to the social and biological sciences.",
+  "cs.SY": "cs.SY is an alias for eess.SY. This section includes theoretical and experimental research covering all facets of automatic control systems, including nonlinear, distributed, adaptive, stochastic and robust control in addition to hybrid and discrete event systems.",
+  /* Statistics */
+  "stat.AP": "Biology, Education, Epidemiology, Engineering, Environmental Sciences, Medical, Physical Sciences, Quality Control, Social Sciences.",
+  "stat.CO": "Algorithms, Simulation, Visualization.",
+  "stat.ME": "Design, Surveys, Model Selection, Multiple Testing, Multivariate Methods, Signal and Image Processing, Time Series, Smoothing, Spatial Statistics, Survival Analysis, Nonparametric and Semiparametric Methods.",
+  "stat.ML": "Covers machine learning papers (supervised, unsupervised, semi-supervised learning, graphical models, reinforcement learning, bandits, high dimensional inference, etc.) with a statistical or theoretical grounding.",
+  "stat.OT": "Work in statistics that does not fit into the other stat classifications.",
+  "stat.TH": "stat.TH is an alias for math.ST. Asymptotics, Bayesian Inference, Decision Theory, Estimation, Foundations, Inference, Testing.",
+  /* Economics */
+  "econ.EM": "Econometric Theory, Micro-Econometrics, Macro-Econometrics, Empirical Content of Economic Relations discovered via New Methods, Methodological Aspects of the Application of Statistical Inference to Economic Data.",
+  "econ.GN": "General methodological, applied, and empirical contributions to economics.",
+  "econ.TH": "Includes theoretical contributions to Contract Theory, Decision Theory, Game Theory, General Equilibrium, Growth, Learning and Evolution, Macroeconomics, Market and Mechanism Design, and Social Choice.",
+  /* Quantitative Finance */
+  "q-fin.CP": "Computational methods, including Monte Carlo, PDE, lattice and other numerical methods with applications to financial modeling.",
+  "q-fin.EC": "q-fin.EC is an alias for econ.GN. Economics, including micro and macro economics, international economics, theory of the firm, labor economics, and other economic topics outside finance.",
+  "q-fin.GN": "Development of general quantitative methodologies with applications in finance.",
+  "q-fin.MF": "Mathematical and analytical methods of finance, including stochastic, probabilistic and functional analysis, algebraic, geometric and other methods.",
+  "q-fin.PM": "Security selection and optimization, capital allocation, investment strategies and performance measurement.",
+  "q-fin.PR": "Valuation and hedging of financial securities, their derivatives, and structured products.",
+  "q-fin.RM": "Measurement and management of financial risks in trading, banking, insurance, corporate and other applications.",
+  "q-fin.ST": "Statistical, econometric and econophysics analyses with applications to financial markets and economic data.",
+  "q-fin.TR": "Market microstructure, liquidity, exchange and auction design, automated trading, agent-based modeling and market-making."
+};
+
+/* ── tooltip element ── */
+var tooltip = document.createElement('div');
+tooltip.className = 'desc-tooltip';
+document.body.appendChild(tooltip);
+var tooltipTimer = null;
+
+function showTooltip(el, text) {
+  clearTimeout(tooltipTimer);
+  tooltipTimer = setTimeout(function() {
+    tooltip.textContent = text;
+    tooltip.style.display = 'block';
+    var rect = el.getBoundingClientRect();
+    var left = rect.left;
+    var top = rect.bottom + 6;
+    tooltip.style.left = left + 'px';
+    tooltip.style.top = top + 'px';
+    /* adjust if off-screen */
+    var ttRect = tooltip.getBoundingClientRect();
+    if (left + ttRect.width > window.innerWidth - 16) {
+      tooltip.style.left = Math.max(8, window.innerWidth - ttRect.width - 16) + 'px';
+    }
+    if (top + ttRect.height > window.innerHeight - 16) {
+      tooltip.style.top = (rect.top - ttRect.height - 6) + 'px';
+    }
+  }, 300);
+}
+function hideTooltip() {
+  clearTimeout(tooltipTimer);
+  tooltip.style.display = 'none';
+}
+
 /* ── helpers ── */
 function countLeaves(n) {
   if (!n.children || !n.children.length) return 1;
@@ -470,15 +687,7 @@ banner.appendChild(mkDiv('stat-divider'));
 banner.appendChild(mkStat(totalReviewers, 'Reviewers', true));
 
 /* ── track state ── */
-var activePanel = null;
-var activeDomain = null;
 var openCard = null;
-
-function closePanel() {
-  if (activePanel) { activePanel.classList.remove('open'); activePanel = null; }
-  if (activeDomain) { activeDomain.classList.remove('active'); activeDomain = null; }
-  if (openCard) { openCard.remove(); openCard = null; }
-}
 
 /* ── build subdomain panel content ── */
 function buildSubdomainPanel(domain, color) {
@@ -530,6 +739,13 @@ function buildSubdomainPanel(domain, color) {
         openCard = card;
       });
       item.appendChild(badge);
+    }
+
+    /* tooltip on hover */
+    var desc = DESCRIPTIONS[sub.code];
+    if (desc) {
+      item.addEventListener('mouseenter', function() { showTooltip(item, desc); });
+      item.addEventListener('mouseleave', hideTooltip);
     }
 
     parent.appendChild(item);
@@ -655,13 +871,15 @@ searchInput.addEventListener('input', function() {
   document.querySelectorAll('.sub-group-kids').forEach(function(el) { el.classList.remove('open'); });
   document.querySelectorAll('.sg-arrow').forEach(function(el) { el.classList.remove('open'); });
 
-  if (!q) { closePanel(); return; }
+  if (!q) {
+    /* Close all panels */
+    document.querySelectorAll('.subdomain-panel').forEach(function(p) { p.classList.remove('open'); });
+    document.querySelectorAll('.tnode-domain').forEach(function(d) { d.classList.remove('active'); });
+    return;
+  }
 
-  /* Find first matching domain and open it */
-  var bestDomain = null;
-  var bestNode = null;
-
-  document.querySelectorAll('.tnode-domain').forEach(function(dNode, idx) {
+  /* Search all domains and open matching ones */
+  document.querySelectorAll('.tnode-domain').forEach(function(dNode) {
     var panel = dNode.querySelector('.subdomain-panel');
     if (!panel) return;
     var items = panel.querySelectorAll('.sub-item');
@@ -673,7 +891,6 @@ searchInput.addEventListener('input', function() {
         item.classList.add('search-match');
         hasMatch = true;
         /* expand parent sub-group if any */
-        var prev = item.previousElementSibling;
         var parent = item.parentElement;
         if (parent && parent.classList.contains('sub-group-kids')) {
           parent.classList.add('open');
@@ -698,21 +915,14 @@ searchInput.addEventListener('input', function() {
       }
     });
 
-    if (hasMatch && !bestNode) {
-      bestNode = dNode;
+    if (hasMatch) {
+      dNode.classList.add('active');
+      panel.classList.add('open');
+    } else {
+      dNode.classList.remove('active');
+      panel.classList.remove('open');
     }
   });
-
-  /* Open the first matching domain's panel */
-  if (bestNode) {
-    closePanel();
-    var panel = bestNode.querySelector('.subdomain-panel');
-    activeDomain = bestNode;
-    activePanel = panel;
-    bestNode.classList.add('active');
-    panel.classList.add('open');
-    backdrop.classList.add('open');
-  }
 });
 
 searchClear.addEventListener('click', function() {

@@ -11,6 +11,10 @@ Ask the user for (if not already provided):
 
 If the user provides a personal website, look up their research domain from it.
 
+## Important: Use existing subdomains only
+
+The subdomain **must** already exist as a pre-created folder under `skills/<domain>/`. All 131 arXiv-aligned subdomain folders are pre-created. Do **NOT** invent or create new custom subdomain folders. If the user's research area doesn't map exactly to one folder, pick the closest existing arXiv subdomain (e.g. use `cryptography-and-security` instead of creating `blockchain`).
+
 ## Steps
 
 ### Step 1: Add as GitHub Collaborator (Write permission)

@@ -186,13 +186,12 @@ skills/physics/    @their-github-handle
 
 | Domain | Subdomain | Maintainer | Affiliation |
 |---|---|---|---|
-| ⚛️ Physics | Space Physics | [@huangzesen](https://github.com/huangzesen) | UCLA Postdoc |
-| ⚛️ Physics | Earth System Modeling | [@ktwu01](https://github.com/ktwu01) | UT Austin PhD Student |
-| ⚛️ Physics | Chemical Physics | [@Alexandrina-Chen](https://github.com/Alexandrina-Chen) | Flatiron Institute Research Fellow |
-| 💻 Computer Science | Hardware Architecture | [@Zhichenzzz](https://github.com/Zhichenzzz) | UW CS PhD Student |
-| 💻 Computer Science | Multiagent Systems | [@suqisheng](https://github.com/suqisheng) | USTC PhD Student |
-| 💻 Computer Science | Blockchain | [@xhyumiracle](https://github.com/xhyumiracle) | Imperial College PhD Student |
-| 💻 Computer Science | Cryptocurrency | [@xhyumiracle](https://github.com/xhyumiracle) | Imperial College PhD Student |
+| ⚛️ Physics | Space Physics | 黄泽森 [@huangzesen](https://github.com/huangzesen) | UCLA Postdoc |
+| ⚛️ Physics | Atmospheric and Oceanic Physics | 吴叩天 [@ktwu01](https://github.com/ktwu01) | UT Austin PhD Student |
+| ⚛️ Physics | Chemical Physics | 陈思佳 [@Alexandrina-Chen](https://github.com/Alexandrina-Chen) | Flatiron Institute Research Fellow |
+| 💻 Computer Science | Hardware Architecture | 曾郅琛 [@Zhichenzzz](https://github.com/Zhichenzzz) | UW CS PhD Student |
+| 💻 Computer Science | Multiagent Systems | 苏启晟 [@suqisheng](https://github.com/suqisheng) | USTC PhD Student |
+| 💻 Computer Science | Cryptography and Security | 余晓航 [@xhyumiracle](https://github.com/xhyumiracle) | Imperial College PhD Student |
 
 > Want to maintain a subdomain? Open an issue or reach out to [@HHHHHejia](https://github.com/HHHHHejia).
 
@@ -362,13 +361,12 @@ skills/physics/    @their-github-handle
 
 | 领域 | 子领域 | 维护者 | 机构 |
 |---|---|---|---|
-| ⚛️ Physics | Space Physics | [@huangzesen](https://github.com/huangzesen) | UCLA Postdoc |
-| ⚛️ Physics | Earth System Modeling | [@ktwu01](https://github.com/ktwu01) | UT Austin PhD Student |
-| ⚛️ Physics | Chemical Physics | [@Alexandrina-Chen](https://github.com/Alexandrina-Chen) | Flatiron Institute Research Fellow |
-| 💻 Computer Science | Hardware Architecture | [@Zhichenzzz](https://github.com/Zhichenzzz) | UW CS PhD Student |
-| 💻 Computer Science | Multiagent Systems | [@suqisheng](https://github.com/suqisheng) | USTC PhD Student |
-| 💻 Computer Science | Blockchain | [@xhyumiracle](https://github.com/xhyumiracle) | Imperial College PhD Student |
-| 💻 Computer Science | Cryptocurrency | [@xhyumiracle](https://github.com/xhyumiracle) | Imperial College PhD Student |
+| ⚛️ Physics | Space Physics | 黄泽森 [@huangzesen](https://github.com/huangzesen) | UCLA Postdoc |
+| ⚛️ Physics | Atmospheric and Oceanic Physics | 吴叩天 [@ktwu01](https://github.com/ktwu01) | UT Austin PhD Student |
+| ⚛️ Physics | Chemical Physics | 陈思佳 [@Alexandrina-Chen](https://github.com/Alexandrina-Chen) | Flatiron Institute Research Fellow |
+| 💻 Computer Science | Hardware Architecture | 曾郅琛 [@Zhichenzzz](https://github.com/Zhichenzzz) | UW CS PhD Student |
+| 💻 Computer Science | Multiagent Systems | 苏启晟 [@suqisheng](https://github.com/suqisheng) | USTC PhD Student |
+| 💻 Computer Science | Cryptography and Security | 余晓航 [@xhyumiracle](https://github.com/xhyumiracle) | Imperial College PhD Student |
 
 > 想认领一个子领域？提交 Issue 或联系 [@HHHHHejia](https://github.com/HHHHHejia)。
 

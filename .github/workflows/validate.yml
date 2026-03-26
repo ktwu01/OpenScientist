@@ -10,6 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -20,9 +22,11 @@ jobs:
         run: pip install pyyaml
 
       - name: Validate changed skill files
+        env:
+          BASE_REF: ${{ github.base_ref }}
         run: |
-          git fetch origin ${{ github.base_ref }}
-          CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...HEAD -- 'skills/**/*.md')
+          git fetch origin "$BASE_REF"
+          CHANGED=$(git diff --name-only "origin/$BASE_REF"...HEAD -- 'skills/**/*.md')
           if [ -z "$CHANGED" ]; then
             echo "No skill files changed."
             exit 0

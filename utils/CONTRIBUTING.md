@@ -56,7 +56,7 @@ A domain reviewer listed in [CODEOWNERS](../.github/CODEOWNERS) will review your
 
 ## 3. Propose a New Area
 
-All 155 arXiv-aligned subcategory folders are pre-created under `skills/`. If you believe a subdomain is missing or want to propose a new top-level domain, [**open an issue →**](https://github.com/HHHHHejia/OpenScientist/issues/new?template=propose-new-area.md)
+All 155 arXiv-aligned subcategory folders are pre-created under `skills/`. If you believe a subdomain is missing or want to propose a new top-level domain, [**open an issue →**](https://github.com/OpenScientists/OpenScientist/issues/new?template=propose-new-area.md)
 
 ---
 
@@ -146,7 +146,7 @@ python utils/tools/validate.py skills/<领域>/<子领域>/<你的skill名称>.m
 
 ## 3. 提议新领域或子领域
 
-所有 155 个 arXiv 对齐的子领域文件夹已预创建在 `skills/` 下。如果你认为缺少某个子领域或想提议新的顶层领域，[**提交 Issue →**](https://github.com/HHHHHejia/OpenScientist/issues/new?template=propose-new-area.md)
+所有 155 个 arXiv 对齐的子领域文件夹已预创建在 `skills/` 下。如果你认为缺少某个子领域或想提议新的顶层领域，[**提交 Issue →**](https://github.com/OpenScientists/OpenScientist/issues/new?template=propose-new-area.md)
 
 ---
 

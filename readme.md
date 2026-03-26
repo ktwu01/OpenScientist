@@ -8,7 +8,7 @@
 
 # 🌍 OpenScientist
 
-[![GitHub stars](https://img.shields.io/github/stars/HHHHHejia/OpenScientist?style=social)](https://github.com/HHHHHejia/OpenScientist/stargazers) [![GitHub forks](https://img.shields.io/github/forks/HHHHHejia/OpenScientist?style=social)](https://github.com/HHHHHejia/OpenScientist/fork) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
+[![GitHub stars](https://img.shields.io/github/stars/OpenScientists/OpenScientist?style=social)](https://github.com/OpenScientists/OpenScientist/stargazers) [![GitHub forks](https://img.shields.io/github/forks/OpenScientists/OpenScientist?style=social)](https://github.com/OpenScientists/OpenScientist/fork) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
 
 > *"Wer nicht von dreitausend Jahren sich weiß Rechenschaft zu geben,*
 > *bleibt im Dunkeln unerfahren, mag von Tag zu Tage leben."*
@@ -26,13 +26,13 @@
 **Call for action:** Share your research expertise. Together, we create the AI-era Einstein, Da Vinci, and Kant.
 
 <p align="center">
-  <a href="https://hhhhhejia.github.io/OpenScientist/">
-    <img src="https://raw.githubusercontent.com/HHHHHejia/OpenScientist/main/utils/assets/knowledge-tree-v2.png" alt="Knowledge Tree" width="100%">
+  <a href="https://openscientists.github.io/OpenScientist/">
+    <img src="https://raw.githubusercontent.com/OpenScientists/OpenScientist/main/utils/assets/knowledge-tree-v2.png" alt="Knowledge Tree" width="100%">
   </a>
 </p>
 
 <p align="center">
-  <a href="https://hhhhhejia.github.io/OpenScientist/">View Interactive Knowledge Tree →</a>
+  <a href="https://openscientists.github.io/OpenScientist/">View Interactive Knowledge Tree →</a>
 </p>
 
 ---
@@ -82,7 +82,7 @@ Aligned with the [arXiv category taxonomy](https://arxiv.org/category_taxonomy).
 | 📈 Economics | econ | 3 | *Seeking reviewer* |
 | 💹 Quantitative Finance | q-fin | 9 | *Seeking reviewer* |
 
-> [View all 155 subcategories in the interactive knowledge tree →](https://hhhhhejia.github.io/OpenScientist/)
+> [View all 155 subcategories in the interactive knowledge tree →](https://openscientists.github.io/OpenScientist/)
 
 ---
 
@@ -94,7 +94,7 @@ Each skill is a single `.md` file. Install it once, invoke it any time in Claude
 
 ```bash
 # 1. Clone
-git clone https://github.com/HHHHHejia/OpenScientist.git
+git clone https://github.com/OpenScientists/OpenScientist.git
 
 # 2. Copy a skill (or symlink a whole domain)
 cp OpenScientist/skills/physics/quantum-physics/quantum-entanglement.md ~/.claude/skills/
@@ -159,11 +159,11 @@ A domain reviewer listed in CODEOWNERS will be automatically assigned to review 
 
 ### 4.3 Don't see your field?
 
-- [**Propose a new area →**](https://github.com/HHHHHejia/OpenScientist/issues/new?template=propose-new-area.md)
+- [**Propose a new area →**](https://github.com/OpenScientists/OpenScientist/issues/new?template=propose-new-area.md)
 
 ### 4.4 Need a skill but can't write it yourself?
 
-- [**Request a skill →**](https://github.com/HHHHHejia/OpenScientist/issues/new?template=skill-request.yml)
+- [**Request a skill →**](https://github.com/OpenScientists/OpenScientist/issues/new?template=skill-request.yml)
 
 ---
 
@@ -190,9 +190,9 @@ Reviewers are domain experts who ensure the scientific quality of skills in thei
 
 ### 5.4 Actions
 
-- [**Apply to become a category reviewer →**](https://github.com/HHHHHejia/OpenScientist/issues/new?template=maintainer-application.yml)
-- [**View all reviewers in the Knowledge Tree →**](https://hhhhhejia.github.io/OpenScientist/)
-- [**View all reviewers list →**](https://hhhhhejia.github.io/OpenScientist/reviewers.html)
+- [**Apply to become a category reviewer →**](https://github.com/OpenScientists/OpenScientist/issues/new?template=maintainer-application.yml)
+- [**View all reviewers in the Knowledge Tree →**](https://openscientists.github.io/OpenScientist/)
+- [**View all reviewers list →**](https://openscientists.github.io/OpenScientist/reviewers.html)
 
 ---
 
@@ -202,9 +202,9 @@ Reviewers are domain experts who ensure the scientific quality of skills in thei
 
 | Template | When to use |
 | --- | --- |
-| [Skill Request](https://github.com/HHHHHejia/OpenScientist/issues/new?template=skill-request.yml) | Need a skill but can't write it yourself |
-| [Reviewer Application](https://github.com/HHHHHejia/OpenScientist/issues/new?template=maintainer-application.yml) | Apply to become a subdomain reviewer |
-| [Propose New Area](https://github.com/HHHHHejia/OpenScientist/issues/new?template=propose-new-area.md) | Propose a new top-level domain |
+| [Skill Request](https://github.com/OpenScientists/OpenScientist/issues/new?template=skill-request.yml) | Need a skill but can't write it yourself |
+| [Reviewer Application](https://github.com/OpenScientists/OpenScientist/issues/new?template=maintainer-application.yml) | Apply to become a subdomain reviewer |
+| [Propose New Area](https://github.com/OpenScientists/OpenScientist/issues/new?template=propose-new-area.md) | Propose a new top-level domain |
 
 ### 6.2 Pull request workflow
 
@@ -221,7 +221,7 @@ Reviewers are domain experts who ensure the scientific quality of skills in thei
 When a Reviewer Application issue receives the `approved` label, the [onboard-maintainer](/.github/workflows/onboard-maintainer.yml) workflow automatically:
 
 - Adds the reviewer to `.github/CODEOWNERS`
-- Adds their name to the [Knowledge Tree](https://hhhhhejia.github.io/OpenScientist/) and [Reviewers page](https://hhhhhejia.github.io/OpenScientist/reviewers.html)
+- Adds their name to the [Knowledge Tree](https://openscientists.github.io/OpenScientist/) and [Reviewers page](https://openscientists.github.io/OpenScientist/reviewers.html)
 - Closes the issue with a welcome comment
 
 ### 6.4 CODEOWNERS & review assignment
@@ -292,7 +292,7 @@ OpenScientist 是一个完全开源、非盈利的项目。随着项目的发展
 | 📈 Economics 经济学 | econ | 3 | *招募中* |
 | 💹 Quantitative Finance 定量金融 | q-fin | 9 | *招募中* |
 
-> [查看全部 155 个子领域（交互式知识树）→](https://hhhhhejia.github.io/OpenScientist/)
+> [查看全部 155 个子领域（交互式知识树）→](https://openscientists.github.io/OpenScientist/)
 
 ---
 
@@ -304,7 +304,7 @@ OpenScientist 是一个完全开源、非盈利的项目。随着项目的发展
 
 ```bash
 # 1. 克隆仓库
-git clone https://github.com/HHHHHejia/OpenScientist.git
+git clone https://github.com/OpenScientists/OpenScientist.git
 
 # 2. 复制 Skill（或符号链接整个领域）
 cp OpenScientist/skills/physics/quantum-physics/quantum-entanglement.md ~/.claude/skills/
@@ -369,11 +369,11 @@ CODEOWNERS 中的领域审稿人会自动收到 review 请求，负责审核科�
 
 ### 4.3 没有你的研究方向？
 
-- [**提议新领域 →**](https://github.com/HHHHHejia/OpenScientist/issues/new?template=propose-new-area.md)
+- [**提议新领域 →**](https://github.com/OpenScientists/OpenScientist/issues/new?template=propose-new-area.md)
 
 ### 4.4 需要某个 Skill 但自己写不了？
 
-- [**请求 Skill →**](https://github.com/HHHHHejia/OpenScientist/issues/new?template=skill-request.yml)
+- [**请求 Skill →**](https://github.com/OpenScientists/OpenScientist/issues/new?template=skill-request.yml)
 
 ---
 
@@ -400,9 +400,9 @@ CODEOWNERS 中的领域审稿人会自动收到 review 请求，负责审核科�
 
 ### 5.4 行动
 
-- [**申请成为类别审稿人 →**](https://github.com/HHHHHejia/OpenScientist/issues/new?template=maintainer-application.yml)
-- [**查看全部审稿人（知识树）→**](https://hhhhhejia.github.io/OpenScientist/)
-- [**查看全部审稿人列表 →**](https://hhhhhejia.github.io/OpenScientist/reviewers.html)
+- [**申请成为类别审稿人 →**](https://github.com/OpenScientists/OpenScientist/issues/new?template=maintainer-application.yml)
+- [**查看全部审稿人（知识树）→**](https://openscientists.github.io/OpenScientist/)
+- [**查看全部审稿人列表 →**](https://openscientists.github.io/OpenScientist/reviewers.html)
 
 ---
 
@@ -412,9 +412,9 @@ CODEOWNERS 中的领域审稿人会自动收到 review 请求，负责审核科�
 
 | 模板 | 使用场景 |
 | --- | --- |
-| [Skill Request](https://github.com/HHHHHejia/OpenScientist/issues/new?template=skill-request.yml) | 需要某个 Skill 但自己写不了 |
-| [Reviewer Application](https://github.com/HHHHHejia/OpenScientist/issues/new?template=maintainer-application.yml) | 申请成为子领域审稿人 |
-| [Propose New Area](https://github.com/HHHHHejia/OpenScientist/issues/new?template=propose-new-area.md) | 提议新的顶层领域 |
+| [Skill Request](https://github.com/OpenScientists/OpenScientist/issues/new?template=skill-request.yml) | 需要某个 Skill 但自己写不了 |
+| [Reviewer Application](https://github.com/OpenScientists/OpenScientist/issues/new?template=maintainer-application.yml) | 申请成为子领域审稿人 |
+| [Propose New Area](https://github.com/OpenScientists/OpenScientist/issues/new?template=propose-new-area.md) | 提议新的顶层领域 |
 
 ### 6.2 Pull Request 工作流
 
@@ -431,7 +431,7 @@ CODEOWNERS 中的领域审稿人会自动收到 review 请求，负责审核科�
 当 Reviewer Application issue 被打上 `approved` 标签后，[onboard-maintainer](/.github/workflows/onboard-maintainer.yml) 工作流自动：
 
 - 将审稿人添加到 `.github/CODEOWNERS`
-- 将其姓名添加到[知识树](https://hhhhhejia.github.io/OpenScientist/)和[审稿人页面](https://hhhhhejia.github.io/OpenScientist/reviewers.html)
+- 将其姓名添加到[知识树](https://openscientists.github.io/OpenScientist/)和[审稿人页面](https://openscientists.github.io/OpenScientist/reviewers.html)
 - 关闭 issue 并发送欢迎评论
 
 ### 6.4 CODEOWNERS 与审核分配
@@ -472,6 +472,6 @@ CODEOWNERS 中的领域审稿人会自动收到 review 请求，负责审核科�
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=HHHHHejia/OpenScientist&type=Date)](https://star-history.com/#HHHHHejia/OpenScientist&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=OpenScientists/OpenScientist&type=Date)](https://star-history.com/#OpenScientists/OpenScientist&Date)
 
 </div>

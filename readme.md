@@ -34,9 +34,11 @@ Today: We're launching the largest academic collaboration in human history
 
 ### 1.1 What is it
 
-OpenScientist is a curated library of **AI agent skills** (compatible with **Claude Code** and **Codex CLI**) — structured Markdown files that give AI agents deep, expert-level reasoning capabilities in specific scientific domains.
+**Science is the last important problem left for AI to solve.** Code, law, design — AI already handles these. But real scientific breakthroughs require something no model has: the hard-won intuition of researchers who've spent years at the frontier.
 
-Our mission is to unite the world's top experts across every domain, turning their knowledge into AI-reusable skills that accelerate scientific discovery. Share your research expertise — together, we create the AI-era Einstein, Da Vinci, and Kant.
+This intuition lives in your head — the know-how, the heuristics, the reasoning patterns, the "I just know this won't work" instinct. It never makes it into papers. It dies when you retire.
+
+**OpenScientist captures it before it's lost.** We turn the tacit knowledge of the world's top researchers — their skills, thinking frameworks, and principles — into reusable AI agent skills (compatible with **Claude Code** and **Codex CLI**). Every contribution makes every AI scientist — now and in the future — smarter, permanently.
 
 ### 1.2 How it works
 

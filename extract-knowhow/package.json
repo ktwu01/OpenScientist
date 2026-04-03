@@ -1,0 +1,33 @@
+{
+  "name": "@openscientist/extract-knowhow",
+  "version": "0.1.0",
+  "description": "Claude Code slash command that extracts reusable research know-how from your conversation history and generates OpenScientist skill files.",
+  "keywords": [
+    "claude-code",
+    "openscientist",
+    "scientific-research",
+    "know-how",
+    "skills",
+    "ai-science"
+  ],
+  "author": "OpenScientist Contributors",
+  "license": "CC-BY-4.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/OpenScientists/OpenScientist.git",
+    "directory": "extract-knowhow"
+  },
+  "scripts": {
+    "postinstall": "node scripts/postinstall.js",
+    "postuninstall": "node scripts/postuninstall.js",
+    "test": "node tests/test-postinstall.js"
+  },
+  "files": [
+    "commands/",
+    "templates/",
+    "scripts/"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

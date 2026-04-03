@@ -152,10 +152,14 @@ git clone https://github.com/OpenScientists/OpenScientist.git
 cp OpenScientist/extract-knowhow/commands/extract-knowhow.md ~/.claude/commands/
 ```
 
-Then in Claude Code:
+Then in Claude Code, switch to the best model for extraction and run:
 ```
+/model opus[1m]
+/effort max
 /extract-knowhow
 ```
+
+> **Tip:** `/extract-knowhow` uses your current Claude Code model to analyze sessions. For best results, use Opus with 1M context and max effort. This ensures deep analysis across your full conversation history.
 
 The command will:
 1. Scan your conversation history
@@ -392,10 +396,14 @@ git clone https://github.com/OpenScientists/OpenScientist.git
 cp OpenScientist/extract-knowhow/commands/extract-knowhow.md ~/.claude/commands/
 ```
 
-然后在 Claude Code 中输入：
+然后在 Claude Code 中切换到最佳模型并运行：
 ```
+/model opus[1m]
+/effort max
 /extract-knowhow
 ```
+
+> **提示：** `/extract-knowhow` 使用你当前 Claude Code 会话的模型来分析。为获得最佳提取效果，建议使用 Opus 模型、1M 上下文、最大推理深度。
 
 该命令会：
 1. 扫描你的对话历史

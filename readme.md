@@ -14,7 +14,7 @@
 >
 > *Today: We're launching the largest academic collaboration in human history*
 >
-> 🏛️ *Building the Library of Alexandria for AGI, Accelerating Automated Scientific Discovery.*
+> *— 🏛️ Building the Library of Alexandria for AGI, Accelerating Automated Scientific Discovery.*
 
 <p align="center">
   <a href="https://openscientists.github.io/OpenScientist/">

@@ -14,7 +14,7 @@
 >
 > *今天：我们正在开启人类有史以来最大规模的学术合作*
 >
-> 🏛️ **为 AGI 建一座亚历山大图书馆，加速自动化科学发现。**
+> *— 🏛️ 为 AGI 建一座亚历山大图书馆，加速自动化科学发现。*
 
 <p align="center">
   <a href="https://openscientists.github.io/OpenScientist/">

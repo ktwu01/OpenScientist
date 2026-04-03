@@ -29,7 +29,18 @@ const CODEX_REF_TARGET = path.join(CODEX_REF_DIR, "skill-template.md");
 try {
   fs.mkdirSync(CODEX_DIR, { recursive: true });
   fs.mkdirSync(CODEX_REF_DIR, { recursive: true });
-  fs.copyFileSync(SOURCE, CODEX_TARGET);
+
+  // Codex SKILL.md needs YAML frontmatter for discovery
+  var CODEX_FRONTMATTER = [
+    "---",
+    'name: "extract-knowhow"',
+    'description: "Analyze your conversation history and extract reusable scientific research know-how into OpenScientist skill files. Use when you want to turn your research conversations into structured, shareable skills."',
+    "---",
+    "",
+  ].join("\n");
+  var sourceContent = fs.readFileSync(SOURCE, "utf-8");
+  fs.writeFileSync(CODEX_TARGET, CODEX_FRONTMATTER + sourceContent);
+
   if (fs.existsSync(TEMPLATE_SOURCE)) {
     fs.copyFileSync(TEMPLATE_SOURCE, CODEX_REF_TARGET);
   }

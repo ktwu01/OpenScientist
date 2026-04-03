@@ -1,6 +1,6 @@
 # /extract-knowhow
 
-You are a research know-how extraction agent for **OpenScientist** — a curated library of Claude Code Skills for scientific domains. Your job is to analyze the user's Claude Code conversation history, identify sessions involving scientific research, and extract reusable know-how into OpenScientist skill files.
+You are a research know-how extraction agent for **OpenScientist** — a curated library of AI agent skills for scientific domains. Your job is to analyze the user's conversation history (from **Claude Code** and/or **Codex CLI**), identify sessions involving scientific research, and extract reusable know-how into OpenScientist skill files.
 
 Execute the following 6-stage pipeline using your built-in tools (Read, Bash, Glob, Write). Work autonomously through each stage, reporting progress to the user at each milestone.
 
@@ -8,8 +8,9 @@ Execute the following 6-stage pipeline using your built-in tools (Read, Bash, Gl
 
 ## Stage 1: Session Discovery
 
-Scan for all conversation session files:
+Scan for conversation session files from both Claude Code and Codex CLI:
 
+**Claude Code sessions:**
 1. Use Glob to find all `.jsonl` files under `~/.claude/projects/`:
    ```
    ~/.claude/projects/**/*.jsonl
@@ -17,9 +18,22 @@ Scan for all conversation session files:
 2. For each file, extract:
    - `session_id` (from filename, e.g. `abc123.jsonl` → `abc123`)
    - `project_path` (from parent directory name, e.g. `-Users-scientist-Desktop-myproject` — convert dashes back to path: `/Users/scientist/Desktop/myproject`)
-   - File size (skip files < 500 bytes — too small to contain meaningful sessions)
-3. Sort by file modification time (most recent first)
-4. Report to user: "Found N session files across M projects."
+
+**Codex CLI sessions:**
+3. Also scan for `.jsonl` files in Codex history locations:
+   ```
+   ~/.codex/archived_sessions/rollout-*.jsonl
+   ~/.codex/sessions/**/*.jsonl
+   ```
+4. For each Codex file, extract:
+   - `session_id` (from filename)
+   - `project_path` (from the `cwd` field in the first `session_meta` line)
+   - Mark as `source: "codex"`
+
+**For all sessions:**
+5. Skip files < 500 bytes (too small to contain meaningful sessions)
+6. Sort by file modification time (most recent first)
+7. Report to user: "Found N session files across M projects (X from Claude Code, Y from Codex CLI)."
 
 ---
 

@@ -6,16 +6,36 @@ const path = require("path");
 const os = require("os");
 
 const SOURCE = path.join(__dirname, "..", "commands", "extract-knowhow.md");
-const TARGET_DIR = path.join(os.homedir(), ".claude", "commands");
-const TARGET = path.join(TARGET_DIR, "extract-knowhow.md");
+const TEMPLATE_SOURCE = path.join(__dirname, "..", "templates", "skill-template.md");
+
+// --- Claude Code ---
+const CC_DIR = path.join(os.homedir(), ".claude", "commands");
+const CC_TARGET = path.join(CC_DIR, "extract-knowhow.md");
 
 try {
-  fs.mkdirSync(TARGET_DIR, { recursive: true });
-  fs.copyFileSync(SOURCE, TARGET);
-
-  console.log("✓ /extract-knowhow command installed to ~/.claude/commands/");
-  console.log("  Usage: type /extract-knowhow in Claude Code to analyze your research sessions");
+  fs.mkdirSync(CC_DIR, { recursive: true });
+  fs.copyFileSync(SOURCE, CC_TARGET);
+  console.log("✓ Claude Code: /extract-knowhow installed to ~/.claude/commands/");
 } catch (err) {
-  console.error("⚠ Could not install /extract-knowhow command:", err.message);
-  console.error("  You can manually copy commands/extract-knowhow.md to ~/.claude/commands/");
+  console.error("⚠ Claude Code: could not install —", err.message);
 }
+
+// --- Codex CLI ---
+const CODEX_DIR = path.join(os.homedir(), ".codex", "skills", "extract-knowhow");
+const CODEX_TARGET = path.join(CODEX_DIR, "SKILL.md");
+const CODEX_REF_DIR = path.join(CODEX_DIR, "references");
+const CODEX_REF_TARGET = path.join(CODEX_REF_DIR, "skill-template.md");
+
+try {
+  fs.mkdirSync(CODEX_DIR, { recursive: true });
+  fs.mkdirSync(CODEX_REF_DIR, { recursive: true });
+  fs.copyFileSync(SOURCE, CODEX_TARGET);
+  if (fs.existsSync(TEMPLATE_SOURCE)) {
+    fs.copyFileSync(TEMPLATE_SOURCE, CODEX_REF_TARGET);
+  }
+  console.log("✓ Codex CLI:   $extract-knowhow installed to ~/.codex/skills/");
+} catch (err) {
+  console.error("⚠ Codex CLI: could not install —", err.message);
+}
+
+console.log("\n  Usage: /extract-knowhow (Claude Code) or $extract-knowhow (Codex CLI)");

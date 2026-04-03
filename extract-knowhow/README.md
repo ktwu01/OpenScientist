@@ -1,6 +1,6 @@
 # @openscientist/extract-knowhow
 
-> Automatically extract reusable research know-how from your Claude Code conversation history and generate [OpenScientist](https://github.com/OpenScientists/OpenScientist) skill files.
+> Automatically extract reusable research know-how from your Claude Code / Codex CLI conversation history and generate [OpenScientist](https://github.com/OpenScientists/OpenScientist) skill files.
 
 ## What It Does
 
@@ -14,14 +14,22 @@ When you use Claude Code for scientific research — data analysis, paper writin
 npm install -g @openscientist/extract-knowhow
 ```
 
-This installs the `/extract-knowhow` slash command into your Claude Code environment.
+This installs the command into both environments automatically:
+- **Claude Code** → `~/.claude/commands/extract-knowhow.md`
+- **Codex CLI** → `~/.codex/skills/extract-knowhow/SKILL.md`
 
 ## Usage
 
-In Claude Code, type:
-
+**Claude Code:**
 ```
+/model opus[1m]
+/effort max
 /extract-knowhow
+```
+
+**Codex CLI:**
+```
+$extract-knowhow
 ```
 
 The command will:
@@ -55,12 +63,8 @@ Generated skill files follow the [OpenScientist skill format](https://github.com
 
 After reviewing the generated skills:
 
-```bash
-cd OpenScientist
-git add skills/
-git commit -m "feat: add extracted skills from /extract-knowhow"
-# Open a PR to https://github.com/OpenScientists/OpenScientist
-```
+- [**Submit via GitHub Issue →**](https://github.com/OpenScientists/OpenScientist/issues/new?template=submit-skill.yml) (just paste the file content — no git required!)
+- Or open a PR if you prefer git
 
 ## Uninstall
 

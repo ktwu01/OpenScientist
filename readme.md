@@ -86,19 +86,11 @@ Aligned with the [arXiv category taxonomy](https://arxiv.org/category_taxonomy).
 
 ### 3.1 Install
 
-Each skill is a single `.md` file. Install it once, invoke it any time in Claude Code:
-
 ```bash
-# 1. Clone
-git clone https://github.com/OpenScientists/OpenScientist.git
-
-# 2. Copy a skill (or symlink a whole domain)
-cp OpenScientist/skills/physics/quantum-physics/quantum-entanglement.md ~/.claude/skills/
-# or: ln -s $(pwd)/OpenScientist/skills/physics ~/.claude/skills/os-physics
-
-# 3. Invoke in Claude Code
-/quantum-entanglement  →  Claude reasons as a quantum physics expert
+npm install -g @openscientist/extract-knowhow
 ```
+
+This installs the `/extract-knowhow` command for both **Claude Code** and **Codex CLI**. Use it to automatically extract research skills from your conversation history, or browse and install individual skills from the `skills/` directory.
 
 ### 3.2 What's inside a skill file?
 
@@ -320,19 +312,11 @@ OpenScientist 是一个完全开源、非盈利的项目。随着项目的发展
 
 ### 3.1 安装
 
-每个 Skill 是一个 `.md` 文件，安装一次，在 Claude Code 中随时调用：
-
 ```bash
-# 1. 克隆仓库
-git clone https://github.com/OpenScientists/OpenScientist.git
-
-# 2. 复制 Skill（或符号链接整个领域）
-cp OpenScientist/skills/physics/quantum-physics/quantum-entanglement.md ~/.claude/skills/
-# 或：ln -s $(pwd)/OpenScientist/skills/physics ~/.claude/skills/os-physics
-
-# 3. 在 Claude Code 中调用
-/quantum-entanglement  →  Claude 以量子物理专家身份推理
+npm install -g @openscientist/extract-knowhow
 ```
+
+安装后，**Claude Code** 和 **Codex CLI** 都可使用 `/extract-knowhow` 命令。用它从你的对话历史中自动提取科研 Skill，或浏览 `skills/` 目录手动安装单个 Skill。
 
 ### 3.2 Skill 文件的结构
 

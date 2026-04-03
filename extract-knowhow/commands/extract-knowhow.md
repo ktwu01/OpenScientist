@@ -4,11 +4,11 @@ You are a research know-how extraction agent for **OpenScientist**. Analyze the 
 
 **Run fully automatically with ZERO user interaction.** Do not pause or ask questions. Report progress at each milestone.
 
-**Caching:** All intermediate results are cached to `~/.claude/openscientist/cache/`. Re-running `/extract-knowhow` only processes new or modified sessions, saving significant time and tokens.
+**Caching:** All intermediate results are cached to `~/.openscientist/cache/`. Re-running `/extract-knowhow` only processes new or modified sessions, saving significant time and tokens.
 
 At the start, create the cache directory:
 ```bash
-mkdir -p ~/.claude/openscientist/cache/meta ~/.claude/openscientist/cache/knowhow
+mkdir -p ~/.openscientist/cache/meta ~/.openscientist/cache/knowhow
 ```
 
 ---
@@ -29,7 +29,7 @@ Skip files < 500 bytes. Sort by modification time. Report: "Found N sessions acr
 
 ## Stage 2: Metadata Extraction & Filtering
 
-**Caching:** For each session, check if `~/.claude/openscientist/cache/meta/<session_id>.json` exists AND the cached file's timestamp matches the `.jsonl` file size. If cache hit, load cached metadata and skip parsing. If cache miss, parse and save to cache.
+**Caching:** For each session, check if `~/.openscientist/cache/meta/<session_id>.json` exists AND the cached file's timestamp matches the `.jsonl` file size. If cache hit, load cached metadata and skip parsing. If cache miss, parse and save to cache.
 
 For each uncached session, read first 50 lines and last 20 lines:
 1. Count user messages (lines with `"role":"user"`)
@@ -38,7 +38,7 @@ For each uncached session, read first 50 lines and last 20 lines:
 4. Extract `cwd` field
 5. Classify as research / engineering / other (see Stage 3 rules below)
 
-Save the extracted metadata + classification to `~/.claude/openscientist/cache/meta/<session_id>.json`:
+Save the extracted metadata + classification to `~/.openscientist/cache/meta/<session_id>.json`:
 ```json
 {
   "session_id": "abc123",
@@ -99,7 +99,7 @@ Report: "Mapped N research projects to domains."
 
 For each project, extract ALL know-how automatically.
 
-**Caching:** Check if `~/.claude/openscientist/cache/knowhow/<session_id>.json` exists for each session in the project. If ALL sessions in a project have cached know-how AND no session files have changed, load from cache and skip extraction. Otherwise, re-extract for that project only.
+**Caching:** Check if `~/.openscientist/cache/knowhow/<session_id>.json` exists for each session in the project. If ALL sessions in a project have cached know-how AND no session files have changed, load from cache and skip extraction. Otherwise, re-extract for that project only.
 
 **Incremental limit:** Process at most 50 new (uncached) sessions per run. If more remain, report: "Processed 50 sessions. Run /extract-knowhow again to analyze the remaining N sessions."
 
@@ -139,7 +139,7 @@ Read full `.jsonl` files. For sessions > 30,000 chars, split into 25,000-char se
 }
 ```
 
-After extraction, save each session's know-how to `~/.claude/openscientist/cache/knowhow/<session_id>.json`:
+After extraction, save each session's know-how to `~/.openscientist/cache/knowhow/<session_id>.json`:
 ```json
 {
   "session_id": "abc123",
@@ -189,9 +189,9 @@ Assemble all results into a single JSON object:
 
 ### Step 6.3: Generate HTML
 
-Create directory: `mkdir -p ~/.claude/openscientist`
+Create directory: `mkdir -p ~/.openscientist`
 
-Write a SINGLE self-contained HTML file to `~/.claude/openscientist/report.html`. The HTML must:
+Write a SINGLE self-contained HTML file to `~/.openscientist/report.html`. The HTML must:
 
 1. **Embed the JSON data** as `const DATA = { ... };` in a `<script>` tag (replace actual values, no placeholders)
 2. **Use dark theme** (GitHub-style: #0d1117 background, #e6edf3 text)
@@ -213,8 +213,8 @@ Write a SINGLE self-contained HTML file to `~/.claude/openscientist/report.html`
 ### Step 6.4: Open Report
 
 ```bash
-open ~/.claude/openscientist/report.html  # macOS
-# or: xdg-open ~/.claude/openscientist/report.html  # Linux
+open ~/.openscientist/report.html  # macOS
+# or: xdg-open ~/.openscientist/report.html  # Linux
 ```
 
 ### Step 6.5: Terminal Message
@@ -238,7 +238,7 @@ After the user returns from the browser:
 
 Look for the downloaded file. Check these locations in order:
 1. `~/Downloads/approved-skills.json`
-2. `~/.claude/openscientist/approved-skills.json`
+2. `~/.openscientist/approved-skills.json`
 3. Ask the user for the path if not found
 
 ### Step 7.2: Read and parse the JSON

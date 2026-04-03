@@ -146,9 +146,17 @@ After the command finishes, review the generated files for scientific accuracy, 
 - [**Submit your skill via GitHub Issue →**](https://github.com/OpenScientists/OpenScientist/issues/new?template=submit-skill.yml) (just paste the file content — no git required!)
 - Or, if you prefer git: fork the repo, copy the files into `skills/<domain>/<subdomain>/`, and open a PR
 
-### 3.3 Method B: One-Click Prompt for Web Users (ChatGPT / Claude.ai)
+### 3.3 Method B: One-Click Prompt for Web Users (ChatGPT / Claude / Gemini)
 
-If you use the web version of ChatGPT or Claude, paste this prompt into a conversation where you've done research work:
+Works with any AI chat that can reference your past conversations. First, enable memory so the AI can access your history:
+
+| Platform | How to enable | Settings link |
+|----------|--------------|---------------|
+| **ChatGPT** | Settings > Personalization > turn on **Memory** and **Reference chat history** | [Settings](https://chatgpt.com/settings) |
+| **Claude** | Settings > Capabilities > turn on **Memory** | [Settings](https://claude.ai/settings/capabilities) |
+| **Gemini** | Settings > Personal context > turn on **Your past chats with Gemini** | [Settings](https://gemini.google.com/settings) |
+
+Then paste this prompt into a **new conversation**:
 
 <details>
 <summary><b>Click to expand the full prompt</b></summary>

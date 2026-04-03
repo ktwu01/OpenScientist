@@ -146,9 +146,17 @@ $extract-knowhow
 - [**通过 GitHub Issue 提交你的 Skill →**](https://github.com/OpenScientists/OpenScientist/issues/new?template=submit-skill.yml)（直接粘贴文件内容，无需 git！）
 - 或者，如果你熟悉 git：fork 仓库，将文件复制到 `skills/<领域>/<子领域>/`，提交 PR
 
-### 3.3 方式 B：网页版用户一键提取（ChatGPT / Claude.ai）
+### 3.3 方式 B：网页版用户一键提取（ChatGPT / Claude / Gemini）
 
-如果你使用 ChatGPT 或 Claude 网页版，在你做过科研工作的对话中粘贴以下 prompt：
+适用于任何能引用历史对话的 AI 聊天工具。首先开启记忆功能，让 AI 能访问你的历史：
+
+| 平台 | 如何开启 | 设置链接 |
+|------|---------|---------|
+| **ChatGPT** | Settings > Personalization > 开启 **Memory** 和 **Reference chat history** | [Settings](https://chatgpt.com/settings) |
+| **Claude** | Settings > Capabilities > 开启 **Memory** | [Settings](https://claude.ai/settings/capabilities) |
+| **Gemini** | Settings > Personal context > 开启 **Your past chats with Gemini** | [Settings](https://gemini.google.com/settings) |
+
+然后在一个**新对话**中粘贴以下 prompt：
 
 <details>
 <summary><b>点击展开完整 prompt</b></summary>

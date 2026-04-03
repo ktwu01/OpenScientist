@@ -167,7 +167,30 @@ The command will:
 3. Cluster by project and map to scientific domains
 4. Extract reusable know-how across 10 categories (literature survey, ideation, formalization, experiment design, data collection, implementation, analysis, tool development, writing, peer review)
 5. Present a report for your review
-6. Generate skill files ready to PR
+6. Generate skill files for you to review
+
+After the command finishes, contribute your generated skills back:
+```bash
+# 1. Fork & clone OpenScientist (skip if already done)
+git clone https://github.com/<your-username>/OpenScientist.git
+cd OpenScientist
+
+# 2. Copy generated skill files into the repo
+cp ~/.claude/skills/openscientist/physics/quantum-physics/*.md skills/physics/quantum-physics/
+# (adjust the path to match your actual domain/subdomain)
+
+# 3. Validate
+python utils/tools/validate.py skills/<domain>/<subdomain>/<your-skill>.md
+
+# 4. Review & edit — check each file for scientific accuracy!
+
+# 5. Submit
+git checkout -b add-extracted-skills
+git add skills/
+git commit -m "feat: add skills extracted by /extract-knowhow"
+git push origin add-extracted-skills
+# Then open a PR on GitHub
+```
 
 ### 4.3 Method B: Write Manually
 
@@ -411,7 +434,30 @@ cp OpenScientist/extract-knowhow/commands/extract-knowhow.md ~/.claude/commands/
 3. 按项目聚类并映射到科学领域
 4. 从 10 个类别中提取可复用的 know-how（文献调研、提出想法、形式化、实验设计、数据采集、代码实现、结果分析、工具开发、论文写作、同行评审）
 5. 展示报告供你确认
-6. 生成可直接 PR 提交的 Skill 文件
+6. 生成 Skill 文件供你审核
+
+命令运行完成后，将生成的 Skill 贡献回仓库：
+```bash
+# 1. Fork 并克隆 OpenScientist（已做过可跳过）
+git clone https://github.com/<你的用户名>/OpenScientist.git
+cd OpenScientist
+
+# 2. 将生成的 Skill 文件复制到仓库
+cp ~/.claude/skills/openscientist/physics/quantum-physics/*.md skills/physics/quantum-physics/
+# （根据你实际的领域/子领域调整路径）
+
+# 3. 验证
+python utils/tools/validate.py skills/<领域>/<子领域>/<你的skill>.md
+
+# 4. 审核并编辑 —— 请务必检查每个文件的科学准确性！
+
+# 5. 提交 PR
+git checkout -b add-extracted-skills
+git add skills/
+git commit -m "feat: add skills extracted by /extract-knowhow"
+git push origin add-extracted-skills
+# 然后在 GitHub 上创建 Pull Request
+```
 
 ### 4.3 方式 B：手动撰写
 

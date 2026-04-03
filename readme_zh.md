@@ -117,9 +117,15 @@ npm install -g @openscientist/extract-knowhow
 
 然后运行：
 
-**Claude Code:** `/extract-knowhow`
+**Claude Code:**
+```
+/extract-knowhow
+```
 
-**Codex CLI:** `$extract-knowhow`
+**Codex CLI:**
+```
+$extract-knowhow
+```
 
 该命令会：
 1. 自动扫描你的对话历史

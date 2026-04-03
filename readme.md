@@ -117,9 +117,15 @@ npm install -g @openscientist/extract-knowhow
 
 Then run:
 
-**Claude Code:** `/extract-knowhow`
+**Claude Code:**
+```
+/extract-knowhow
+```
 
-**Codex CLI:** `$extract-knowhow`
+**Codex CLI:**
+```
+$extract-knowhow
+```
 
 The command will:
 1. Scan your conversation history automatically

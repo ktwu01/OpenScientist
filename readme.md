@@ -99,8 +99,6 @@ Skills are also classified by **research activity type** — 10 categories that 
 
 <h2 align="center">3. How to Contribute</h2>
 
-We welcome contributions from domain experts. See [CONTRIBUTING.md](utils/CONTRIBUTING.md) for the full guide.
-
 ### 3.1 Contributor Requirements
 
 > **Who can contribute?** We maintain a high bar for scientific accuracy.

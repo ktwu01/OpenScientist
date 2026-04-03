@@ -5,7 +5,7 @@ description: >
   Produces structured, concise captions that clearly describe multi-panel figures, data sources,
   variables, time periods, and statistical results without including methodology or conclusions.
 domain: physics
-subdomain: earth-system-modeling
+subdomain: atmospheric-and-oceanic-physics
 author: "Koutian Wu"
 expertise_level: intermediate
 tags: [geoscience, scientific-writing, documentation, figures, captions, earth-systems]

@@ -229,7 +229,7 @@ Assemble all results into a single JSON object:
 
 Create directory: `mkdir -p ~/.openscientist`
 
-Read the HTML template from the npm package at `templates/report.html` (installed alongside this command). The template contains all CSS, JS, and the interactive UI. Replace the `__REPORT_DATA__` placeholder in the template with the actual JSON data object from Step 6.2.
+Read the HTML template from the npm package at `templates/report.html` (installed alongside this command). The template contains all CSS, JS, and the interactive UI. Replace only the `__REPORT_DATA__` token in the line `const DATA = __REPORT_DATA__;` with the raw JSON data object from Step 6.2, and preserve every other template line exactly.
 
 If the template file is not found, fall back to writing a minimal HTML page that embeds the JSON data and displays it.
 

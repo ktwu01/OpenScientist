@@ -36,6 +36,9 @@ assert(fs.existsSync(TARGET), "Command file exists after install");
 const content = fs.readFileSync(TARGET, "utf-8");
 assert(content.includes("extract-knowhow"), "Command file contains expected content");
 assert(content.startsWith("#"), "Command file starts with markdown header");
+assert(content.includes("Prefer fewer, stronger skills over many weak ones."), "Command includes the stronger skill-selection guidance");
+assert(content.includes("Only keep an item if it passes **all** of these checks:"), "Command includes the reuse quality bar");
+assert(content.includes("If you cannot write a concrete reasoning protocol or concrete pitfalls"), "Command enforces replicability requirements");
 
 console.log("\nTest: report template invariants");
 const template = fs.readFileSync(TEMPLATE, "utf-8");

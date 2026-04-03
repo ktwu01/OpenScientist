@@ -146,17 +146,107 @@ After the command finishes, review the generated files for scientific accuracy, 
 - [**Submit your skill via GitHub Issue →**](https://github.com/OpenScientists/OpenScientist/issues/new?template=submit-skill.yml) (just paste the file content — no git required!)
 - Or, if you prefer git: fork the repo, copy the files into `skills/<domain>/<subdomain>/`, and open a PR
 
-### 3.3 Method B: Write Manually
+### 3.3 Method B: One-Click Prompt for Web Users (ChatGPT / Claude.ai)
+
+If you use the web version of ChatGPT or Claude, paste this prompt into a conversation where you've done research work:
+
+<details>
+<summary><b>Click to expand the full prompt</b></summary>
+
+```
+Review all our past conversations and extract every piece of reusable scientific research know-how. Focus exclusively on research activities — ignore general programming, setup, or casual conversations.
+
+For each piece of know-how you find, classify it into one of these 10 categories:
+1. Literature Search — search strategies, paper filtering, citation analysis
+2. Hypothesis & Ideation — hypothesis formation, research question development
+3. Math & Modeling — proof strategies, derivations, mathematical formulations
+4. Experiment Planning — protocols, control strategies, variable selection
+5. Data Acquisition — data sources, cleaning pipelines, labeling strategies
+6. Coding & Execution — research coding patterns, library choices, debugging
+7. Result Analysis — statistical methods, visualization, interpretation
+8. Reusable Tooling — tools, methods, or workflows you helped me build
+9. Paper Writing — writing structure, figure standards, claim formulation
+10. Review & Rebuttal — self-critique, reviewer responses, revision strategies
+
+Output each item in a SINGLE code block using this exact format, so I can copy-paste it directly:
+
+---
+name: short-descriptive-title
+description: >
+  2-3 sentences explaining what this know-how is and when to apply it.
+domain: [physics|mathematics|computer-science|quantitative-biology|statistics|eess|economics|quantitative-finance]
+subdomain: specific-area
+category: [01-literature-search|02-hypothesis-and-ideation|03-math-and-modeling|04-experiment-planning|05-data-acquisition|06-coding-and-execution|07-result-analysis|08-reusable-tooling|09-paper-writing|10-review-and-rebuttal]
+author: "My Name (My Institution)"
+expertise_level: intermediate
+tags: [keyword1, keyword2]
+dependencies: []
+version: 1.0.0
+status: draft
+reviewed_by: []
+---
+
+## Purpose
+
+[Expand the description into a full paragraph]
+
+## Tools
+
+- **[Tool Name]**: what it does, when to use it
+
+## Domain Knowledge
+
+### Key Concepts
+
+[Core concepts relevant to this know-how]
+
+### Fundamental Principles
+
+[Underlying scientific principles]
+
+## Reasoning Protocol
+
+Step 1: [specific step]
+Step 2: [specific step]
+Step 3: [specific step]
+
+## Common Pitfalls
+
+- [Pitfall 1: what goes wrong and how to avoid it]
+- [Pitfall 2: what goes wrong and how to avoid it]
+
+## References
+
+- Extracted from conversation history
+- Extraction date: [today's date]
+
+---
+
+Rules:
+- Extract EVERY piece of research know-how, no matter how small
+- Preserve my exact words and specific parameter values where possible
+- DO NOT extract generic programming knowledge or textbook basics
+- DO NOT summarize or group multiple items — one skill file per know-how item
+- After the code block, confirm whether that is the complete set or if any remain
+```
+
+</details>
+
+After running, review the output for accuracy, then submit:
+
+- [**Submit your skill via GitHub Issue →**](https://github.com/OpenScientists/OpenScientist/issues/new?template=submit-skill.yml) (just paste it — no git required!)
+
+### 3.4 Method C: Write Manually
 
 Write your own skill following the [template](skills/_template.md), then submit:
 
 - [**Submit your skill via GitHub Issue →**](https://github.com/OpenScientists/OpenScientist/issues/new?template=submit-skill.yml)
 
-### 3.4 Don't see your field?
+### 3.5 Don't see your field?
 
 - [**Propose a new area →**](https://github.com/OpenScientists/OpenScientist/issues/new?template=propose-new-area.md)
 
-### 3.5 Need a skill but can't write it yourself?
+### 3.6 Need a skill but can't write it yourself?
 
 - [**Request a skill →**](https://github.com/OpenScientists/OpenScientist/issues/new?template=skill-request.yml)
 

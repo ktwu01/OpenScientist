@@ -146,17 +146,107 @@ $extract-knowhow
 - [**通过 GitHub Issue 提交你的 Skill →**](https://github.com/OpenScientists/OpenScientist/issues/new?template=submit-skill.yml)（直接粘贴文件内容，无需 git！）
 - 或者，如果你熟悉 git：fork 仓库，将文件复制到 `skills/<领域>/<子领域>/`，提交 PR
 
-### 3.3 方式 B：手动撰写
+### 3.3 方式 B：网页版用户一键提取（ChatGPT / Claude.ai）
+
+如果你使用 ChatGPT 或 Claude 网页版，在你做过科研工作的对话中粘贴以下 prompt：
+
+<details>
+<summary><b>点击展开完整 prompt</b></summary>
+
+```
+回顾我们所有的历史对话，提取每一条可复用的科研 know-how。只关注科研活动，忽略通用编程、环境配置或闲聊内容。
+
+将每条 know-how 归入以下 10 个类别之一：
+1. 文献搜索 — 搜索策略、论文筛选、引用分析
+2. 假设与构思 — 假设构建、研究问题提炼
+3. 数学与建模 — 证明策略、推导、数学表述
+4. 实验规划 — 实验方案、控制策略、变量选择
+5. 数据采集 — 数据来源、清洗流程、标注策略
+6. 编码与执行 — 科研编码模式、库选择、调试
+7. 结果分析 — 统计方法、可视化、结果解读
+8. 可复用工具 — 你让我帮你构建的工具、方法或工作流
+9. 论文写作 — 写作结构、图表规范、论点构建
+10. 评审与修改 — 自我批判、回复审稿人、修改策略
+
+将每个条目输出在一个代码块中，使用以下格式，方便我直接复制粘贴：
+
+---
+name: 简短描述性标题
+description: >
+  2-3 句话解释这条 know-how 是什么以及何时使用。
+domain: [physics|mathematics|computer-science|quantitative-biology|statistics|eess|economics|quantitative-finance]
+subdomain: 具体子领域
+category: [01-literature-search|02-hypothesis-and-ideation|03-math-and-modeling|04-experiment-planning|05-data-acquisition|06-coding-and-execution|07-result-analysis|08-reusable-tooling|09-paper-writing|10-review-and-rebuttal]
+author: "我的姓名 (我的机构)"
+expertise_level: intermediate
+tags: [关键词1, 关键词2]
+dependencies: []
+version: 1.0.0
+status: draft
+reviewed_by: []
+---
+
+## Purpose
+
+[将描述扩展为完整段落]
+
+## Tools
+
+- **[工具名]**: 用途和使用时机
+
+## Domain Knowledge
+
+### Key Concepts
+
+[与此 know-how 相关的核心概念]
+
+### Fundamental Principles
+
+[底层科学原理]
+
+## Reasoning Protocol
+
+Step 1: [具体步骤]
+Step 2: [具体步骤]
+Step 3: [具体步骤]
+
+## Common Pitfalls
+
+- [陷阱 1: 哪里会出错以及如何避免]
+- [陷阱 2: 哪里会出错以及如何避免]
+
+## References
+
+- 从对话历史中提取
+- 提取日期: [今天日期]
+
+---
+
+规则：
+- 提取每一条科研 know-how，无论多小
+- 尽量保留我的原话和具体参数值
+- 不要提取通用编程知识或教科书基础内容
+- 不要合并或归纳多个条目 — 每条 know-how 单独一个 skill 文件
+- 代码块之后，确认是否已经提取完整，是否还有遗漏
+```
+
+</details>
+
+运行后检查输出的准确性，然后提交：
+
+- [**通过 GitHub Issue 提交你的 Skill →**](https://github.com/OpenScientists/OpenScientist/issues/new?template=submit-skill.yml)（直接粘贴，无需 git！）
+
+### 3.4 方式 C：手动撰写
 
 参照[模板](skills/_template.md)撰写你的 Skill，然后提交：
 
 - [**通过 GitHub Issue 提交你的 Skill →**](https://github.com/OpenScientists/OpenScientist/issues/new?template=submit-skill.yml)
 
-### 3.4 没有你的研究方向？
+### 3.5 没有你的研究方向？
 
 - [**提议新领域 →**](https://github.com/OpenScientists/OpenScientist/issues/new?template=propose-new-area.md)
 
-### 3.5 需要某个 Skill 但自己写不了？
+### 3.6 需要某个 Skill 但自己写不了？
 
 - [**请求 Skill →**](https://github.com/OpenScientists/OpenScientist/issues/new?template=skill-request.yml)
 

@@ -171,19 +171,9 @@ After the command finishes, review the generated files for scientific accuracy, 
 
 ### 4.3 Method B: Write Manually
 
-- **Fork** this repo
-- **Copy the template** into the right domain folder:
-  ```bash
-  cp skills/_template.md skills/<domain>/<subdomain>/<your-skill-name>.md
-  ```
-- **Fill in every section** — Purpose, Domain Knowledge, Reasoning Protocol, Tools, Common Pitfalls
-- **Validate locally** (optional but recommended):
-  ```bash
-  python utils/tools/validate.py skills/<domain>/<subdomain>/<your-skill-name>.md
-  ```
-- **Open a pull request** — title format: `[physics/quantum-physics] Add quantum-entanglement skill`
+Write your own skill following the [template](skills/_template.md), then submit:
 
-A domain reviewer listed in CODEOWNERS will be automatically assigned to review your PR for scientific accuracy.
+- [**Submit your skill via GitHub Issue →**](https://github.com/OpenScientists/OpenScientist/issues/new?template=submit-skill.yml)
 
 ### 4.4 Don't see your field?
 
@@ -415,19 +405,9 @@ npm install -g @openscientist/extract-knowhow
 
 ### 4.3 方式 B：手动撰写
 
-- **Fork** 本仓库
-- **复制模板** 到对应领域文件夹：
-  ```bash
-  cp skills/_template.md skills/<领域>/<子领域>/<你的skill名称>.md
-  ```
-- **填写每个章节** —— Purpose、Domain Knowledge、Reasoning Protocol、Tools、Common Pitfalls
-- **本地验证**（推荐）：
-  ```bash
-  python utils/tools/validate.py skills/<领域>/<子领域>/<你的skill名称>.md
-  ```
-- **提交 Pull Request** —— 标题格式：`[physics/quantum-physics] Add quantum-entanglement skill`
+参照[模板](skills/_template.md)撰写你的 Skill，然后提交：
 
-CODEOWNERS 中的领域审稿人会自动收到 review 请求，负责审核科学内容的准确性。
+- [**通过 GitHub Issue 提交你的 Skill →**](https://github.com/OpenScientists/OpenScientist/issues/new?template=submit-skill.yml)
 
 ### 4.4 没有你的研究方向？
 

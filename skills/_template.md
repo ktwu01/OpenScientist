@@ -5,6 +5,7 @@ description: >                               # 1-2 sentences: when should this s
   Describe what this skill does and when to invoke it.
 domain: physics                              # physics | mathematics | computer-science | quantitative-biology | statistics | eess | economics | quantitative-finance
 subdomain: ""                                # optional: more specific area
+category: ""                                 # 01-literature-search | 02-hypothesis-and-ideation | 03-math-and-modeling | 04-experiment-planning | 05-data-acquisition | 06-coding-and-execution | 07-result-analysis | 08-reusable-tooling | 09-paper-writing | 10-review-and-rebuttal
 author: "Full Name (Institution)"            # e.g. "Dr. Albert Einstein (ETH Zürich Physics)"
 expertise_level: advanced                    # beginner | intermediate | advanced
 tags: []                                     # optional: [keyword1, keyword2, ...]

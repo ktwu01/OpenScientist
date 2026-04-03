@@ -7,11 +7,13 @@ This document defines the complete specification for OpenScientist skill files.
 ## 1. File Location
 
 ```
-skills/<domain>/<subdomain>/<skill-name>.md
+skills/<domain>/<subdomain>/<category>/<skill-name>.md
 ```
 
 - `domain` must match one of: `physics`, `mathematics`, `computer-science`, `quantitative-biology`, `statistics`, `eess`, `economics`, `quantitative-finance`
 - `subdomain` must match one of the arXiv-aligned subdomain folders under each domain (see `skills/<domain>/` for the full list)
+- `category` must match one of the 10 research activity categories:
+  - `01-literature-search`, `02-hypothesis-and-ideation`, `03-math-and-modeling`, `04-experiment-planning`, `05-data-acquisition`, `06-coding-and-execution`, `07-result-analysis`, `08-reusable-tooling`, `09-paper-writing`, `10-review-and-rebuttal`
 - `skill-name` must be lowercase, hyphen-separated
 
 ---
@@ -24,6 +26,7 @@ name: <string>                  # REQUIRED. Unique identifier. Lowercase, hyphen
 description: <string>           # REQUIRED. 1-2 sentences. When should this skill be invoked? What does it do?
 domain: <string>                # REQUIRED. One of: physics | mathematics | computer-science | quantitative-biology | statistics | eess | economics | quantitative-finance
 subdomain: <string>             # optional. More specific area within the domain.
+category: <string>              # REQUIRED. One of: 01-literature-search | 02-hypothesis-and-ideation | 03-math-and-modeling | 04-experiment-planning | 05-data-acquisition | 06-coding-and-execution | 07-result-analysis | 08-reusable-tooling | 09-paper-writing | 10-review-and-rebuttal
 author: <string>                # REQUIRED. "Full Name (Affiliation)" — e.g. "Dr. Albert Einstein (ETH Zürich Physics)"
 expertise_level: <string>       # REQUIRED. One of: beginner | intermediate | advanced
 tags: [<string>, ...]           # optional. Keywords for discovery.
@@ -42,6 +45,7 @@ reviewed_by: [<string>, ...]    # optional. GitHub usernames of reviewers who ap
 | `description` | yes | string | 1–2 sentences |
 | `domain` | yes | enum | see list above |
 | `subdomain` | no | string | free text |
+| `category` | yes | enum | `01-literature-search` `02-hypothesis-and-ideation` `03-math-and-modeling` `04-experiment-planning` `05-data-acquisition` `06-coding-and-execution` `07-result-analysis` `08-reusable-tooling` `09-paper-writing` `10-review-and-rebuttal` |
 | `author` | yes | string | "Name (Affiliation)" |
 | `expertise_level` | yes | enum | `beginner` `intermediate` `advanced` |
 | `tags` | no | list | free text keywords |

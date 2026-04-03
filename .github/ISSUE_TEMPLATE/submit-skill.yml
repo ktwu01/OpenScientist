@@ -9,7 +9,7 @@ body:
         Submit your skill here! Paste the full content of your `.md` skill file below.
 
         **How to generate a skill:**
-        1. Install: `cp OpenScientist/extract-knowhow/commands/extract-knowhow.md ~/.claude/commands/`
+        1. Install: `npm install -g @openscientist/extract-knowhow`
         2. In Claude Code: `/model opus[1m]` → `/effort max` → `/extract-knowhow`
         3. Review the generated file, then paste its content here.
 
@@ -169,6 +169,25 @@ body:
         - "Statistics / Methodology"
         - "Statistics / Other Statistics"
         - "Statistics / Statistics Theory"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Research Activity Category
+      description: What type of research activity does this skill cover?
+      options:
+        - "01-literature-search — Literature search & survey"
+        - "02-hypothesis-and-ideation — Hypothesis formation & ideation"
+        - "03-math-and-modeling — Math derivation & modeling"
+        - "04-experiment-planning — Experiment design & planning"
+        - "05-data-acquisition — Data collection & management"
+        - "06-coding-and-execution — Coding & experiment execution"
+        - "07-result-analysis — Result analysis & visualization"
+        - "08-reusable-tooling — Reusable tool & method development"
+        - "09-paper-writing — Paper writing & publication"
+        - "10-review-and-rebuttal — Peer review & rebuttal"
     validations:
       required: true
 

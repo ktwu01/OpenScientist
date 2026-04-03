@@ -84,16 +84,16 @@ Skills are also classified by **research activity type** — 10 categories that 
 
 | # | Category | What it covers |
 |---|----------|---------------|
-| 1 | Literature & Survey | Search strategies, paper filtering, citation analysis |
-| 2 | Ideation | Hypothesis formation, research question development |
-| 3 | Formalization | Proof strategies, modeling, mathematical formulation |
-| 4 | Experiment Design | Protocols, control strategies, variable selection |
-| 5 | Data & Collection | Data sources, cleaning pipelines, labeling |
-| 6 | Implementation | Coding patterns, library choices, debugging |
-| 7 | Analysis | Statistical methods, visualization, interpretation |
-| 8 | Tool & Method Dev | Reusable tools, method innovations, workflows |
-| 9 | Writing & Publication | Paper structure, figures, claim formulation |
-| 10 | Peer Review & Rebuttal | Self-critique, reviewer responses, revision |
+| 1 | `01-literature-search` | Search strategies, paper filtering, citation analysis |
+| 2 | `02-hypothesis-and-ideation` | Hypothesis formation, research question development |
+| 3 | `03-math-and-modeling` | Proof strategies, modeling, mathematical formulation |
+| 4 | `04-experiment-planning` | Protocols, control strategies, variable selection |
+| 5 | `05-data-acquisition` | Data sources, cleaning pipelines, labeling |
+| 6 | `06-coding-and-execution` | Coding patterns, library choices, debugging |
+| 7 | `07-result-analysis` | Statistical methods, visualization, interpretation |
+| 8 | `08-reusable-tooling` | Reusable tools, method innovations, workflows |
+| 9 | `09-paper-writing` | Paper structure, figures, claim formulation |
+| 10 | `10-review-and-rebuttal` | Self-critique, reviewer responses, revision |
 
 ---
 
@@ -315,16 +315,16 @@ Skill 还按**科研活动类型**分类 —— 10 个跨领域的类别：
 
 | # | 类别 | 涵盖内容 |
 |---|------|---------|
-| 1 | 文献调研 | 搜索策略、论文筛选、引用分析 |
-| 2 | 提出想法 | 假设构建、研究问题提炼 |
-| 3 | 形式化 | 证明策略、建模、数学表述 |
-| 4 | 实验设计 | 实验方案、控制策略、变量选择 |
-| 5 | 数据采集 | 数据来源、清洗流程、标注 |
-| 6 | 代码实现 | 编码模式、库选择、调试 |
-| 7 | 结果分析 | 统计方法、可视化、结果解读 |
-| 8 | 工具开发 | 可复用工具、方法创新、工作流 |
-| 9 | 论文写作 | 论文结构、图表、论点构建 |
-| 10 | 同行评审 | 自我批判、回复审稿人、修改 |
+| 1 | `01-literature-search` | 搜索策略、论文筛选、引用分析 |
+| 2 | `02-hypothesis-and-ideation` | 假设构建、研究问题提炼 |
+| 3 | `03-math-and-modeling` | 证明策略、建模、数学表述 |
+| 4 | `04-experiment-planning` | 实验方案、控制策略、变量选择 |
+| 5 | `05-data-acquisition` | 数据来源、清洗流程、标注 |
+| 6 | `06-coding-and-execution` | 编码模式、库选择、调试 |
+| 7 | `07-result-analysis` | 统计方法、可视化、结果解读 |
+| 8 | `08-reusable-tooling` | 可复用工具、方法创新、工作流 |
+| 9 | `09-paper-writing` | 论文结构、图表、论点构建 |
+| 10 | `10-review-and-rebuttal` | 自我批判、回复审稿人、修改 |
 
 ---
 

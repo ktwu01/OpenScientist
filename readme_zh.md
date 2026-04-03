@@ -115,14 +115,23 @@ Skill 还按**科研活动类型**分类 —— 10 个跨领域的类别：
 npm install -g @openscientist/extract-knowhow
 ```
 
-然后在 Claude Code 或 Codex CLI 中运行：
+然后运行提取：
+
+**Claude Code:**
 ```
 /model opus[1m]
 /effort max
 /extract-knowhow
 ```
 
-> **提示：** 为获得最佳提取效果，建议使用 Opus 模型、1M 上下文、最大推理深度。
+**Codex CLI:**
+```
+/model gpt-5.4
+/effort extra-high
+$extract-knowhow
+```
+
+> **提示：** 使用最强模型 + 最大推理深度，可获得最佳提取效果。
 
 该命令会：
 1. 扫描你的对话历史

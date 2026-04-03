@@ -115,14 +115,23 @@ Let AI analyze your conversation history and automatically generate skill files 
 npm install -g @openscientist/extract-knowhow
 ```
 
-Then in Claude Code or Codex CLI:
+Then run the extraction:
+
+**Claude Code:**
 ```
 /model opus[1m]
 /effort max
 /extract-knowhow
 ```
 
-> **Tip:** For best results, use Opus with 1M context and max effort. This ensures deep analysis across your full conversation history.
+**Codex CLI:**
+```
+/model gpt-5.4
+/effort extra-high
+$extract-knowhow
+```
+
+> **Tip:** Use the most capable model with maximum effort for best extraction results.
 
 The command will:
 1. Scan your conversation history

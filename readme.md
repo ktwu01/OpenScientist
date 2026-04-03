@@ -169,28 +169,10 @@ The command will:
 5. Present a report for your review
 6. Generate skill files for you to review
 
-After the command finishes, contribute your generated skills back:
-```bash
-# 1. Fork & clone OpenScientist (skip if already done)
-git clone https://github.com/<your-username>/OpenScientist.git
-cd OpenScientist
+After the command finishes, review the generated files for scientific accuracy, then submit:
 
-# 2. Copy generated skill files into the repo
-cp ~/.claude/skills/openscientist/physics/quantum-physics/*.md skills/physics/quantum-physics/
-# (adjust the path to match your actual domain/subdomain)
-
-# 3. Validate
-python utils/tools/validate.py skills/<domain>/<subdomain>/<your-skill>.md
-
-# 4. Review & edit — check each file for scientific accuracy!
-
-# 5. Submit
-git checkout -b add-extracted-skills
-git add skills/
-git commit -m "feat: add skills extracted by /extract-knowhow"
-git push origin add-extracted-skills
-# Then open a PR on GitHub
-```
+- [**Submit your skill via GitHub Issue →**](https://github.com/OpenScientists/OpenScientist/issues/new?template=submit-skill.yml) (just paste the file content — no git required!)
+- Or, if you prefer git: fork the repo, copy the files into `skills/<domain>/<subdomain>/`, and open a PR
 
 ### 4.3 Method B: Write Manually
 
@@ -436,28 +418,10 @@ cp OpenScientist/extract-knowhow/commands/extract-knowhow.md ~/.claude/commands/
 5. 展示报告供你确认
 6. 生成 Skill 文件供你审核
 
-命令运行完成后，将生成的 Skill 贡献回仓库：
-```bash
-# 1. Fork 并克隆 OpenScientist（已做过可跳过）
-git clone https://github.com/<你的用户名>/OpenScientist.git
-cd OpenScientist
+命令运行完成后，检查生成文件的科学准确性，然后提交：
 
-# 2. 将生成的 Skill 文件复制到仓库
-cp ~/.claude/skills/openscientist/physics/quantum-physics/*.md skills/physics/quantum-physics/
-# （根据你实际的领域/子领域调整路径）
-
-# 3. 验证
-python utils/tools/validate.py skills/<领域>/<子领域>/<你的skill>.md
-
-# 4. 审核并编辑 —— 请务必检查每个文件的科学准确性！
-
-# 5. 提交 PR
-git checkout -b add-extracted-skills
-git add skills/
-git commit -m "feat: add skills extracted by /extract-knowhow"
-git push origin add-extracted-skills
-# 然后在 GitHub 上创建 Pull Request
-```
+- [**通过 GitHub Issue 提交你的 Skill →**](https://github.com/OpenScientists/OpenScientist/issues/new?template=submit-skill.yml)（直接粘贴文件内容，无需 git！）
+- 或者，如果你熟悉 git：fork 仓库，将文件复制到 `skills/<领域>/<子领域>/`，提交 PR
 
 ### 4.3 方式 B：手动撰写
 

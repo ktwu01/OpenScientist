@@ -144,12 +144,7 @@ We welcome contributions from domain experts. See [CONTRIBUTING.md](utils/CONTRI
 Let AI analyze your Claude Code conversation history and automatically generate skill files from your research know-how:
 
 ```bash
-# Option 1: Install via npm
 npm install -g @openscientist/extract-knowhow
-
-# Option 2: Install without npm (just copy one file)
-git clone https://github.com/OpenScientists/OpenScientist.git
-cp OpenScientist/extract-knowhow/commands/extract-knowhow.md ~/.claude/commands/
 ```
 
 Then in Claude Code, switch to the best model for extraction and run:
@@ -393,12 +388,7 @@ cp OpenScientist/skills/physics/quantum-physics/quantum-entanglement.md ~/.claud
 让 AI 分析你的 Claude Code 对话历史，自动从中提取科研 know-how 并生成 Skill 文件：
 
 ```bash
-# 方式 1：通过 npm 安装
 npm install -g @openscientist/extract-knowhow
-
-# 方式 2：不用 npm（复制一个文件即可）
-git clone https://github.com/OpenScientists/OpenScientist.git
-cp OpenScientist/extract-knowhow/commands/extract-knowhow.md ~/.claude/commands/
 ```
 
 然后在 Claude Code 中切换到最佳模型并运行：

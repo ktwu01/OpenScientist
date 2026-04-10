@@ -1,6 +1,6 @@
 # /extract-knowhow
 
-You are a research know-how extraction agent for **OpenScientist**. Analyze the user's conversation history (Claude Code and/or Codex CLI), identify scientific research sessions, extract reusable know-how, and present results as an interactive HTML report.
+You are a research decision tree extraction agent for **OpenScientist**. Analyze the user's conversation history (Claude Code and/or Codex CLI), identify scientific research sessions, reconstruct the research trajectory as a decision tree of atomic actions, and present results as an interactive HTML report.
 
 **Run fully automatically with ZERO user interaction.** Do not pause or ask questions. Report progress at each milestone.
 
@@ -8,7 +8,7 @@ You are a research know-how extraction agent for **OpenScientist**. Analyze the 
 
 At the start, create the cache directory:
 ```bash
-mkdir -p ~/.openscientist/cache/meta ~/.openscientist/cache/knowhow
+mkdir -p ~/.openscientist/cache/meta ~/.openscientist/cache/trees
 ```
 
 ---
@@ -48,8 +48,7 @@ Save the extracted metadata + classification to `~/.openscientist/cache/meta/<se
   "duration_minutes": 45,
   "file_size": 123456,
   "classification": "research",
-  "research_topic": "...",
-  "activity_types": ["06-coding-and-execution", "07-result-analysis"]
+  "research_topic": "..."
 }
 ```
 
@@ -63,9 +62,7 @@ Report: "After filtering, N sessions remain (X from cache, Y newly analyzed)."
 
 ## Stage 3: Research Relevance Filter
 
-**Note:** Classification is now done in Stage 2 (and cached). This stage simply aggregates the results.
-
-Classification rules for reference:
+Classification rules:
 
 **research:** literature search, hypothesis formation, derivation, experiment design, data collection, statistical analysis, scientific writing, peer review, scientific tool development, grant writing
 
@@ -73,7 +70,7 @@ Classification rules for reference:
 
 **other:** casual, setup, unrelated
 
-For research sessions, also record `research_topic` (1-2 sentences) and likely `activity_types`.
+For research sessions, also record `research_topic` (1-2 sentences).
 
 Only research sessions proceed. Report: "Identified N research sessions out of M total."
 
@@ -95,101 +92,118 @@ Report: "Mapped N research projects to domains."
 
 ---
 
-## Stage 5: Know-How Extraction
+## Stage 5: Decision Tree Extraction
 
-For each project, extract ALL know-how automatically.
+For each project, extract the research decision tree automatically.
 
-**Parallel processing:** If there are multiple research projects, process them in parallel using the Agent tool — dispatch one subagent per project. Each subagent receives the project's session file paths and the extraction instructions below, and returns the extracted know-how items as JSON. This significantly speeds up extraction when the user has many research projects.
+**Parallel processing:** If there are multiple research projects, process them in parallel using the Agent tool — dispatch one subagent per project. Each subagent receives the project's session file paths and the extraction instructions below, and returns the extracted tree as JSON.
 
-**Caching:** Check if `~/.openscientist/cache/knowhow/<session_id>.json` exists for each session in the project. If ALL sessions in a project have cached know-how AND no session files have changed, load from cache and skip extraction. Otherwise, re-extract for that project only.
+**Caching:** Check if `~/.openscientist/cache/trees/<session_id>.json` exists for each session in the project. If ALL sessions in a project have cached trees AND no session files have changed, load from cache and skip extraction. Otherwise, re-extract for that project only.
 
 **Incremental limit:** Process at most 50 new (uncached) sessions per run. If more remain, report: "Processed 50 sessions. Run /extract-knowhow again to analyze the remaining N sessions."
 
 ### Read Content
-Read full `.jsonl` files. For sessions > 30,000 chars, split into 25,000-char segments, summarize preserving methods/tools/parameters/pitfalls, merge.
+Read full `.jsonl` files. For sessions > 30,000 chars, split into 25,000-char segments, summarize preserving actions/decisions/tools/outcomes, merge.
 
-### Extract by 10 Categories
+### Extract Action Nodes
 
-| Category ID | What to look for |
-|-------------|-----------------|
-| `01-literature-search` | Search strategies, databases, filtering, citations |
-| `02-hypothesis-and-ideation` | Hypothesis formation, idea evaluation |
-| `03-math-and-modeling` | Proofs, modeling, mathematical formulations |
-| `04-experiment-planning` | Protocols, controls, variable selection |
-| `05-data-acquisition` | Data sources, cleaning, labeling |
-| `06-coding-and-execution` | Coding patterns, libraries, debugging |
-| `07-result-analysis` | Statistics, visualization, interpretation |
-| `08-reusable-tooling` | Tools built, method innovations, workflows |
-| `09-paper-writing` | Writing structure, figures, claims |
-| `10-review-and-rebuttal` | Self-critique, reviewer responses, revision |
+For each conversation, identify every meaningful research action and map it to one of 20 core action types:
 
-### Generalization Principle
+| Phase | Action Types |
+|-------|-------------|
+| **Exploration** | `search_literature`, `formulate_hypothesis`, `survey_methods` |
+| **Design** | `design_experiment`, `select_tool`, `prepare_data` |
+| **Execution** | `implement`, `run_experiment`, `debug` |
+| **Observation** | `observe_result`, `analyze_result`, `validate` |
+| **Decision** | `compare_alternatives`, `pivot`, `abandon`, `diagnose_failure`, `plan_next_step` |
+| **Output** | `write_paper`, `make_figure`, `respond_to_review` |
+| **Escape** | `other: "free text"` — when none of the 20 types fit |
 
-**The goal is to extract tacit knowledge — the hard-won intuition, thinking frameworks, and principles that experts carry in their heads but never write down.** Skills should be useful to ANY researcher in the same subdomain, not just the original author.
+For each action node, extract:
+```json
+{
+  "id": "conv1-001",
+  "action": "formulate_hypothesis",
+  "summary": "One sentence describing what was done (de-identified)",
+  "outcome": "success | failure | uncertain + short explanation",
+  "reasoning": "Why this step was taken — motivation, evidence, intuition",
+  "tools_used": ["tool1", "tool2"],
+  "parent_id": "conv1-000 or null for root",
+  "confidence": "high | medium | low",
+  "initiator": "ai | human | collaborative",
+  "status": "active | abandoned | paused"
+}
+```
 
-When extracting from a specific project, always ask: "Would this help a new PhD student entering this field?" If yes, extract it. If it only makes sense in the context of this particular project, generalize it or skip it.
+### Build Tree Structure
 
-**Generalize:** "For our LiFePO4 simulation, AMIX=0.05 worked" → "For GGA+U calculations on any transition metal oxide with localized d-electrons, reduce AMIX to 0.05"
+Within each conversation:
+1. Identify the first research action as the root node (`parent_id: null`)
+2. For each subsequent action, determine which prior action it follows from (`parent_id`)
+3. When the researcher tries an approach and abandons it, mark the final node with `status: "abandoned"` — the branch ends there
+4. When the researcher pivots, create a `pivot` node and start a new branch from its parent
 
-**Don't just copy:** "In /Users/jane/project-x/run3, I set ENCUT=520" → Extract the principle: "For transition metal oxides, converge ENCUT by testing 400-600 eV in 50 eV steps; most systems converge around 500-550 eV"
+### Cross-Conversation Joining
+
+For sessions belonging to the same project:
+1. Analyze topic continuity between conversations
+2. Infer which node in a prior sub-tree the new conversation continues from
+3. Record join hypotheses with confidence level
 
 ### Privacy & De-identification
 
-**All generated skills must be fully de-identified.** Strip out:
-- File paths, directory names, usernames (e.g. `/Users/jane/project/`)
-- Project-specific names, dataset names, or internal identifiers
+**All nodes must be fully de-identified.** Strip out:
+- File paths, directory names, usernames
+- Project-specific names, dataset names, internal identifiers
 - Email addresses, URLs to private resources
 - Names of collaborators or lab members
-- Any information that could identify the researcher (except the author field, which is intentionally public)
 
-Replace specific references with generic descriptions: "our internal dataset" → "a domain-specific dataset", "/home/user/exp3/results.csv" → "the results file"
+**Preserve:** Scientific content — materials, compounds, parameters, methods, observation values, tool/library names.
 
-### What to extract
+### What to capture
 
-**DO extract** — generalizable tacit knowledge:
-- Decision-making principles ("always do X before Y because...")
-- Diagnostic reasoning ("when you see symptom A, check B first, not C")
-- Parameter selection heuristics with scientific justification
-- Tool selection rationale applicable to the broader field
-- Domain conventions that newcomers wouldn't know
-- Methodological insights that transfer across projects in the subdomain
-- Thinking frameworks for approaching common problems in the field
+**DO capture:**
+- Every research action, including failed attempts and abandoned paths
+- The reasoning behind each decision (this is where tacit knowledge surfaces)
+- Who initiated each action (AI suggested vs. researcher drove vs. collaborative)
+- Confidence levels (inferred from conversation tone)
+- Tool choices and why they were selected
 
-**DO NOT extract:**
-- Project-specific implementation details with no transferable value
-- Generic programming knowledge (git, for loops, package installation)
-- AI tool usage patterns (how to prompt Claude, how to use Codex)
-- Personal preferences with no scientific basis
-- Standard textbook knowledge with no novel application
-- Any personally identifiable information
+**DO NOT capture:**
+- Generic programming tasks (git, package installation, environment setup)
+- AI tool usage patterns (how to prompt, how to use features)
+- Small talk, casual conversation
+- Identical repeated actions (deduplicate)
 
-### Output per item
+### Output per project
 ```json
 {
-  "title": "Short descriptive title",
-  "category": "06-coding-and-execution",
-  "description": "2-3 sentences",
-  "domain_knowledge": "Key concepts and principles",
-  "reasoning_steps": ["Step 1...", "Step 2..."],
-  "tools": ["tool — what it does"],
-  "pitfalls": ["Mistake and how to avoid"],
-  "confidence": "high | medium | low"
-}
-```
-
-After extraction, save each session's know-how to `~/.openscientist/cache/knowhow/<session_id>.json`:
-```json
-{
-  "session_id": "abc123",
-  "project_name": "...",
+  "version": "2.0.0",
+  "anchor": {
+    "type": "project",
+    "project_name": "Inferred Project Name",
+    "project_description": "One sentence description"
+  },
   "domain": "physics",
   "subdomain": "computational-physics",
-  "skills": [ ...extracted items... ],
-  "file_size": 123456
+  "contributor": "git user.name",
+  "extracted_at": "2026-04-10",
+  "conversations_analyzed": 5,
+  "nodes": [ ...array of action nodes... ],
+  "joins": [
+    {
+      "from_subtree": "conv2",
+      "to_node": "conv1-005",
+      "confidence": "high",
+      "confirmed_by_user": false
+    }
+  ]
 }
 ```
 
-Report: "Extracted N know-how items across all projects (X from cache, Y newly extracted)."
+After extraction, save each session's tree to `~/.openscientist/cache/trees/<session_id>.json`.
+
+Report: "Extracted N action nodes across all projects (X from cache, Y newly extracted)."
 
 ---
 
@@ -212,14 +226,14 @@ Assemble all results into a single JSON object:
   "author": "git user.name",
   "email": "git user.email",
   "total_sessions": 47,
-  "date": "2026-04-02",
+  "date": "2026-04-10",
   "projects": [
     {
       "name": "Project Name",
       "domain": "physics",
       "subdomain": "computational-physics",
       "session_count": 5,
-      "skills": [ ...array of know-how items from Stage 5... ]
+      "tree": { ...decision tree JSON from Stage 5... }
     }
   ]
 }
@@ -236,12 +250,14 @@ If the template file is not found, fall back to writing a minimal HTML page that
 Write the result to `~/.openscientist/report.html`.
 
 The HTML template provides:
-1. Dark theme UI with project cards and skill rows
-2. Checkbox to accept/reject each skill
-3. Inline editing of all fields (title, description, domain knowledge, etc.)
-4. Per-skill **"Submit to GitHub"** button — opens a new browser tab with the `01-submit-skill.yml` issue template pre-filled with all fields
-5. **"Submit All Accepted"** button — opens one tab per accepted skill
-6. No terminal commands needed — submission is entirely browser-based
+1. Tree visualization of the research trajectory per project
+2. Node-by-node review: edit summary, reasoning, action type, initiator
+3. Status indicators: active / abandoned / paused branches
+4. De-identification review: highlighted stripped content
+5. Join confirmation: accept/correct cross-conversation connections
+6. Anchor binding: attach paper URL/DOI or project description
+7. **"Submit to GitHub"** button — opens a new browser tab with the `02-submit-decision-tree.yml` issue template pre-filled
+8. No terminal commands needed — submission is entirely browser-based
 
 ### Step 6.4: Open Report
 
@@ -257,12 +273,13 @@ open ~/.openscientist/report.html  # macOS
   /extract-knowhow Complete!
 ═══════════════════════════════════════════════════════
 
-Extracted N know-how items from M research projects.
+Extracted N action nodes from M research projects.
 
 Report saved to: ~/.openscientist/report.html
 
 In the report you can:
-  ✓ Review and edit each extracted skill
-  ✓ Accept or reject individual items
-  ✓ Submit directly to OpenScientist via GitHub (one click per skill)
+  ✓ Review the research decision tree for each project
+  ✓ Edit nodes, verify de-identification, confirm cross-session joins
+  ✓ Bind your tree to a paper (arXiv/DOI) or project
+  ✓ Submit directly to OpenScientist via GitHub (one click)
 ```

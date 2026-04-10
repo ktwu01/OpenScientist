@@ -8,11 +8,7 @@ domain: physics
 subdomain: atmospheric-and-oceanic-physics
 author: "Koutian Wu"
 expertise_level: intermediate
-tags: [geoscience, scientific-writing, documentation, figures, captions, earth-systems]
-dependencies: []
-version: 1.0.0
 status: draft
-reviewed_by: []
 ---
 
 ## Purpose

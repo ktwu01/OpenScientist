@@ -2,7 +2,6 @@
 """Validate OpenScientist skill files against the schema defined in SKILL_SCHEMA.md."""
 
 import sys
-import re
 from pathlib import Path
 
 try:
@@ -17,7 +16,6 @@ REQUIRED_FIELDS = {
     "domain": str,
     "author": str,
     "expertise_level": str,
-    "version": str,
     "status": str,
 }
 
@@ -37,16 +35,6 @@ REQUIRED_SECTIONS = [
     "## Common Pitfalls",
 ]
 
-VALID_CATEGORIES = {
-    "01-literature-search", "02-hypothesis-and-ideation",
-    "03-math-and-modeling", "04-experiment-planning",
-    "05-data-acquisition", "06-coding-and-execution",
-    "07-result-analysis", "08-reusable-tooling",
-    "09-paper-writing", "10-review-and-rebuttal",
-}
-
-SEMVER_RE = re.compile(r"^\d+\.\d+\.\d+$")
-
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 SKILLS_DIR = REPO_ROOT / "skills"
 
@@ -60,21 +48,18 @@ def validate_path(path: Path) -> list[str]:
         errors.append(f"File is not under skills/ directory")
         return errors
 
-    parts = rel.parts  # e.g. ('physics', 'quantum-physics', '09-paper-writing', 'my-skill.md')
-    if len(parts) < 4:
-        errors.append(f"File must be in skills/<domain>/<subdomain>/<category>/, got: skills/{'/'.join(parts)}")
+    parts = rel.parts  # e.g. ('physics', 'quantum-physics', 'my-skill.md')
+    if len(parts) < 3:
+        errors.append(f"File must be in skills/<domain>/<subdomain>/, got: skills/{'/'.join(parts)}")
         return errors
 
-    domain, subdomain, category = parts[0], parts[1], parts[2]
+    domain, subdomain = parts[0], parts[1]
     if domain not in VALID_DOMAINS:
         errors.append(f"Invalid domain folder '{domain}'. Must be one of: {sorted(VALID_DOMAINS)}")
 
     subdomain_dir = SKILLS_DIR / domain / subdomain
     if not subdomain_dir.is_dir():
         errors.append(f"Subdomain folder 'skills/{domain}/{subdomain}/' does not exist")
-
-    if category not in VALID_CATEGORIES:
-        errors.append(f"Invalid category folder '{category}'. Must be one of: {sorted(VALID_CATEGORIES)}")
 
     return errors
 
@@ -123,9 +108,6 @@ def validate_file(path: Path) -> list[str]:
 
     if front.get("status") and front["status"] not in VALID_STATUSES:
         errors.append(f"Invalid status '{front['status']}'. Must be one of: {sorted(VALID_STATUSES)}")
-
-    if front.get("version") and not SEMVER_RE.match(str(front["version"])):
-        errors.append(f"Invalid version '{front['version']}'. Must be semver format (e.g. 1.0.0)")
 
     # Check name matches filename
     expected_name = path.stem

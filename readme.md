@@ -38,7 +38,7 @@ This intuition lives in your head — the know-how, the heuristics, the reasonin
 
 **OpenScientist captures it before it's lost.** We turn the tacit knowledge of the world's top researchers — their skills, thinking frameworks, and principles — into reusable AI agent skills (compatible with **Claude Code** and **Codex CLI**). Every contribution makes every AI scientist — now and in the future — smarter, permanently.
 
-Each skill encodes the knowledge, tools, reasoning protocols, and common pitfalls of a scientific field. Skills can be written by domain experts or **auto-extracted from your research conversations** using `/extract-knowhow`. Point your AI agent at a skill, and it reasons like a domain expert.
+Each skill encodes the knowledge, tools, reasoning protocols, and common pitfalls of a scientific field. Skills can be written by domain experts or **auto-extracted from your research conversations** using `/extract-knowhow`. The command reconstructs your research trajectory as a **decision tree** — every action you took, every path you abandoned, every judgment call you made — then derives reusable skills from it. Point your AI agent at a skill, and it reasons like a domain expert.
 
 ---
 
@@ -60,7 +60,9 @@ npm install -g @openscientist/extract-knowhow
 $extract-knowhow
 ```
 
-The command automatically scans your conversation history, extracts research know-how, and opens an interactive report in your browser — where you can review, edit, and submit skills directly to OpenScientist via GitHub.
+The command scans your conversation history and reconstructs your research as a **decision tree** — a structured trace of every action you took, what worked, what you abandoned, and why. Each node is mapped to one of 20 atomic research action types (e.g., `formulate_hypothesis`, `diagnose_failure`, `pivot`, `validate`), capturing who initiated each step (you or the AI) and the reasoning behind it.
+
+An interactive browser review page lets you verify the tree, check de-identification, and bind it to your paper (arXiv/DOI) or project. Submit your tree to OpenScientist, where it becomes part of a growing dataset of real research trajectories — the raw material for building better AI scientist skills.
 
 ### Method B: One-Click Prompt for Web Users (ChatGPT / Claude / Gemini)
 
@@ -78,82 +80,62 @@ Then paste this prompt into a **new conversation**:
 <summary><b>Click to expand the full prompt</b></summary>
 
 ```
-Review all our past conversations and extract every piece of reusable scientific research know-how. Focus exclusively on research activities — ignore general programming, setup, or casual conversations.
+Review all our past conversations and reconstruct my research process as a decision tree. Focus exclusively on research activities — ignore general programming, setup, or casual conversations.
 
-For each piece of know-how you find, classify it into one of these 10 categories:
-1. Literature Search — search strategies, paper filtering, citation analysis
-2. Hypothesis & Ideation — hypothesis formation, research question development
-3. Math & Modeling — proof strategies, derivations, mathematical formulations
-4. Experiment Planning — protocols, control strategies, variable selection
-5. Data Acquisition — data sources, cleaning pipelines, labeling strategies
-6. Coding & Execution — research coding patterns, library choices, debugging
-7. Result Analysis — statistical methods, visualization, interpretation
-8. Reusable Tooling — tools, methods, or workflows you helped me build
-9. Paper Writing — writing structure, figure standards, claim formulation
-10. Review & Rebuttal — self-critique, reviewer responses, revision strategies
+For each meaningful research action you find, create a node with the following fields:
 
-Output each item in a SINGLE code block using this exact format, so I can copy-paste it directly:
+- action: one of these 20 types:
+  Exploration: search_literature, formulate_hypothesis, survey_methods
+  Design: design_experiment, select_tool, prepare_data
+  Execution: implement, run_experiment, debug
+  Observation: observe_result, analyze_result, validate
+  Decision: compare_alternatives, pivot, abandon, diagnose_failure, plan_next_step
+  Output: write_paper, make_figure, respond_to_review
+  (If none fit, use: other: "free text description")
+- summary: one sentence describing what was done
+- outcome: success | failure | uncertain + short explanation
+- reasoning: why this step was taken (motivation, evidence, intuition)
+- tools_used: tools, models, or libraries involved (empty list if none)
+- confidence: high | medium | low
+- initiator: ai | human | collaborative (who proposed this action?)
+- status: active | abandoned | paused
 
----
-name: short-descriptive-title
-description: >
-  2-3 sentences explaining what this know-how is and when to apply it.
-domain: [physics|mathematics|computer-science|quantitative-biology|statistics|eess|economics|quantitative-finance]
-subdomain: specific-area
-category: [01-literature-search|02-hypothesis-and-ideation|03-math-and-modeling|04-experiment-planning|05-data-acquisition|06-coding-and-execution|07-result-analysis|08-reusable-tooling|09-paper-writing|10-review-and-rebuttal]
-author: "My Name (My Institution)"
-expertise_level: intermediate
-tags: [keyword1, keyword2]
-dependencies: []
-version: 1.0.0
-status: draft
-reviewed_by: []
----
+Output the full tree as a SINGLE JSON code block using this format:
 
-## Purpose
-
-[Expand the description into a full paragraph]
-
-## Tools
-
-- **[Tool Name]**: what it does, when to use it
-
-## Domain Knowledge
-
-### Key Concepts
-
-[Core concepts relevant to this know-how]
-
-### Fundamental Principles
-
-[Underlying scientific principles]
-
-## Reasoning Protocol
-
-Step 1: [specific step]
-Step 2: [specific step]
-Step 3: [specific step]
-
-## Common Pitfalls
-
-- [Pitfall 1: what goes wrong and how to avoid it]
-- [Pitfall 2: what goes wrong and how to avoid it]
-
-## References
-
-- Extracted from conversation history
-- Extraction date: [today's date]
-
----
+{
+  "anchor": {
+    "type": "paper or project",
+    "paper_url": "arXiv/DOI URL if available",
+    "project_name": "project name if no paper",
+    "project_description": "one sentence"
+  },
+  "contributor": "My Name (My Institution)",
+  "extracted_at": "[today's date]",
+  "nodes": [
+    {
+      "id": "001",
+      "action": "search_literature",
+      "summary": "Surveyed recent methods for X",
+      "outcome": "success: identified 3 approaches",
+      "reasoning": "Needed to understand SOTA before designing experiment",
+      "tools_used": ["Google Scholar"],
+      "parent_id": null,
+      "confidence": "high",
+      "initiator": "human",
+      "status": "active"
+    }
+  ]
+}
 
 Rules:
-- Extract EVERY piece of research know-how, no matter how small
-- GENERALIZE from project-specific details to subdomain-universal principles. Ask: "Would this help any researcher in this field, not just me?" For example: "AMIX=0.05 worked for our LiFePO4 run" → "For GGA+U on transition metal oxides with localized d-electrons, reduce AMIX to 0.05"
-- DE-IDENTIFY all output: remove file paths, usernames, project names, private URLs, collaborator names. Replace with generic descriptions. The only real name allowed is the author field.
-- Focus on tacit knowledge: thinking frameworks, decision-making principles, diagnostic reasoning, heuristics — the kind of intuition that never makes it into papers
+- Reconstruct the FULL research trajectory, including dead ends and abandoned paths
+- Use parent_id to build tree structure: child actions branch from the action that led to them
+- Mark abandoned paths with status: "abandoned" — these dead ends are the most valuable data
+- DE-IDENTIFY all output: remove file paths, usernames, project names, private URLs, collaborator names. Keep scientific content (materials, parameters, methods)
+- Focus on capturing the reasoning and judgment behind each action — the kind of intuition that never makes it into papers
+- DO NOT skip failed attempts or abandoned directions — they reveal tacit knowledge
 - DO NOT extract generic programming knowledge, AI tool usage patterns, or textbook basics
-- DO NOT summarize or group multiple items — one skill file per know-how item
-- After the code block, confirm whether that is the complete set or if any remain
+- After the JSON block, ask if there are research conversations that were missed
 ```
 
 </details>

@@ -100,7 +100,7 @@ Regardless of mode, preserve the classification on each session's cached metadat
 2. Merge sessions with same research topic across directories
 3. Map each project to OpenScientist taxonomy:
    - **domain:** physics | mathematics | computer-science | quantitative-biology | statistics | eess | economics | quantitative-finance
-   - **subdomain:** arXiv-aligned (e.g. machine-learning, quantum-physics)
+   - **subdomain:** arXiv-aligned (e.g. machine-learning, quantum-physics). Canonical list at https://researchskills.ai/taxonomy.json (155 subdomains across 8 domains, auto-generated from the OpenScientist skills/ tree). Fetch this file if unsure — do not invent subdomain names.
 
 **Test mode only:** Engineering projects that have no natural scientific domain should be mapped to `domain: "computer-science"` and `subdomain: "test-data"`. Do not try to force-fit them into scientific subdomains.
 

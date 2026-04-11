@@ -5,19 +5,34 @@ const fs = require("fs");
 const path = require("path");
 const os = require("os");
 
+const HELPER_SCRIPTS = [
+  "scan-sessions.js",
+  "format-session.js",
+  "extract-nodes.js",
+  "build-tree.js",
+  "upload-tree.js",
+  "finalize.js",
+];
+
 // --- Claude Code ---
-const CC_TARGET = path.join(os.homedir(), ".claude", "commands", "extract-knowhow.md");
-const CC_BUILD_TREE_TARGET = path.join(os.homedir(), ".claude", "utils", "build-tree.js");
+const CC_COMMAND_TARGET = path.join(os.homedir(), ".claude", "commands", "extract-knowhow.md");
+const CC_UTILS_DIR = path.join(os.homedir(), ".claude", "utils");
+
 try {
-  if (fs.existsSync(CC_TARGET)) {
-    fs.unlinkSync(CC_TARGET);
+  if (fs.existsSync(CC_COMMAND_TARGET)) {
+    fs.unlinkSync(CC_COMMAND_TARGET);
     console.log("✓ Claude Code: /extract-knowhow removed");
   }
-  if (fs.existsSync(CC_BUILD_TREE_TARGET)) {
-    fs.unlinkSync(CC_BUILD_TREE_TARGET);
-    console.log("✓ Claude Code: build-tree.js removed");
+  for (const script of HELPER_SCRIPTS) {
+    const p = path.join(CC_UTILS_DIR, script);
+    if (fs.existsSync(p)) {
+      fs.unlinkSync(p);
+      console.log(`✓ Claude Code: ${script} removed`);
+    }
   }
-} catch (err) {}
+} catch (err) {
+  // ignore
+}
 
 // --- Codex CLI ---
 const CODEX_DIR = path.join(os.homedir(), ".codex", "skills", "extract-knowhow");
@@ -26,4 +41,9 @@ try {
     fs.rmSync(CODEX_DIR, { recursive: true });
     console.log("✓ Codex CLI:   $extract-knowhow removed");
   }
-} catch (err) {}
+} catch (err) {
+  // ignore
+}
+
+// Note: cache directory ~/.openscientist/cache/ is intentionally preserved,
+// so reinstalling retains previously extracted subtrees.

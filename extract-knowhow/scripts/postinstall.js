@@ -7,15 +7,21 @@ const os = require("os");
 
 const SOURCE = path.join(__dirname, "..", "commands", "extract-knowhow.md");
 const TEMPLATE_SOURCE = path.join(__dirname, "..", "templates", "skill-template.md");
+const BUILD_TREE_SOURCE = path.join(__dirname, "build-tree.js");
 
 // --- Claude Code ---
 const CC_DIR = path.join(os.homedir(), ".claude", "commands");
 const CC_TARGET = path.join(CC_DIR, "extract-knowhow.md");
+const CC_UTILS_DIR = path.join(os.homedir(), ".claude", "utils");
+const CC_BUILD_TREE_TARGET = path.join(CC_UTILS_DIR, "build-tree.js");
 
 try {
   fs.mkdirSync(CC_DIR, { recursive: true });
+  fs.mkdirSync(CC_UTILS_DIR, { recursive: true });
   fs.copyFileSync(SOURCE, CC_TARGET);
+  fs.copyFileSync(BUILD_TREE_SOURCE, CC_BUILD_TREE_TARGET);
   console.log("✓ Claude Code: /extract-knowhow installed to ~/.claude/commands/");
+  console.log("✓ Claude Code: build-tree.js installed to ~/.claude/utils/");
 } catch (err) {
   console.error("⚠ Claude Code: could not install —", err.message);
 }

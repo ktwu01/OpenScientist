@@ -323,7 +323,7 @@ Report: "Extracted N action nodes from M sessions across all projects (X from ca
 For each project, run the tree assembly algorithm to convert per-session subtrees into a complete tree:
 
 ```bash
-node utils/scripts/build-tree.js \
+node ~/.claude/utils/build-tree.js \
   <per-session-subtrees.json> \
   <complete-tree.json>
 ```

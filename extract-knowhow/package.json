@@ -25,7 +25,8 @@
   "files": [
     "commands/",
     "templates/",
-    "scripts/"
+    "scripts/",
+    "tests/"
   ],
   "engines": {
     "node": ">=18.0.0"

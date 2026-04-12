@@ -24,7 +24,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const USER_MAX_CHARS = 500;
+const USER_MAX_CHARS = Infinity; // User messages are the core research content — never truncate
 const ASSISTANT_MAX_CHARS = 300;
 const TOOL_RESULT_MAX_CHARS = 200;
 const SEGMENT_THRESHOLD = 30000;

@@ -346,10 +346,10 @@ function main() {
         '-p', prompt,
         '--model', 'haiku',
         '--permission-mode', 'bypassPermissions',
-        '--allowedTools', 'Read,Write,Bash',
+        '--allowedTools', 'Read,Write,Bash,Glob',
         '--no-session-persistence',
-        '--max-budget-usd', '0.05',
-      ], { timeout: 120_000 }); // 2 min per session
+        '--max-budget-usd', '0.10',
+      ], { timeout: 180_000 }); // 3 min per session
     } catch (err) {
       console.log('ERROR (claude CLI failed)');
       if (opts.verbose) console.error('  ', err.message);

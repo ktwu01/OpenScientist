@@ -147,8 +147,6 @@ function buildPrompt(session, segmentFile, segmentInfo, opts) {
   const subdomain = opts.subdomain || 'general';
   const contributor = opts.contributor || 'anonymous';
   const sessionId = session.session_id;
-  const projectName = deriveProjectName(session, opts) || 'unknown';
-  const projectSlug = opts.projectSlug || slugify(projectName) || 'unknown';
 
   // Read formatted text — will be called once per segment for multi-segment sessions
   const sessionText = fs.readFileSync(segmentFile, 'utf-8');
@@ -164,7 +162,6 @@ Analyze the session text below${segLabel}. Identify research impasse moments and
 ## Input
 
 Session ID: ${sessionId}${segLabel}
-Project: ${projectName}
 Domain: ${domain}
 Subdomain: ${subdomain}
 Contributor: ${contributor}
@@ -195,8 +192,6 @@ subtype: failure | adaptation | anomalous
 domain: ${domain}
 subdomain: ${subdomain}
 contributor: ${contributor}
-project_name: "${projectName}"
-project_slug: "${projectSlug}"
 source:
   type: session
   session_id: "${sessionId}"
@@ -232,8 +227,6 @@ subtype: frontier | non-public | correction
 domain: ${domain}
 subdomain: ${subdomain}
 contributor: ${contributor}
-project_name: "${projectName}"
-project_slug: "${projectSlug}"
 source:
   type: session
   session_id: "${sessionId}"
@@ -267,8 +260,6 @@ subtype: tie | no-change | constraint-failure | operator-fail
 domain: ${domain}
 subdomain: ${subdomain}
 contributor: ${contributor}
-project_name: "${projectName}"
-project_slug: "${projectSlug}"
 source:
   type: session
   session_id: "${sessionId}"
@@ -379,7 +370,20 @@ function runClaudeAsync(prompt, timeoutMs = 180_000) {
 // Parse skill-md blocks from Haiku output → write files → validate
 // ---------------------------------------------------------------------------
 
-function writeAndValidateSkills(sessionId, output) {
+function injectProjectMeta(content, projectMeta) {
+  if (!projectMeta || !content.startsWith('---')) return content;
+  const lines = content.split('\n');
+  const endIdx = lines.indexOf('---', 1);
+  if (endIdx <= 0) return content;
+  const insert = [];
+  if (projectMeta.projectName) insert.push(`project_name: "${projectMeta.projectName}"`);
+  if (projectMeta.projectSlug) insert.push(`project_slug: "${projectMeta.projectSlug}"`);
+  if (insert.length === 0) return content;
+  lines.splice(endIdx, 0, ...insert);
+  return lines.join('\n');
+}
+
+function writeAndValidateSkills(sessionId, output, projectMeta) {
   const blocks = [];
   const regex = /```skill-md\n([\s\S]*?)```/g;
   let m;
@@ -391,8 +395,9 @@ function writeAndValidateSkills(sessionId, output) {
 
   const skillFiles = [];
   for (let i = 0; i < blocks.length; i++) {
+    const content = injectProjectMeta(blocks[i], projectMeta);
     const filePath = path.join(os.tmpdir(), `skill-${sessionId}-${i + 1}.md`);
-    fs.writeFileSync(filePath, blocks[i] + '\n');
+    fs.writeFileSync(filePath, content + '\n');
     skillFiles.push(filePath);
   }
 
@@ -540,7 +545,9 @@ async function main() {
       // Find the original session object to pass to buildPrompt
       const session = batch.find(s => s.session_id === sid);
       const prompt = buildPrompt(session, formattedFiles[si], segInfo, opts);
-      workUnits.push({ sid, prompt, segFile: formattedFiles[si], segInfo });
+      const projectName = deriveProjectName(session, opts) || 'unknown';
+      const projectSlug = opts.projectSlug || slugify(projectName) || 'unknown';
+      workUnits.push({ sid, prompt, segFile: formattedFiles[si], segInfo, projectMeta: { projectName, projectSlug } });
     }
   }
 
@@ -555,7 +562,7 @@ async function main() {
 
     console.log(`\n  Batch ${batchNum}/${totalBatches} (${chunk.length} calls):`);
 
-    const promises = chunk.map(async ({ sid, prompt, segFile, segInfo }) => {
+    const promises = chunk.map(async ({ sid, prompt, segFile, segInfo, projectMeta }) => {
       const segLabel = segInfo ? ` seg${segInfo.index}/${segInfo.total}` : '';
       const startTime = Date.now();
       const { ok, output, error } = await runClaudeAsync(prompt, 300_000);
@@ -570,8 +577,8 @@ async function main() {
         return null;
       }
 
-      // Parse skill-md blocks from output → write files → validate
-      const written = writeAndValidateSkills(sid, output);
+      // Parse skill-md blocks from output → inject project metadata → write files → validate
+      const written = writeAndValidateSkills(sid, output, projectMeta);
 
       const result = parseResult(sid, output, opts.verbose);
       if (result) {

@@ -487,7 +487,9 @@ async function main() {
     }
   }
 
-  const batch = uncached; // for summary stats
+  const batch = uncached;
+  // Sessions that passed pre-filter but didn't fit in batch-size
+  const remaining = uncached.length - totals.skipped - totals.errors - prepared.length;
 
   console.log(`  ${prepared.length} sessions ready, ${totals.skipped} skipped, ${totals.errors} errors\n`);
 

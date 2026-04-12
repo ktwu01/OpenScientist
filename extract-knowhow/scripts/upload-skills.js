@@ -171,6 +171,8 @@ async function uploadSkills(skillsDir, options = {}) {
     }
 
     const payload = { ...parsed.frontmatter, body: parsed.body, batch_id: batchId };
+    if (options.projectSlug) payload.project_slug = options.projectSlug;
+    if (options.projectName) payload.project_name = options.projectName;
 
     try {
       const response = await postSkill(apiUrl, payload);
@@ -199,13 +201,17 @@ if (require.main === module) {
   const noOpen = args.includes('--no-open');
   const apiIdx = args.indexOf('--api');
   const apiUrl = apiIdx !== -1 && args[apiIdx + 1] ? args[apiIdx + 1] : DEFAULT_API;
+  const projectSlugIdx = args.indexOf('--project-slug');
+  const projectSlug = projectSlugIdx !== -1 && args[projectSlugIdx + 1] ? args[projectSlugIdx + 1] : null;
+  const projectNameIdx = args.indexOf('--project-name');
+  const projectName = projectNameIdx !== -1 && args[projectNameIdx + 1] ? args[projectNameIdx + 1] : null;
 
   if (!fs.existsSync(skillsDir) || !fs.statSync(skillsDir).isDirectory()) {
     console.error(`Error: directory not found: ${skillsDir}`);
     process.exit(1);
   }
 
-  uploadSkills(skillsDir, { apiUrl }).then((result) => {
+  uploadSkills(skillsDir, { apiUrl, projectSlug, projectName }).then((result) => {
     if (result.ok) {
       const uploaded = result.results.filter((r) => r.ok);
       const ids = uploaded

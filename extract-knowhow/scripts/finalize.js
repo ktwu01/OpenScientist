@@ -70,6 +70,12 @@ function finalize(metaPath, options = {}) {
   // 2. Upload skills
   const uploadArgs = [outputDir];
   if (options.noOpen) uploadArgs.push('--no-open');
+  if (meta.project_slug) {
+    uploadArgs.push('--project-slug', meta.project_slug);
+  }
+  if (meta.anchor && meta.anchor.project_name) {
+    uploadArgs.push('--project-name', meta.anchor.project_name);
+  }
   try {
     const out = runNode(UPLOAD_SKILLS, uploadArgs);
     process.stdout.write(out);

@@ -327,16 +327,19 @@ app.post('/api/skills', async (req, res) => {
   const validationError = validateSkillData(skill);
   if (validationError) return res.status(400).json({ error: validationError });
 
+  const row = {
+    data: skill,
+    memory_type: skill.memory_type,
+    subtype: skill.subtype,
+    domain: skill.domain,
+    subdomain: skill.subdomain,
+    contributor: skill.contributor,
+  };
+  if (skill.batch_id) row.batch_id = skill.batch_id;
+
   const { data, error } = await supabase
     .from('skills')
-    .insert({
-      data: skill,
-      memory_type: skill.memory_type,
-      subtype: skill.subtype,
-      domain: skill.domain,
-      subdomain: skill.subdomain,
-      contributor: skill.contributor,
-    })
+    .insert(row)
     .select('id')
     .single();
 
@@ -349,15 +352,27 @@ app.post('/api/skills', async (req, res) => {
   res.json({ id: data.id, reviewUrl: `${baseUrl}/review/skill/${data.id}` });
 });
 
-// GET /api/skills — list all skills for current user
+// GET /api/skills — list all skills for current user (owned + unclaimed)
 app.get('/api/skills', requireAuth, async (req, res) => {
   const { data, error } = await supabase
     .from('skills')
-    .select('id, status, memory_type, subtype, domain, subdomain, contributor, created_at, updated_at, submitted_at')
-    .eq('user_id', req.user.id)
+    .select('id, data, status, memory_type, subtype, domain, subdomain, contributor, batch_id, created_at, updated_at, submitted_at')
+    .or(`user_id.eq.${req.user.id},user_id.is.null`)
     .order('updated_at', { ascending: false });
 
   if (error) return res.status(500).json({ error: 'Failed to fetch skills' });
+  res.json(data || []);
+});
+
+// GET /api/skills/batch/:batchId — get all skills in a batch (no auth)
+// NOTE: must be defined BEFORE /api/skills/:id to avoid "batch" matching as :id
+app.get('/api/skills/batch/:batchId', async (req, res) => {
+  const { data, error } = await supabase
+    .from('skills')
+    .select('*')
+    .eq('batch_id', req.params.batchId)
+    .order('memory_type', { ascending: true });
+  if (error) return res.status(500).json({ error: 'Failed to fetch batch' });
   res.json(data || []);
 });
 
@@ -479,6 +494,10 @@ app.get('/onboarding', (req, res) => {
 
 app.get('/review/skill/:id', (req, res) => {
   res.sendFile(path.join(__dirname, 'views', 'review-skill.html'));
+});
+
+app.get('/review/batch/:batchId', (req, res) => {
+  res.sendFile(path.join(__dirname, 'views', 'review-batch.html'));
 });
 
 app.get('/review/:id', (req, res) => {

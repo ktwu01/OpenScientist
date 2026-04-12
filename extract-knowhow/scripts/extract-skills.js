@@ -17,6 +17,7 @@
  *   --subdomain <subdomain>    Subdomain for all skills (e.g. machine-learning)
  *   --contributor <name>       Contributor name (git user.name)
  *   --batch-size <n>           Max sessions to process (default: unlimited)
+ *   --concurrency <n>          Parallel claude -p calls per batch (default: 5)
  *   --session-ids <csv>        Only process these session IDs (comma-separated)
  *   --test                     Mark as test data
  *   --verbose                  Print detailed progress
@@ -27,7 +28,7 @@
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
-const { execFileSync } = require('child_process');
+const { execFileSync, spawn } = require('child_process');
 
 const UTILS_DIR = path.join(os.homedir(), '.claude', 'utils');
 const FORMAT_SCRIPT = path.join(UTILS_DIR, 'format-session.js');
@@ -56,6 +57,7 @@ function parseArgs() {
     subdomain: null,
     contributor: null,
     batchSize: Infinity,
+    concurrency: 5,
     sessionIds: null,
     test: false,
     verbose: false,
@@ -67,6 +69,7 @@ function parseArgs() {
       case '--subdomain':    opts.subdomain = args[++i]; break;
       case '--contributor':  opts.contributor = args[++i]; break;
       case '--batch-size':   opts.batchSize = parseInt(args[++i], 10); break;
+      case '--concurrency':  opts.concurrency = parseInt(args[++i], 10); break;
       case '--session-ids':  opts.sessionIds = args[++i].split(','); break;
       case '--test':         opts.test = true; break;
       case '--verbose':      opts.verbose = true; break;
@@ -289,10 +292,104 @@ SKILLS_EXTRACTED: <total> (E:<episodic> S:<semantic> P:<procedural>)`;
 }
 
 // ---------------------------------------------------------------------------
-// Main
+// Async claude runner (non-blocking)
 // ---------------------------------------------------------------------------
 
-function main() {
+function runClaudeAsync(prompt, timeoutMs = 180_000) {
+  return new Promise((resolve) => {
+    const chunks = [];
+    const proc = spawn('claude', [
+      '-p', prompt,
+      '--model', 'haiku',
+      '--permission-mode', 'bypassPermissions',
+      '--allowedTools', 'Read,Write,Bash,Glob',
+      '--no-session-persistence',
+      '--max-budget-usd', '0.10',
+    ], { stdio: ['pipe', 'pipe', 'pipe'] });
+
+    proc.stdout.on('data', (d) => chunks.push(d));
+    proc.stderr.on('data', (d) => chunks.push(d));
+
+    const timer = setTimeout(() => {
+      proc.kill('SIGTERM');
+      resolve({ ok: false, output: '', error: 'timeout' });
+    }, timeoutMs);
+
+    proc.on('close', (code) => {
+      clearTimeout(timer);
+      const output = Buffer.concat(chunks).toString('utf-8');
+      resolve({ ok: code === 0, output, error: code !== 0 ? `exit ${code}` : null });
+    });
+
+    proc.on('error', (err) => {
+      clearTimeout(timer);
+      resolve({ ok: false, output: '', error: err.message });
+    });
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Process a single session: pre-filter → format → build prompt
+// Returns { skip, error, ready, sid, prompt, formattedFiles }
+// ---------------------------------------------------------------------------
+
+function prepareSession(session, opts) {
+  const sid = session.session_id;
+
+  // Pre-filter by first_prompt
+  const fp = (session.first_prompt || '').trim();
+  if (fp && SKIP_PROMPT_PATTERNS.some(p => p.test(fp))) {
+    return { sid, skip: 'trivial prompt' };
+  }
+
+  // Format
+  const outPath = path.join(os.tmpdir(), `session-${sid}.txt`);
+  const meta = formatSession(session.file_path, outPath);
+  if (!meta) {
+    return { sid, error: 'format failed' };
+  }
+
+  const formattedFiles = meta.output_files || [outPath];
+
+  // Pre-filter by size
+  let totalChars = 0;
+  for (const f of formattedFiles) {
+    try { totalChars += fs.statSync(f).size; } catch {}
+  }
+  if (totalChars < MIN_FORMATTED_CHARS) {
+    for (const f of formattedFiles) { try { fs.unlinkSync(f); } catch {} }
+    return { sid, skip: `${totalChars} chars < ${MIN_FORMATTED_CHARS} min` };
+  }
+
+  const prompt = buildPrompt(session, formattedFiles, opts);
+  return { sid, ready: true, prompt, formattedFiles };
+}
+
+// ---------------------------------------------------------------------------
+// Parse Haiku output and collect result
+// ---------------------------------------------------------------------------
+
+function parseResult(sid, output, verbose) {
+  const match = output.match(/SKILLS_EXTRACTED:\s*(\d+)\s*\(E:(\d+)\s+S:(\d+)\s+P:(\d+)\)/);
+  if (match) {
+    const [, total, e, s, p] = match.map(Number);
+    return { sid, total, episodic: e, semantic: s, procedural: p };
+  }
+  if (isCached(sid)) {
+    return { sid, total: 0, episodic: 0, semantic: 0, procedural: 0, note: 'cached, no count' };
+  }
+  if (verbose) {
+    const lastLines = output.split('\n').slice(-5).join('\n');
+    console.error(`  [${sid}] Last output:`, lastLines);
+  }
+  return null;
+}
+
+// ---------------------------------------------------------------------------
+// Main (async, batched parallel)
+// ---------------------------------------------------------------------------
+
+async function main() {
   const opts = parseArgs();
 
   if (!opts.workListPath) {
@@ -303,117 +400,93 @@ function main() {
   const workList = JSON.parse(fs.readFileSync(opts.workListPath, 'utf-8'));
   let sessions = workList.sessions || [];
 
-  // Filter by session IDs if specified
   if (opts.sessionIds) {
     const idSet = new Set(opts.sessionIds);
     sessions = sessions.filter(s => idSet.has(s.session_id));
   }
 
-  // Skip cached sessions
   const uncached = sessions.filter(s => !isCached(s.session_id));
   const cached = sessions.length - uncached.length;
-
-  console.log(`\nSessions: ${sessions.length} total, ${cached} cached, ${uncached.length} to process`);
-
-  // Apply batch limit
   const batch = uncached.slice(0, opts.batchSize);
   const remaining = uncached.length - batch.length;
+
+  console.log(`\nSessions: ${sessions.length} total, ${cached} cached, ${batch.length} to process`);
+  console.log(`Concurrency: ${opts.concurrency} parallel Haiku calls\n`);
 
   if (batch.length === 0) {
     console.log('All sessions already cached. Nothing to do.');
     process.exit(0);
   }
 
-  console.log(`Processing batch of ${batch.length} sessions...\n`);
-
-  // Tally
+  // Phase 1: Pre-filter and format all sessions (fast, serial)
+  console.log('Phase 1: Pre-filtering and formatting...');
+  const prepared = [];
   const totals = { episodic: 0, semantic: 0, procedural: 0, errors: 0, skipped: 0 };
-  const results = [];
 
-  for (let i = 0; i < batch.length; i++) {
-    const session = batch[i];
-    const sid = session.session_id;
-    const progress = `[${i + 1}/${batch.length}]`;
-
-    process.stdout.write(`${progress} ${sid} ... `);
-
-    // 1. Pre-filter by first_prompt
-    const fp = (session.first_prompt || '').trim();
-    if (fp && SKIP_PROMPT_PATTERNS.some(p => p.test(fp))) {
-      console.log('SKIP (trivial prompt)');
+  for (const session of batch) {
+    const result = prepareSession(session, opts);
+    if (result.skip) {
+      console.log(`  ${result.sid} → SKIP (${result.skip})`);
       totals.skipped++;
-      continue;
-    }
-
-    // 2. Format
-    const outPath = path.join(os.tmpdir(), `session-${sid}.txt`);
-    const meta = formatSession(session.file_path, outPath);
-    if (!meta) {
-      console.log('SKIP (format failed)');
+    } else if (result.error) {
+      console.log(`  ${result.sid} → ERROR (${result.error})`);
       totals.errors++;
-      continue;
-    }
-
-    const formattedFiles = meta.output_files || [outPath];
-
-    // 3. Pre-filter by formatted text size
-    let totalChars = 0;
-    for (const f of formattedFiles) {
-      try { totalChars += fs.statSync(f).size; } catch {}
-    }
-    if (totalChars < MIN_FORMATTED_CHARS) {
-      console.log(`SKIP (${totalChars} chars < ${MIN_FORMATTED_CHARS} min)`);
-      for (const f of formattedFiles) { try { fs.unlinkSync(f); } catch {} }
-      totals.skipped++;
-      continue;
-    }
-
-    // 5. Build prompt and call claude CLI
-    const prompt = buildPrompt(session, formattedFiles, opts);
-
-    let output = '';
-    try {
-      output = run('claude', [
-        '-p', prompt,
-        '--model', 'haiku',
-        '--permission-mode', 'bypassPermissions',
-        '--allowedTools', 'Read,Write,Bash,Glob',
-        '--no-session-persistence',
-        '--max-budget-usd', '0.10',
-      ], { timeout: 180_000 }); // 3 min per session
-    } catch (err) {
-      console.log('ERROR (claude CLI failed)');
-      if (opts.verbose) console.error('  ', err.message);
-      totals.errors++;
-      continue;
-    }
-
-    // 6. Parse result
-    const match = output.match(/SKILLS_EXTRACTED:\s*(\d+)\s*\(E:(\d+)\s+S:(\d+)\s+P:(\d+)\)/);
-    if (match) {
-      const [, total, e, s, p] = match.map(Number);
-      totals.episodic += e;
-      totals.semantic += s;
-      totals.procedural += p;
-      results.push({ session_id: sid, total, episodic: e, semantic: s, procedural: p });
-      console.log(`${total} skills (E:${e} S:${s} P:${p})`);
     } else {
-      // Check if files were written anyway
-      if (isCached(sid)) {
-        console.log('OK (cached, no count line)');
-      } else {
-        console.log('WARN (no SKILLS_EXTRACTED line)');
-        if (opts.verbose) {
-          const lastLines = output.split('\n').slice(-5).join('\n');
-          console.error('  Last output:', lastLines);
-        }
-      }
+      prepared.push(result);
     }
+  }
 
-    // 7. Clean up formatted text
-    for (const f of formattedFiles) {
-      try { fs.unlinkSync(f); } catch {}
-    }
+  console.log(`  ${prepared.length} sessions ready, ${totals.skipped} skipped, ${totals.errors} errors\n`);
+
+  if (prepared.length === 0) {
+    console.log('No sessions to extract. Done.');
+    process.exit(0);
+  }
+
+  // Phase 2: Parallel Haiku extraction in batches of concurrency
+  console.log(`Phase 2: Extracting skills (${prepared.length} sessions, ${opts.concurrency} at a time)...`);
+  const results = [];
+  let completed = 0;
+
+  for (let i = 0; i < prepared.length; i += opts.concurrency) {
+    const chunk = prepared.slice(i, i + opts.concurrency);
+    const batchNum = Math.floor(i / opts.concurrency) + 1;
+    const totalBatches = Math.ceil(prepared.length / opts.concurrency);
+
+    console.log(`\n  Batch ${batchNum}/${totalBatches} (${chunk.length} sessions):`);
+
+    // Launch all in this chunk in parallel
+    const promises = chunk.map(async ({ sid, prompt, formattedFiles }) => {
+      const startTime = Date.now();
+      const { ok, output, error } = await runClaudeAsync(prompt);
+      const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+
+      // Clean up formatted files
+      for (const f of formattedFiles) { try { fs.unlinkSync(f); } catch {} }
+
+      if (!ok) {
+        console.log(`    ${sid} → ERROR (${error}) [${elapsed}s]`);
+        totals.errors++;
+        return null;
+      }
+
+      const result = parseResult(sid, output, opts.verbose);
+      if (result) {
+        totals.episodic += result.episodic;
+        totals.semantic += result.semantic;
+        totals.procedural += result.procedural;
+        console.log(`    ${sid} → ${result.total} skills (E:${result.episodic} S:${result.semantic} P:${result.procedural}) [${elapsed}s]`);
+        return result;
+      } else {
+        console.log(`    ${sid} → WARN (no count) [${elapsed}s]`);
+        return null;
+      }
+    });
+
+    const chunkResults = await Promise.all(promises);
+    results.push(...chunkResults.filter(Boolean));
+    completed += chunk.length;
+    console.log(`  Progress: ${completed}/${prepared.length}`);
   }
 
   // Summary
@@ -432,7 +505,6 @@ function main() {
 ${remaining > 0 ? `  Remaining:    ${remaining} (run again to continue)` : ''}
 ═══════════════════════════════════════════════`);
 
-  // Write summary JSON for main agent
   const summaryPath = path.join(os.tmpdir(), 'extract-skills-summary.json');
   fs.writeFileSync(summaryPath, JSON.stringify({
     batch_size: batch.length,
@@ -444,4 +516,7 @@ ${remaining > 0 ? `  Remaining:    ${remaining} (run again to continue)` : ''}
   console.log(`\nSummary: ${summaryPath}`);
 }
 
-main();
+main().catch(err => {
+  console.error('Fatal:', err);
+  process.exit(1);
+});

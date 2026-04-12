@@ -89,7 +89,8 @@ Report: `"Classified N projects. Proceeding with M."`
 node ~/.claude/utils/extract-skills.js ~/.openscientist/cache/work-list.json \
   --domain <domain> \
   --subdomain <subdomain> \
-  --contributor "$(git config user.name)"
+  --contributor "$(git config user.name)" \
+  --verbose
 ```
 
 For test mode, add `--test`. To process specific sessions only, use `--session-ids <csv>`. To limit batch size, use `--batch-size <n>`.

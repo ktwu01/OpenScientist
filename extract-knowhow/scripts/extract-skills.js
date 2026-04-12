@@ -313,12 +313,17 @@ SKILLS_EXTRACTED: <total> (E:<episodic> S:<semantic> P:<procedural>)`;
 function runClaudeAsync(prompt, timeoutMs = 180_000) {
   return new Promise((resolve) => {
     const chunks = [];
+    // Pass prompt via stdin instead of command arg (avoids arg length issues)
     const proc = spawn('claude', [
-      '-p', prompt,
+      '-p',
       '--model', 'haiku',
       '--no-session-persistence',
       '--max-budget-usd', '0.10',
     ], { stdio: ['pipe', 'pipe', 'pipe'] });
+
+    // Write prompt to stdin then close
+    proc.stdin.write(prompt);
+    proc.stdin.end();
 
     proc.stdout.on('data', (d) => chunks.push(d));
     proc.stderr.on('data', (d) => chunks.push(d));
@@ -508,7 +513,7 @@ async function main() {
     // Launch all in this chunk in parallel
     const promises = chunk.map(async ({ sid, prompt, formattedFiles }) => {
       const startTime = Date.now();
-      const { ok, output, error } = await runClaudeAsync(prompt);
+      const { ok, output, error } = await runClaudeAsync(prompt, 300_000);
       const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
 
       // Clean up formatted files

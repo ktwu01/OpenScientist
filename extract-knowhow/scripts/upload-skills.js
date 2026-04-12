@@ -23,6 +23,7 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const { execFileSync } = require('child_process');
+const { randomUUID } = require('crypto');
 
 const DEFAULT_API = 'https://researchskills.ai/api/skills';
 
@@ -145,6 +146,7 @@ function openBrowser(url) {
 
 async function uploadSkills(skillsDir, options = {}) {
   const apiUrl = options.apiUrl || DEFAULT_API;
+  const batchId = randomUUID();
 
   const files = fs.readdirSync(skillsDir).filter((f) => f.endsWith('.md'));
   if (files.length === 0) {
@@ -154,6 +156,8 @@ async function uploadSkills(skillsDir, options = {}) {
   const results = [];
   const failedSkills = [];
   let allOk = true;
+
+  console.log(`Batch ${batchId} — uploading ${files.length} skill(s)`);
 
   for (const file of files) {
     const filePath = path.join(skillsDir, file);
@@ -166,7 +170,7 @@ async function uploadSkills(skillsDir, options = {}) {
       continue;
     }
 
-    const payload = { ...parsed.frontmatter, body: parsed.body };
+    const payload = { ...parsed.frontmatter, body: parsed.body, batch_id: batchId };
 
     try {
       const response = await postSkill(apiUrl, payload);
@@ -180,7 +184,7 @@ async function uploadSkills(skillsDir, options = {}) {
     }
   }
 
-  return { ok: allOk, results, failedSkills };
+  return { ok: allOk, results, failedSkills, batchId };
 }
 
 // CLI
@@ -207,21 +211,24 @@ if (require.main === module) {
       const ids = uploaded
         .map((r) => r.response && (r.response.id || r.response.skill_id))
         .filter(Boolean);
-      const reviewUrl = uploaded
-        .map((r) => r.response && (r.response.reviewUrl || r.response.review_url))
-        .find(Boolean);
 
-      const summary = { count: uploaded.length };
+      const baseUrl = apiUrl.replace(/\/api\/skills$/, '');
+      const batchReviewUrl = `${baseUrl}/review/batch/${result.batchId}`;
+
+      const summary = {
+        count: uploaded.length,
+        batchId: result.batchId,
+        batchReviewUrl,
+      };
       if (ids.length > 0) summary.ids = ids;
-      if (reviewUrl) summary.reviewUrl = reviewUrl;
 
       console.log(`RESULT=${JSON.stringify(summary)}`);
 
-      if (reviewUrl && !noOpen) {
-        if (openBrowser(reviewUrl)) {
-          console.log('\u2713 Opened review page in browser');
+      if (!noOpen) {
+        if (openBrowser(batchReviewUrl)) {
+          console.log('\u2713 Opened batch review page in browser');
         } else {
-          console.log(`  (Could not open browser \u2014 visit manually: ${reviewUrl})`);
+          console.log(`  (Could not open browser \u2014 visit manually: ${batchReviewUrl})`);
         }
       }
 

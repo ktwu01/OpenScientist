@@ -1,4 +1,7 @@
-// Dashboard page logic — warm academic design matching review-batch
+// Dashboard — sidebar with project tabs + horizontal memory sections + subtype groups
+// Shares layout design with review-batch
+'use strict';
+
 (async function () {
   var session = await window.app.getSession();
   if (!session) {
@@ -7,25 +10,13 @@
   }
 
   var token = session.access_token;
-
-  // Check profile exists
   var profile = await window.app.requireProfile();
   if (!profile) return;
 
   document.getElementById('loading').style.display = 'none';
   document.getElementById('dashboard').style.display = 'block';
 
-  // --- Tabs ---
-  document.querySelectorAll('.tab').forEach(function (tab) {
-    tab.addEventListener('click', function () {
-      document.querySelectorAll('.tab').forEach(function (t) { t.classList.remove('active'); });
-      document.querySelectorAll('.tab-content').forEach(function (c) { c.classList.remove('active'); });
-      tab.classList.add('active');
-      document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
-    });
-  });
-
-  // --- Profile Tab ---
+  // --- Profile form ---
   document.getElementById('prof-name').value = profile.full_name || '';
   document.getElementById('prof-affiliation').value = profile.affiliation || '';
   document.getElementById('prof-role').value = profile.role || '';
@@ -35,14 +26,12 @@
     e.preventDefault();
     var msgEl = document.getElementById('profile-message');
     msgEl.style.display = 'none';
-
     var body = {
       full_name: document.getElementById('prof-name').value.trim(),
       affiliation: document.getElementById('prof-affiliation').value.trim(),
       role: document.getElementById('prof-role').value,
       homepage_url: document.getElementById('prof-homepage').value.trim(),
     };
-
     try {
       var res = await fetch('/api/profile', {
         method: 'PUT',
@@ -60,315 +49,397 @@
     }
   });
 
-  // --- Research Skills Tab ---
-  await loadSkills();
-
-  async function loadSkills() {
-    var statsEl = document.getElementById('skills-stats');
-    var contentEl = document.getElementById('skills-content');
-
-    try {
-      var res = await fetch('/api/skills', {
-        headers: { Authorization: 'Bearer ' + token },
-      });
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      var skills = await res.json();
-
-      if (skills.length === 0) {
-        contentEl.textContent = '';
-        var empty = document.createElement('div');
-        empty.className = 'empty-state';
-        var p1 = document.createElement('p');
-        p1.textContent = 'No research skills yet.';
-        empty.appendChild(p1);
-        var p2 = document.createElement('p');
-        var t1 = document.createTextNode('Run ');
-        p2.appendChild(t1);
-        var code = document.createElement('code');
-        code.textContent = '/extract-knowhow';
-        p2.appendChild(code);
-        var t2 = document.createTextNode(' in Claude Code or Codex CLI to get started.');
-        p2.appendChild(t2);
-        empty.appendChild(p2);
-        contentEl.appendChild(empty);
-        return;
-      }
-
-      // Render stats
-      renderStats(statsEl, skills);
-
-      // Group by batch_id (or ungrouped)
-      var groups = {};
-      skills.forEach(function (skill) {
-        var key = skill.batch_id || '__single_' + skill.id;
-        if (!groups[key]) {
-          groups[key] = {
-            batch_id: skill.batch_id,
-            domain: skill.domain,
-            subdomain: skill.subdomain,
-            skills: [],
-            latest: skill.updated_at,
-          };
-        }
-        groups[key].skills.push(skill);
-        if (skill.updated_at > groups[key].latest) {
-          groups[key].latest = skill.updated_at;
-        }
-      });
-
-      // Sort by latest updated
-      var sorted = Object.values(groups).sort(function (a, b) {
-        return b.latest > a.latest ? 1 : -1;
-      });
-
-      contentEl.textContent = '';
-      sorted.forEach(function (group) {
-        contentEl.appendChild(renderBatchGroup(group));
-      });
-
-    } catch (err) {
-      contentEl.textContent = 'Error loading skills: ' + err.message;
-    }
+  // --- Load skills ---
+  var allSkills = [];
+  try {
+    var res = await fetch('/api/skills', {
+      headers: { Authorization: 'Bearer ' + token },
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    allSkills = await res.json();
+  } catch (err) {
+    document.getElementById('skills-display').textContent = 'Error loading skills: ' + err.message;
+    return;
   }
 
-  function renderStats(container, skills) {
-    container.textContent = '';
+  renderSidebar(allSkills, profile);
+  if (allSkills.length > 0) {
+    renderSkillsByProject(allSkills);
+  } else {
+    var display = document.getElementById('skills-display');
+    var empty = document.createElement('div');
+    empty.className = 'empty-state';
+    var p1 = document.createElement('p');
+    p1.textContent = 'No research skills yet.';
+    empty.appendChild(p1);
+    var p2 = document.createElement('p');
+    p2.appendChild(document.createTextNode('Run '));
+    var code = document.createElement('code');
+    code.textContent = '/extract-knowhow';
+    p2.appendChild(code);
+    p2.appendChild(document.createTextNode(' in Claude Code or Codex CLI to get started.'));
+    empty.appendChild(p2);
+    display.appendChild(empty);
+  }
 
-    var counts = { procedural: 0, semantic: 0, episodic: 0 };
-    var draftCount = 0;
-    var submittedCount = 0;
+  // --- Sidebar ---
+  function renderSidebar(skills, prof) {
+    var sidebar = document.getElementById('sidebar');
+    sidebar.textContent = '';
 
+    // Header
+    var header = document.createElement('div');
+    header.className = 'sidebar-header';
+    var h2 = document.createElement('h2');
+    h2.textContent = 'Dashboard';
+    header.appendChild(h2);
+    var meta = document.createElement('div');
+    meta.className = 'sidebar-meta';
+    meta.textContent = (prof.full_name || 'Researcher') + ' \u00B7 ' + skills.length + ' skills';
+    header.appendChild(meta);
+    sidebar.appendChild(header);
+
+    // Navigation tabs: Skills and Profile
+    var tabs = document.createElement('ul');
+    tabs.className = 'project-tabs';
+
+    var skillsTab = createTab('Skills', skills.length, true);
+    skillsTab.addEventListener('click', function () {
+      setActiveTab(tabs, skillsTab);
+      showSkillsTab();
+      renderSkillsByProject(skills);
+    });
+    tabs.appendChild(skillsTab);
+
+    var profileTab = createTab('Profile', null, false);
+    profileTab.addEventListener('click', function () {
+      setActiveTab(tabs, profileTab);
+      document.getElementById('tab-skills').style.display = 'none';
+      document.getElementById('tab-profile').style.display = 'block';
+    });
+    tabs.appendChild(profileTab);
+
+    sidebar.appendChild(tabs);
+  }
+
+  function createTab(label, count, active) {
+    var tab = document.createElement('li');
+    tab.className = 'project-tab' + (active ? ' active' : '');
+    tab.appendChild(document.createTextNode(label));
+    if (count !== null) {
+      var cnt = document.createElement('span');
+      cnt.className = 'project-tab-count';
+      cnt.textContent = count;
+      tab.appendChild(cnt);
+    }
+    return tab;
+  }
+
+  function setActiveTab(tabList, activeTab) {
+    var tabs = tabList.querySelectorAll('.project-tab');
+    for (var i = 0; i < tabs.length; i++) tabs[i].classList.remove('active');
+    activeTab.classList.add('active');
+  }
+
+  function showSkillsTab() {
+    document.getElementById('tab-skills').style.display = 'block';
+    document.getElementById('tab-profile').style.display = 'none';
+  }
+
+  // --- Render skills grouped by project, then by memory_type/subtype ---
+  function renderSkillsByProject(skills) {
+    var display = document.getElementById('skills-display');
+    display.textContent = '';
+
+    if (skills.length === 0) {
+      var empty = document.createElement('div');
+      empty.className = 'empty-state';
+      var p = document.createElement('p');
+      p.textContent = 'No skills yet.';
+      empty.appendChild(p);
+      display.appendChild(empty);
+      return;
+    }
+
+    // Group by project
+    var projects = {};
+    skills.forEach(function (s) {
+      var d = s.data || {};
+      var slug = d.project_slug || '__ungrouped__';
+      if (!projects[slug]) {
+        projects[slug] = {
+          name: d.project_name || d.project_slug || 'Ungrouped',
+          skills: [],
+        };
+      }
+      projects[slug].skills.push(s);
+    });
+
+    var projectKeys = Object.keys(projects);
+    projectKeys.forEach(function (slug) {
+      var proj = projects[slug];
+
+      // Project section
+      var projSection = document.createElement('div');
+      projSection.className = 'project-section';
+
+      var projHeader = document.createElement('div');
+      projHeader.className = 'project-section-header';
+      var projTitle = document.createElement('h2');
+      projTitle.className = 'project-section-title';
+      projTitle.textContent = proj.name;
+      projHeader.appendChild(projTitle);
+      var projCount = document.createElement('span');
+      projCount.className = 'project-section-count';
+      projCount.textContent = proj.skills.length + ' skill' + (proj.skills.length > 1 ? 's' : '');
+      projHeader.appendChild(projCount);
+      projSection.appendChild(projHeader);
+
+      // Within project, group by memory_type then subtype
+      renderSkillsInSection(projSection, proj.skills);
+
+      display.appendChild(projSection);
+    });
+  }
+
+  function renderSkillsInSection(container, skills) {
+    var grouped = { procedural: [], semantic: [], episodic: [] };
     skills.forEach(function (s) {
       var mt = s.memory_type || '';
-      if (counts[mt] !== undefined) counts[mt]++;
-      if (s.status === 'draft') draftCount++;
-      if (s.status === 'submitted') submittedCount++;
+      if (grouped[mt]) grouped[mt].push(s);
     });
 
-    // Stat cards
-    var statsRow = document.createElement('div');
-    statsRow.className = 'skills-summary';
+    ['procedural', 'semantic', 'episodic'].forEach(function (type) {
+      var list = grouped[type];
+      if (list.length === 0) return;
 
-    var cards = [
-      { num: skills.length, label: 'Total Skills' },
-      { num: counts.procedural, label: 'Procedural' },
-      { num: counts.semantic, label: 'Semantic' },
-      { num: counts.episodic, label: 'Episodic' },
-    ];
+      var section = document.createElement('div');
+      section.className = 'memory-section type-' + type;
 
-    cards.forEach(function (c) {
-      var card = document.createElement('div');
-      card.className = 'stat-card';
-      var num = document.createElement('span');
-      num.className = 'stat-num';
-      num.textContent = c.num;
-      card.appendChild(num);
-      var label = document.createElement('span');
-      label.className = 'stat-label';
-      label.textContent = c.label;
-      card.appendChild(label);
-      statsRow.appendChild(card);
+      var header = document.createElement('div');
+      header.className = 'memory-section-header';
+      var titleEl = document.createElement('h2');
+      titleEl.className = 'memory-section-title';
+      titleEl.textContent = type.charAt(0).toUpperCase() + type.slice(1);
+      header.appendChild(titleEl);
+      var countEl = document.createElement('span');
+      countEl.className = 'memory-section-count';
+      countEl.textContent = list.length + ' skill' + (list.length > 1 ? 's' : '');
+      header.appendChild(countEl);
+      section.appendChild(header);
+
+      // Group by subtype
+      var bySubtype = {};
+      list.forEach(function (s) {
+        var st = (s.data && s.data.subtype) || s.subtype || 'other';
+        if (!bySubtype[st]) bySubtype[st] = [];
+        bySubtype[st].push(s);
+      });
+
+      var order = SUBTYPE_ORDER[type] || [];
+      var subtypeKeys = order.filter(function (k) { return bySubtype[k]; });
+      Object.keys(bySubtype).forEach(function (k) {
+        if (subtypeKeys.indexOf(k) === -1) subtypeKeys.push(k);
+      });
+
+      subtypeKeys.forEach(function (st) {
+        var group = document.createElement('div');
+        group.className = 'subtype-group';
+
+        var groupHeader = document.createElement('div');
+        groupHeader.className = 'subtype-group-header';
+        groupHeader.textContent = st.replace(/-/g, ' ') + ' (' + bySubtype[st].length + ')';
+        group.appendChild(groupHeader);
+
+        var cards = document.createElement('div');
+        cards.className = 'skill-cards';
+
+        bySubtype[st].forEach(function (skill) {
+          cards.appendChild(createSkillCard(skill, type));
+        });
+
+        group.appendChild(cards);
+        section.appendChild(group);
+      });
+
+      container.appendChild(section);
     });
-    container.appendChild(statsRow);
-
-    // Summary bar
-    var total = skills.length;
-    if (total > 0) {
-      var bar = document.createElement('div');
-      bar.className = 'summary-bar';
-      ['procedural', 'semantic', 'episodic'].forEach(function (type) {
-        if (counts[type] > 0) {
-          var seg = document.createElement('div');
-          seg.className = 'seg-' + type;
-          seg.style.width = ((counts[type] / total) * 100) + '%';
-          bar.appendChild(seg);
-        }
-      });
-      container.appendChild(bar);
-
-      var legend = document.createElement('div');
-      legend.className = 'legend';
-      var colors = { procedural: '#4f7a63', semantic: '#5b6c8b', episodic: '#7b5b92' };
-      ['procedural', 'semantic', 'episodic'].forEach(function (type) {
-        var item = document.createElement('span');
-        var dot = document.createElement('span');
-        dot.className = 'legend-dot';
-        dot.style.background = colors[type];
-        item.appendChild(dot);
-        item.appendChild(document.createTextNode(
-          type.charAt(0).toUpperCase() + type.slice(1) + ' (' + counts[type] + ')'
-        ));
-        legend.appendChild(item);
-      });
-      container.appendChild(legend);
-    }
   }
 
-  function renderBatchGroup(group) {
+  // --- Section parser (shared with review-batch) ---
+  function parseSections(body) {
+    if (!body) return [];
+    var sections = [];
+    var parts = body.split(/^## /m).filter(Boolean);
+    for (var i = 0; i < parts.length; i++) {
+      var lines = parts[i].split('\n');
+      sections.push({ title: lines[0].trim(), content: lines.slice(1).join('\n').trim() });
+    }
+    return sections;
+  }
+
+  function getPreview(body) {
+    var sections = parseSections(body);
+    if (sections.length === 0) return '';
+    return (sections[0].content.split('\n')[0] || '').substring(0, 150);
+  }
+
+  // --- Skills display ---
+  var SUBTYPE_ORDER = {
+    procedural: ['tie', 'no-change', 'constraint-failure', 'operator-fail'],
+    semantic: ['frontier', 'non-public', 'correction'],
+    episodic: ['failure', 'adaptation', 'anomalous'],
+  };
+
+  function createSkillCard(skill, memoryType) {
+    var data = skill.data || {};
     var card = document.createElement('div');
-    card.className = 'batch-group';
+    card.className = 'skill-card';
+
+    var badge = document.createElement('div');
+    badge.className = 'subtype-badge';
+    badge.textContent = data.subtype || skill.subtype || '';
+    card.appendChild(badge);
+
+    var name = document.createElement('div');
+    name.className = 'skill-name';
+    name.textContent = data.name || '(unnamed)';
+    card.appendChild(name);
+
+    var preview = document.createElement('div');
+    preview.className = 'skill-preview';
+    preview.textContent = getPreview(data.body);
+    card.appendChild(preview);
+
+    card.addEventListener('click', function () { openExpanded(skill); });
+    return card;
+  }
+
+  // --- Expanded overlay ---
+  function openExpanded(skill) {
+    var data = skill.data || {};
+    var memoryType = data.memory_type || skill.memory_type || '';
+    var sections = parseSections(data.body);
+
+    var card = document.getElementById('expanded-card');
+    while (card.firstChild) card.removeChild(card.firstChild);
 
     var header = document.createElement('div');
-    header.className = 'batch-header';
+    header.className = 'expanded-header';
 
     var headerLeft = document.createElement('div');
-    headerLeft.style.display = 'flex';
-    headerLeft.style.alignItems = 'center';
-    headerLeft.style.gap = '12px';
-    headerLeft.style.flex = '1';
-    headerLeft.style.minWidth = '0';
+    var h2 = document.createElement('h2');
+    h2.textContent = data.name || '(unnamed)';
+    headerLeft.appendChild(h2);
 
-    var chevron = document.createElement('span');
-    chevron.className = 'chevron';
-    headerLeft.appendChild(chevron);
+    var badges = document.createElement('div');
+    badges.className = 'badges';
+    var memBadge = document.createElement('span');
+    memBadge.className = 'badge badge-' + memoryType;
+    memBadge.textContent = memoryType;
+    badges.appendChild(memBadge);
+    var subBadge = document.createElement('span');
+    subBadge.className = 'badge badge-subtype';
+    subBadge.textContent = data.subtype || skill.subtype || '';
+    badges.appendChild(subBadge);
+    headerLeft.appendChild(badges);
 
-    var title = document.createElement('h3');
-    if (group.batch_id) {
-      var domainText = [group.domain, group.subdomain].filter(Boolean).join(' / ') || 'Ungrouped';
-      var date = new Date(group.latest).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-      title.textContent = domainText + ' \u2014 ' + date;
-    } else {
-      var data = group.skills[0].data || {};
-      title.textContent = data.name || group.skills[0].subtype || 'Single skill';
-    }
-    headerLeft.appendChild(title);
+    var closeBtn = document.createElement('button');
+    closeBtn.className = 'close-btn';
+    closeBtn.textContent = '\u00D7';
+    closeBtn.addEventListener('click', function (e) { e.stopPropagation(); closeExpanded(); });
+
     header.appendChild(headerLeft);
-
-    var meta = document.createElement('div');
-    meta.className = 'batch-meta-info';
-
-    // Count per type
-    var typeCounts = { procedural: 0, semantic: 0, episodic: 0 };
-    var draftCount = 0;
-    var submittedCount = 0;
-    group.skills.forEach(function (s) {
-      var mt = s.memory_type || '';
-      if (typeCounts[mt] !== undefined) typeCounts[mt]++;
-      if (s.status === 'draft') draftCount++;
-      if (s.status === 'submitted') submittedCount++;
-    });
-
-    var countSpan = document.createElement('span');
-    countSpan.className = 'batch-count';
-    countSpan.textContent = group.skills.length + ' skill' + (group.skills.length > 1 ? 's' : '');
-    meta.appendChild(countSpan);
-
-    // Mini type badges
-    ['procedural', 'semantic', 'episodic'].forEach(function (type) {
-      if (typeCounts[type] > 0) {
-        var badge = document.createElement('span');
-        badge.className = 'memory-badge memory-' + type;
-        badge.textContent = typeCounts[type] + ' ' + type.charAt(0).toUpperCase();
-        meta.appendChild(badge);
-      }
-    });
-
-    if (draftCount > 0) {
-      var dBadge = document.createElement('span');
-      dBadge.className = 'status-badge status-draft';
-      dBadge.textContent = draftCount + ' draft';
-      meta.appendChild(dBadge);
-    }
-    if (submittedCount > 0) {
-      var sBadge = document.createElement('span');
-      sBadge.className = 'status-badge status-submitted';
-      sBadge.textContent = submittedCount + ' submitted';
-      meta.appendChild(sBadge);
-    }
-
-    // Review batch link
-    if (group.batch_id) {
-      var reviewLink = document.createElement('a');
-      reviewLink.href = '/review/batch/' + group.batch_id;
-      reviewLink.className = 'btn btn-sm btn-secondary';
-      reviewLink.textContent = 'Review Batch';
-      reviewLink.addEventListener('click', function (e) { e.stopPropagation(); });
-      meta.appendChild(reviewLink);
-    }
-
-    header.appendChild(meta);
+    header.appendChild(closeBtn);
     card.appendChild(header);
 
-    // Skill rows
-    var skillList = document.createElement('div');
-    skillList.className = 'skill-list';
+    var body = document.createElement('div');
+    body.className = 'expanded-body';
 
-    header.addEventListener('click', function () {
-      skillList.classList.toggle('open');
-      header.classList.toggle('expanded');
-    });
+    if (memoryType === 'episodic') {
+      renderEpisodicExpanded(body, sections);
+    } else {
+      renderStandardExpanded(body, sections, memoryType);
+    }
+    card.appendChild(body);
 
-    group.skills.forEach(function (skill) {
-      var data = skill.data || {};
+    document.getElementById('overlay').classList.add('active');
+  }
 
-      var row = document.createElement('div');
-      row.className = 'skill-row';
+  function closeExpanded() {
+    document.getElementById('overlay').classList.remove('active');
+  }
 
-      var info = document.createElement('div');
-      info.className = 'skill-row-info';
+  document.getElementById('overlay').addEventListener('click', function (e) {
+    if (e.target === this) closeExpanded();
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeExpanded();
+  });
 
-      var memBadge = document.createElement('span');
-      memBadge.className = 'memory-badge memory-' + (skill.memory_type || '');
-      memBadge.textContent = skill.memory_type || '';
-      info.appendChild(memBadge);
-
-      var subBadge = document.createElement('span');
-      subBadge.className = 'subtype-badge';
-      subBadge.textContent = skill.subtype || '';
-      info.appendChild(subBadge);
-
-      var nameSpan = document.createElement('span');
-      nameSpan.className = 'skill-name';
-      nameSpan.textContent = data.name || skill.subtype || 'Unnamed';
-      info.appendChild(nameSpan);
-
-      var statusBadge = document.createElement('span');
-      statusBadge.className = 'status-badge status-' + (skill.status || 'draft');
-      statusBadge.textContent = skill.status || 'draft';
-      info.appendChild(statusBadge);
-
-      var dateSpan = document.createElement('span');
-      dateSpan.className = 'skill-date';
-      dateSpan.textContent = new Date(skill.updated_at).toLocaleDateString();
-      info.appendChild(dateSpan);
-
-      row.appendChild(info);
-
-      var actions = document.createElement('div');
-      actions.className = 'skill-row-actions';
-
-      var openBtn = document.createElement('a');
-      openBtn.href = '/review/skill/' + skill.id;
-      openBtn.className = 'btn btn-sm btn-secondary';
-      openBtn.textContent = 'Open';
-      actions.appendChild(openBtn);
-
-      if (skill.status === 'draft') {
-        var delBtn = document.createElement('button');
-        delBtn.className = 'btn btn-sm btn-danger';
-        delBtn.textContent = 'Delete';
-        delBtn.addEventListener('click', async function (e) {
-          e.stopPropagation();
-          if (!confirm('Delete this draft skill? This cannot be undone.')) return;
-          try {
-            var delRes = await fetch('/api/skills/' + skill.id, {
-              method: 'DELETE',
-              headers: { Authorization: 'Bearer ' + token },
-            });
-            if (!delRes.ok) throw new Error('HTTP ' + delRes.status);
-            await loadSkills();
-          } catch (err) {
-            alert('Delete failed: ' + err.message);
-          }
-        });
-        actions.appendChild(delBtn);
+  function renderStandardExpanded(container, sections, memoryType) {
+    sections.forEach(function (sec) {
+      var block = document.createElement('div');
+      block.className = 'section-block';
+      if (memoryType === 'procedural' && sec.title.toLowerCase() === 'decision') {
+        block.classList.add('highlight-decision');
       }
+      var title = document.createElement('div');
+      title.className = 'section-block-title';
+      title.textContent = sec.title;
+      block.appendChild(title);
+      var content = document.createElement('div');
+      content.className = 'section-block-content';
+      content.textContent = sec.content;
+      block.appendChild(content);
+      container.appendChild(block);
+    });
+  }
 
-      row.appendChild(actions);
-      skillList.appendChild(row);
+  function renderEpisodicExpanded(container, sections) {
+    var timelineHeaders = ['situation', 'action', 'outcome'];
+    var timelineSections = [];
+    var otherSections = [];
+
+    sections.forEach(function (sec) {
+      if (timelineHeaders.indexOf(sec.title.toLowerCase()) !== -1) {
+        timelineSections.push(sec);
+      } else {
+        otherSections.push(sec);
+      }
     });
 
-    card.appendChild(skillList);
-    return card;
+    if (timelineSections.length > 0) {
+      var flow = document.createElement('div');
+      flow.className = 'timeline-flow';
+      timelineSections.forEach(function (sec) {
+        var step = document.createElement('div');
+        step.className = 'timeline-step';
+        var hdr = document.createElement('div');
+        hdr.className = 'timeline-step-header';
+        hdr.textContent = sec.title;
+        step.appendChild(hdr);
+        var bd = document.createElement('div');
+        bd.className = 'timeline-step-body';
+        bd.textContent = sec.content;
+        step.appendChild(bd);
+        flow.appendChild(step);
+      });
+      container.appendChild(flow);
+    }
+
+    otherSections.forEach(function (sec) {
+      var block = document.createElement('div');
+      block.className = 'section-block';
+      var title = document.createElement('div');
+      title.className = 'section-block-title';
+      title.textContent = sec.title;
+      block.appendChild(title);
+      var content = document.createElement('div');
+      content.className = 'section-block-content';
+      content.textContent = sec.content;
+      block.appendChild(content);
+      container.appendChild(block);
+    });
   }
 })();

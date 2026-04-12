@@ -4,402 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard — researchskills.ai</title>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;
-      background: #faf7f2;
-      color: #1f1f1f;
-      line-height: 1.6;
-    }
-
-    /* --- Header --- */
-    .page-header {
-      background: #fff;
-      border-bottom: 1px solid #e8e2d9;
-      padding: 20px 32px;
-    }
-    .page-header-inner {
-      max-width: 1280px;
-      margin: 0 auto;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .logo {
-      font-family: Georgia, 'Times New Roman', serif;
-      font-size: 1.35em;
-      color: #1f1f1f;
-      text-decoration: none;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-    }
-    #user-info {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .user-avatar { width: 28px; height: 28px; border-radius: 50%; border: 1px solid #e8e2d9; }
-    .user-name { font-size: 0.88em; color: #6b6355; }
-    .btn { display: inline-block; padding: 6px 16px; border-radius: 6px; border: 1px solid #d4cfc7; background: #fff; color: #1f1f1f; cursor: pointer; font-size: 0.85em; text-decoration: none; transition: background 0.15s; }
-    .btn:hover { background: #f5f0ea; text-decoration: none; }
-    .btn-primary { background: #4f7a63; color: #fff; border-color: #4f7a63; }
-    .btn-primary:hover { background: #3d6150; }
-    .btn-sm { padding: 4px 12px; font-size: 0.8em; }
-    .btn-danger { background: #c53030; color: #fff; border-color: #c53030; }
-    .btn-danger:hover { background: #9b2c2c; }
-    .btn-secondary { background: #fff; color: #6b6355; border-color: #d4cfc7; }
-    .btn-secondary:hover { background: #f5f0ea; }
-
-    /* --- Main layout --- */
-    main {
-      max-width: 1280px;
-      margin: 0 auto;
-      padding: 32px;
-    }
-
-    #loading {
-      text-align: center;
-      padding: 80px 0;
-      color: #9b9385;
-      font-family: Georgia, serif;
-      font-size: 1.1em;
-    }
-
-    /* Dashboard grid */
-    .dashboard-layout {
-      display: grid;
-      grid-template-columns: 240px 1fr;
-      gap: 36px;
-      align-items: start;
-    }
-    @media (max-width: 768px) {
-      .dashboard-layout { grid-template-columns: 1fr; gap: 20px; }
-      .dashboard-sidebar { position: static !important; }
-      .tabs { flex-direction: row !important; border-left: none !important; border-bottom: 1px solid #e8e2d9; }
-      .tab { border-left: none !important; border-bottom: 2px solid transparent; margin-left: 0 !important; }
-      .tab.active { border-left-color: transparent !important; border-bottom-color: #4f7a63 !important; }
-    }
-
-    .dashboard-sidebar {
-      position: sticky;
-      top: 24px;
-    }
-    .dashboard-sidebar h1 {
-      font-family: Georgia, 'Times New Roman', serif;
-      font-size: 1.6em;
-      font-weight: 700;
-      color: #1f1f1f;
-      margin: 0 0 20px;
-    }
-    .dashboard-main { min-width: 0; }
-
-    /* Tabs */
-    .tabs {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-      border-left: 2px solid #e8e2d9;
-    }
-    .tab {
-      padding: 10px 18px;
-      background: none;
-      border: none;
-      border-left: 2px solid transparent;
-      margin-left: -2px;
-      color: #9b9385;
-      cursor: pointer;
-      font-family: inherit;
-      font-size: 0.92em;
-      text-align: left;
-      transition: color 0.15s, border-color 0.15s, background 0.15s;
-      border-radius: 0 6px 6px 0;
-    }
-    .tab:hover {
-      color: #1f1f1f;
-      background: #f5f0ea;
-    }
-    .tab.active {
-      color: #1f1f1f;
-      border-left-color: #4f7a63;
-      background: #f5f0ea;
-      font-weight: 600;
-    }
-
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
-
-    /* Panel */
-    .panel {
-      background: #fff;
-      border: 1px solid #e8e2d9;
-      border-radius: 12px;
-      padding: 28px;
-    }
-    .panel h2 {
-      font-family: Georgia, 'Times New Roman', serif;
-      font-size: 1.2em;
-      font-weight: 600;
-      margin-bottom: 6px;
-      color: #1f1f1f;
-    }
-    .tab-description {
-      color: #9b9385;
-      font-size: 0.88em;
-      margin-bottom: 24px;
-    }
-
-    /* Profile form */
-    #profile-form label {
-      display: block;
-      margin-bottom: 16px;
-      font-size: 0.82em;
-      color: #6b6355;
-      font-weight: 500;
-    }
-    .required { color: #c53030; }
-    #profile-form input,
-    #profile-form select {
-      width: 100%;
-      margin-top: 6px;
-      padding: 10px 14px;
-      background: #faf7f2;
-      border: 1px solid #d4cfc7;
-      border-radius: 8px;
-      color: #1f1f1f;
-      font-family: inherit;
-      font-size: 0.95em;
-      transition: border-color 0.15s;
-    }
-    #profile-form input:focus,
-    #profile-form select:focus {
-      outline: none;
-      border-color: #4f7a63;
-    }
-    .form-message {
-      padding: 10px 14px;
-      border-radius: 8px;
-      font-size: 0.85em;
-      margin-bottom: 14px;
-    }
-    .form-message.success {
-      background: #e8f0eb;
-      border: 1px solid #4f7a63;
-      color: #3d6150;
-    }
-    .form-message.error {
-      background: #fde8e8;
-      border: 1px solid #c53030;
-      color: #c53030;
-    }
-
-    /* --- Skills summary stats --- */
-    .skills-summary {
-      display: flex;
-      gap: 16px;
-      margin-bottom: 24px;
-    }
-    .stat-card {
-      flex: 1;
-      background: #fff;
-      border: 1px solid #e8e2d9;
-      border-radius: 10px;
-      padding: 18px 20px;
-      text-align: center;
-    }
-    .stat-num {
-      display: block;
-      font-family: Georgia, serif;
-      font-size: 1.8em;
-      font-weight: 700;
-      color: #1f1f1f;
-      margin-bottom: 2px;
-    }
-    .stat-label {
-      font-size: 0.78em;
-      color: #9b9385;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    /* Summary bar */
-    .summary-bar {
-      height: 6px;
-      border-radius: 3px;
-      overflow: hidden;
-      margin-bottom: 24px;
-      background: #ece7de;
-      display: flex;
-    }
-    .seg-procedural { background: #4f7a63; }
-    .seg-semantic { background: #5b6c8b; }
-    .seg-episodic { background: #7b5b92; }
-
-    .legend {
-      display: flex;
-      gap: 18px;
-      margin-bottom: 24px;
-      font-size: 0.78em;
-      color: #6b6355;
-    }
-    .legend-dot {
-      display: inline-block;
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      margin-right: 5px;
-      vertical-align: middle;
-    }
-
-    /* --- Batch groups --- */
-    .batch-group {
-      background: #fff;
-      border: 1px solid #e8e2d9;
-      border-radius: 12px;
-      margin-bottom: 16px;
-      overflow: hidden;
-    }
-    .batch-header {
-      padding: 16px 22px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 16px;
-      cursor: pointer;
-      transition: background 0.15s;
-    }
-    .batch-header:hover { background: #f5f0ea; }
-    .batch-header.expanded { border-bottom: 1px solid #e8e2d9; }
-    .batch-header h3 {
-      font-family: Georgia, serif;
-      font-size: 0.98em;
-      font-weight: 600;
-      color: #1f1f1f;
-      flex: 1;
-    }
-    .batch-meta-info {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      flex-shrink: 0;
-      font-size: 0.82em;
-    }
-    .batch-count {
-      color: #6b6355;
-    }
-
-    /* Status badges */
-    .status-badge {
-      font-size: 0.72em;
-      padding: 2px 8px;
-      border-radius: 10px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.3px;
-    }
-    .status-draft { background: #f0ece6; color: #6b6355; }
-    .status-submitted { background: #e8f0eb; color: #3d6150; }
-
-    /* Memory type badges */
-    .memory-badge {
-      display: inline-block;
-      padding: 2px 9px;
-      border-radius: 10px;
-      font-size: 0.72em;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.4px;
-    }
-    .memory-procedural { background: #e8f0eb; color: #3d6150; }
-    .memory-semantic { background: #e8ecf2; color: #4a5a74; }
-    .memory-episodic { background: #f0e8f4; color: #644a78; }
-
-    .subtype-badge {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 10px;
-      font-size: 0.7em;
-      font-weight: 500;
-      background: #f0ece6;
-      color: #6b6355;
-    }
-
-    /* Skill list */
-    .skill-list { display: none; }
-    .skill-list.open { display: block; }
-
-    .skill-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px 22px;
-      border-top: 1px solid #f0ece6;
-      gap: 12px;
-      transition: background 0.1s;
-    }
-    .skill-row:hover { background: #faf7f2; }
-
-    .skill-row-info {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      flex: 1;
-      min-width: 0;
-    }
-    .skill-name {
-      font-size: 0.88em;
-      color: #1f1f1f;
-      font-weight: 500;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-    .skill-date {
-      font-size: 0.78em;
-      color: #b0a89e;
-      flex-shrink: 0;
-    }
-
-    .skill-row-actions {
-      display: flex;
-      gap: 6px;
-      flex-shrink: 0;
-    }
-
-    /* Chevron indicator */
-    .chevron {
-      display: inline-block;
-      width: 8px;
-      height: 8px;
-      border-right: 2px solid #9b9385;
-      border-bottom: 2px solid #9b9385;
-      transform: rotate(-45deg);
-      transition: transform 0.2s;
-      flex-shrink: 0;
-    }
-    .batch-header.expanded .chevron {
-      transform: rotate(45deg);
-    }
-
-    /* No skills state */
-    .empty-state {
-      text-align: center;
-      padding: 48px 24px;
-    }
-    .empty-state p {
-      color: #9b9385;
-      font-size: 0.95em;
-      margin-bottom: 8px;
-    }
-    .empty-state code {
-      background: #f0ece6;
-      padding: 3px 8px;
-      border-radius: 4px;
-      font-size: 0.88em;
-      color: #4f7a63;
-    }
-  </style>
+  <link rel="stylesheet" href="/css/skills-layout.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/js/supabase-client.js"></script>
 </head>
@@ -412,67 +17,60 @@
     </div>
   </div>
 
-  <main>
-    <div id="loading">Loading...</div>
+  <div id="loading" class="loading-state">Loading...</div>
 
-    <div id="dashboard" style="display:none">
-      <div class="dashboard-layout">
-        <aside class="dashboard-sidebar">
-          <h1>Dashboard</h1>
-          <nav class="tabs">
-            <button class="tab active" data-tab="skills">Research Skills</button>
-            <button class="tab" data-tab="profile">Profile</button>
-          </nav>
-        </aside>
+  <div id="dashboard" style="display:none">
+    <div class="app-layout">
+      <!-- Sidebar: project tabs + profile -->
+      <aside class="sidebar" id="sidebar"></aside>
 
-        <div class="dashboard-main">
-
-          <!-- Research Skills Tab (default) -->
-          <div id="tab-skills" class="tab-content active">
-            <div id="skills-stats"></div>
-            <div id="skills-content"></div>
-          </div>
-
-          <!-- Profile Tab -->
-          <div id="tab-profile" class="tab-content">
-            <div class="panel">
-              <h2>Your Profile</h2>
-              <form id="profile-form">
-                <label>Full Name (English) <span class="required">*</span>
-                  <input type="text" id="prof-name" required>
-                </label>
-                <label>Affiliation <span class="required">*</span>
-                  <input type="text" id="prof-affiliation" required>
-                </label>
-                <label>Role <span class="required">*</span>
-                  <select id="prof-role" required>
-                    <option value="Undergraduate Student">Undergraduate Student</option>
-                    <option value="Master's Student">Master's Student</option>
-                    <option value="PhD Candidate">PhD Candidate</option>
-                    <option value="Postdoctoral Researcher">Postdoctoral Researcher</option>
-                    <option value="Research Scientist">Research Scientist</option>
-                    <option value="Research Engineer">Research Engineer</option>
-                    <option value="Assistant Professor">Assistant Professor</option>
-                    <option value="Associate Professor">Associate Professor</option>
-                    <option value="Professor">Professor</option>
-                    <option value="Principal Investigator">Principal Investigator</option>
-                    <option value="Industry Researcher">Industry Researcher</option>
-                    <option value="Independent Researcher">Independent Researcher</option>
-                  </select>
-                </label>
-                <label>Homepage URL <span class="required">*</span>
-                  <input type="url" id="prof-homepage" required>
-                </label>
-                <div id="profile-message" class="form-message" style="display:none"></div>
-                <button type="submit" class="btn btn-primary">Save Profile</button>
-              </form>
-            </div>
-          </div>
-
+      <!-- Main content -->
+      <main class="main-content">
+        <div id="tab-skills" style="display:block">
+          <div id="skills-display"></div>
         </div>
-      </div>
+        <div id="tab-profile" style="display:none">
+          <div class="panel">
+            <h2>Your Profile</h2>
+            <form id="profile-form">
+              <label>Full Name (English) <span class="required">*</span>
+                <input type="text" id="prof-name" required>
+              </label>
+              <label>Affiliation <span class="required">*</span>
+                <input type="text" id="prof-affiliation" required>
+              </label>
+              <label>Role <span class="required">*</span>
+                <select id="prof-role" required>
+                  <option value="Undergraduate Student">Undergraduate Student</option>
+                  <option value="Master's Student">Master's Student</option>
+                  <option value="PhD Candidate">PhD Candidate</option>
+                  <option value="Postdoctoral Researcher">Postdoctoral Researcher</option>
+                  <option value="Research Scientist">Research Scientist</option>
+                  <option value="Research Engineer">Research Engineer</option>
+                  <option value="Assistant Professor">Assistant Professor</option>
+                  <option value="Associate Professor">Associate Professor</option>
+                  <option value="Professor">Professor</option>
+                  <option value="Principal Investigator">Principal Investigator</option>
+                  <option value="Industry Researcher">Industry Researcher</option>
+                  <option value="Independent Researcher">Independent Researcher</option>
+                </select>
+              </label>
+              <label>Homepage URL <span class="required">*</span>
+                <input type="url" id="prof-homepage" required>
+              </label>
+              <div id="profile-message" class="form-message" style="display:none"></div>
+              <button type="submit" class="btn btn-primary">Save Profile</button>
+            </form>
+          </div>
+        </div>
+      </main>
     </div>
-  </main>
+  </div>
+
+  <!-- Expanded overlay (same as review-batch) -->
+  <div class="overlay" id="overlay">
+    <div class="expanded-card" id="expanded-card"></div>
+  </div>
 
   <script src="/js/auth-header.js"></script>
   <script src="/js/dashboard.js"></script>

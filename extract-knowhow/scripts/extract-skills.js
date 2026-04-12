@@ -125,13 +125,18 @@ function buildPrompt(session, formattedFiles, opts) {
   const contributor = opts.contributor || 'anonymous';
   const sessionId = session.session_id;
 
-  const fileList = formattedFiles.map(f => `- ${f}`).join('\n');
+  // Read formatted text content directly — no tool access needed
+  const textParts = [];
+  for (const f of formattedFiles) {
+    try { textParts.push(fs.readFileSync(f, 'utf-8')); } catch {}
+  }
+  const sessionText = textParts.join('\n\n--- SEGMENT BREAK ---\n\n');
 
   return `You are a research skill extractor for OpenScientist.
 
 ## Your Task
 
-Read the formatted session text file(s), identify research impasse moments and knowledge gaps, then write skill markdown files.
+Analyze the session text below. Identify research impasse moments and knowledge gaps, then output skill markdown blocks.
 
 ## Input
 
@@ -141,21 +146,22 @@ Subdomain: ${subdomain}
 Contributor: ${contributor}
 Date: ${date}
 
-Formatted text file(s):
-${fileList}
+## Session Text
+
+<session>
+${sessionText}
+</session>
 
 ## Instructions
 
-1. Use the Read tool to read each file listed above.
+Scan the conversation chronologically. Identify:
+- **Impasse moments**: researcher got stuck, had to choose, assumptions failed, or execution broke
+- **Knowledge gaps**: facts the human provided that an LLM wouldn't know
+- **Notable episodes**: failures, workarounds, or surprising findings
 
-2. Scan the conversation chronologically. Identify:
-   - **Impasse moments**: researcher got stuck, had to choose, assumptions failed, or execution broke
-   - **Knowledge gaps**: facts the human provided that an LLM wouldn't know
-   - **Notable episodes**: failures, workarounds, or surprising findings
+For each finding, output a skill as a fenced markdown block.
 
-3. For each finding, write a skill markdown file to /tmp/ using the Write tool.
-
-### Episodic skills → /tmp/skill-${sessionId}-E<N>.md
+### Episodic skills
 
 \`\`\`
 ---
@@ -190,7 +196,7 @@ tags: [<relevant-tags>]
 - [When should an agent recall this?]
 \`\`\`
 
-### Semantic skills → /tmp/skill-${sessionId}-S<N>.md
+### Semantic skills
 
 \`\`\`
 ---
@@ -223,7 +229,7 @@ tags: [<relevant-tags>]
 [When this becomes outdated]
 \`\`\`
 
-### Procedural skills → /tmp/skill-${sessionId}-P<N>.md
+### Procedural skills
 
 \`\`\`
 ---
@@ -269,25 +275,34 @@ tags: [<relevant-tags>]
 - [Where this skill would be harmful]
 \`\`\`
 
-4. After writing all files, run:
-\`\`\`bash
-node ${VALIDATE_SCRIPT} save ${sessionId} /tmp/skill-${sessionId}-*.md
+## Output Format
+
+Output each skill as a fenced markdown block with \`\`\`skill-md markers. Example:
+
+\`\`\`skill-md
+---
+name: "example-slug"
+memory_type: episodic
+subtype: failure
+...
+---
+
+## Situation
+...
 \`\`\`
 
-If validation fails, fix the files and retry.
+Output as many \`\`\`skill-md blocks as you find. If no meaningful content, output zero blocks.
 
 ## Rules
 
-- Use the Read tool on formatted text. Never grep raw .jsonl.
 - Skills must be specific to THIS conversation. No generic advice.
 - De-identify: strip file paths, usernames, project names, private URLs.
 - Preserve: scientific content, methods, tools, parameters.
-- If the session has no meaningful content, write zero files. That's OK.
-- If the session is about general software engineering (not research) in test mode, still extract — but focus on problem-solving patterns, not routine coding.
+- If the session is about general software engineering (not research) in test mode, still extract — focus on problem-solving patterns, not routine coding.
 
-## When done
+## Final line
 
-Print exactly this as your final line:
+After all skill blocks, print exactly:
 SKILLS_EXTRACTED: <total> (E:<episodic> S:<semantic> P:<procedural>)`;
 }
 
@@ -301,8 +316,6 @@ function runClaudeAsync(prompt, timeoutMs = 180_000) {
     const proc = spawn('claude', [
       '-p', prompt,
       '--model', 'haiku',
-      '--permission-mode', 'bypassPermissions',
-      '--allowedTools', 'Read,Write,Bash,Glob',
       '--no-session-persistence',
       '--max-budget-usd', '0.10',
     ], { stdio: ['pipe', 'pipe', 'pipe'] });
@@ -326,6 +339,43 @@ function runClaudeAsync(prompt, timeoutMs = 180_000) {
       resolve({ ok: false, output: '', error: err.message });
     });
   });
+}
+
+// ---------------------------------------------------------------------------
+// Parse skill-md blocks from Haiku output → write files → validate
+// ---------------------------------------------------------------------------
+
+function writeAndValidateSkills(sessionId, output) {
+  const blocks = [];
+  const regex = /```skill-md\n([\s\S]*?)```/g;
+  let m;
+  while ((m = regex.exec(output)) !== null) {
+    blocks.push(m[1].trim());
+  }
+
+  if (blocks.length === 0) return 0;
+
+  const skillFiles = [];
+  for (let i = 0; i < blocks.length; i++) {
+    const filePath = path.join(os.tmpdir(), `skill-${sessionId}-${i + 1}.md`);
+    fs.writeFileSync(filePath, blocks[i] + '\n');
+    skillFiles.push(filePath);
+  }
+
+  // Validate and cache via execFileSync (no shell)
+  try {
+    execFileSync('node', [VALIDATE_SCRIPT, 'save', sessionId, ...skillFiles], {
+      encoding: 'utf-8',
+      stdio: 'pipe',
+    });
+  } catch {
+    // Validation failed — skills still written but not cached
+  }
+
+  // Clean up tmp files
+  for (const f of skillFiles) { try { fs.unlinkSync(f); } catch {} }
+
+  return blocks.length;
 }
 
 // ---------------------------------------------------------------------------
@@ -470,6 +520,10 @@ async function main() {
         return null;
       }
 
+      // Parse skill-md blocks from output → write files → validate
+      const written = writeAndValidateSkills(sid, output);
+
+      // Also try to parse the SKILLS_EXTRACTED line for counts
       const result = parseResult(sid, output, opts.verbose);
       if (result) {
         totals.episodic += result.episodic;
@@ -477,8 +531,11 @@ async function main() {
         totals.procedural += result.procedural;
         console.log(`    ${sid} → ${result.total} skills (E:${result.episodic} S:${result.semantic} P:${result.procedural}) [${elapsed}s]`);
         return result;
+      } else if (written > 0) {
+        console.log(`    ${sid} → ${written} skills written [${elapsed}s]`);
+        return { sid, total: written, episodic: 0, semantic: 0, procedural: 0 };
       } else {
-        console.log(`    ${sid} → WARN (no count) [${elapsed}s]`);
+        console.log(`    ${sid} → 0 skills [${elapsed}s]`);
         return null;
       }
     });

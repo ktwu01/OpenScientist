@@ -126,11 +126,22 @@ function buildPrompt(session, formattedFiles, opts) {
   const sessionId = session.session_id;
 
   // Read formatted text content directly — no tool access needed
+  // Cap at 50K chars total to keep Haiku prompt manageable
+  const MAX_PROMPT_TEXT = 50000;
   const textParts = [];
+  let charCount = 0;
   for (const f of formattedFiles) {
-    try { textParts.push(fs.readFileSync(f, 'utf-8')); } catch {}
+    if (charCount >= MAX_PROMPT_TEXT) break;
+    try {
+      const content = fs.readFileSync(f, 'utf-8');
+      textParts.push(content);
+      charCount += content.length;
+    } catch {}
   }
-  const sessionText = textParts.join('\n\n--- SEGMENT BREAK ---\n\n');
+  let sessionText = textParts.join('\n\n--- SEGMENT BREAK ---\n\n');
+  if (sessionText.length > MAX_PROMPT_TEXT) {
+    sessionText = sessionText.substring(0, MAX_PROMPT_TEXT) + '\n\n[…truncated — session too long]';
+  }
 
   return `You are a research skill extractor for OpenScientist.
 
@@ -318,7 +329,7 @@ function runClaudeAsync(prompt, timeoutMs = 180_000) {
       '-p',
       '--model', 'haiku',
       '--no-session-persistence',
-      '--max-budget-usd', '0.10',
+      '--max-budget-usd', '0.50',
     ], { stdio: ['pipe', 'pipe', 'pipe'] });
 
     // Write prompt to stdin then close

@@ -57,7 +57,7 @@ function parseArgs() {
     subdomain: null,
     contributor: null,
     batchSize: Infinity,
-    concurrency: 5,
+    concurrency: 10,
     sessionIds: null,
     test: false,
     verbose: false,

@@ -12,9 +12,8 @@ const TEMPLATE_SOURCE = path.join(__dirname, "..", "templates", "skill-template.
 const HELPER_SCRIPTS = [
   "scan-sessions.js",
   "format-session.js",
-  "extract-nodes.js",
-  "build-tree.js",
-  "upload-tree.js",
+  "validate-skills.js",
+  "upload-skills.js",
   "finalize.js",
 ];
 
@@ -87,7 +86,7 @@ try {
 const CACHE_DIR = path.join(os.homedir(), ".openscientist", "cache");
 try {
   fs.mkdirSync(path.join(CACHE_DIR, "meta"), { recursive: true });
-  fs.mkdirSync(path.join(CACHE_DIR, "trees"), { recursive: true });
+  fs.mkdirSync(path.join(CACHE_DIR, "skills"), { recursive: true });
   fs.mkdirSync(path.join(CACHE_DIR, "sessions"), { recursive: true });
   console.log("✓ Cache:       ~/.openscientist/cache/ ready");
 } catch (err) {

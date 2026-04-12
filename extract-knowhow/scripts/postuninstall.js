@@ -8,9 +8,8 @@ const os = require("os");
 const HELPER_SCRIPTS = [
   "scan-sessions.js",
   "format-session.js",
-  "extract-nodes.js",
-  "build-tree.js",
-  "upload-tree.js",
+  "validate-skills.js",
+  "upload-skills.js",
   "finalize.js",
 ];
 

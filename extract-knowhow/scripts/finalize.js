@@ -3,13 +3,11 @@
  * finalize.js
  *
  * Project finalizer for /extract-knowhow. Given a project metadata file
- * describing which cached subtrees belong to one project plus the anchor
- * and domain info the AI decided, this script:
+ * describing which cached skills belong to one project, this script:
  *
- *   1. Collects the subtrees  (extract-nodes.js collect)
- *   2. Assembles a complete tree  (build-tree.js)
- *   3. Merges anchor + domain + contributor + test flag
- *   4. Uploads to researchskills.ai  (upload-tree.js)
+ *   1. Collects validated skills  (validate-skills.js collect)
+ *   2. Uploads to researchskills.ai  (upload-skills.js)
+ *   3. Cleans up temp dir
  *
  * Usage:
  *   finalize.js <project-meta.json> [--no-upload] [--no-open]
@@ -33,10 +31,9 @@ const path = require('path');
 const os = require('os');
 const { execFileSync } = require('child_process');
 
-const SCRIPTS_DIR = __dirname;
-const EXTRACT_NODES = path.join(SCRIPTS_DIR, 'extract-nodes.js');
-const BUILD_TREE = path.join(SCRIPTS_DIR, 'build-tree.js');
-const UPLOAD_TREE = path.join(SCRIPTS_DIR, 'upload-tree.js');
+const UTILS_DIR = path.join(os.homedir(), '.claude', 'utils');
+const VALIDATE_SKILLS = path.join(UTILS_DIR, 'validate-skills.js');
+const UPLOAD_SKILLS = path.join(UTILS_DIR, 'upload-skills.js');
 
 function runNode(script, args, opts = {}) {
   return execFileSync('node', [script, ...args], {
@@ -57,60 +54,36 @@ function finalize(metaPath, options = {}) {
   const meta = JSON.parse(fs.readFileSync(metaPath, 'utf-8'));
   const slug = slugify(meta.project_slug || (meta.anchor && meta.anchor.project_name));
   const tmp = os.tmpdir();
-  const subtreesFile = path.join(tmp, `${slug}-subtrees.json`);
-  const assembledFile = path.join(tmp, `${slug}-assembled.json`);
-  const treeFile = path.join(tmp, `${slug}-tree.json`);
+  const outputDir = path.join(tmp, `${slug}-skills`);
 
   const sessionIds = meta.session_ids || [];
   if (sessionIds.length === 0) {
     throw new Error('project-meta.json has empty session_ids');
   }
 
-  // 1. Collect cached subtrees
-  runNode(EXTRACT_NODES, ['collect', subtreesFile, sessionIds.join(',')]);
+  // 1. Collect validated skills
+  runNode(VALIDATE_SKILLS, ['collect', outputDir, sessionIds.join(',')]);
+  console.log(`✓ Skills collected → ${outputDir}`);
 
-  // 2. Build tree
-  runNode(BUILD_TREE, [subtreesFile, assembledFile]);
-  const assembled = JSON.parse(fs.readFileSync(assembledFile, 'utf-8'));
+  if (options.noUpload) return { outputDir, uploaded: false };
 
-  // 3. Merge project metadata
-  const anchor = { ...(meta.anchor || {}) };
-  if (
-    meta.is_test &&
-    anchor.project_name &&
-    !anchor.project_name.startsWith('[TEST]')
-  ) {
-    anchor.project_name = `[TEST] ${anchor.project_name}`;
-  }
-  const tree = {
-    version: '2.0.0',
-    ...(meta.is_test ? { is_test: true } : {}),
-    anchor,
-    contributor: meta.contributor || 'Anonymous Contributor',
-    extracted_at: new Date().toISOString().slice(0, 10),
-    domain: meta.domain,
-    subdomain: meta.subdomain,
-    sessions_analyzed: assembled.sessions_analyzed || sessionIds.length,
-    nodes: assembled.nodes || [],
-    joins: assembled.joins || [],
-  };
-  fs.writeFileSync(treeFile, JSON.stringify(tree, null, 2) + '\n');
-  console.log(
-    `✓ Tree assembled: ${tree.nodes.length} nodes, ${tree.joins.length} joins → ${treeFile}`
-  );
-
-  if (options.noUpload) return { treeFile, uploaded: false };
-
-  // 4. Upload
-  const uploadArgs = [treeFile];
+  // 2. Upload skills
+  const uploadArgs = [outputDir];
   if (options.noOpen) uploadArgs.push('--no-open');
   try {
-    const out = runNode(UPLOAD_TREE, uploadArgs);
+    const out = runNode(UPLOAD_SKILLS, uploadArgs);
     process.stdout.write(out);
-    return { treeFile, uploaded: true };
+    return { outputDir, uploaded: true };
   } catch (err) {
-    console.error(`⚠ Upload step failed (see output above)`);
-    return { treeFile, uploaded: false };
+    console.error('⚠ Upload step failed (see output above)');
+    return { outputDir, uploaded: false };
+  } finally {
+    // 3. Clean up temp dir
+    try {
+      fs.rmSync(outputDir, { recursive: true, force: true });
+    } catch (_) {
+      // best-effort cleanup
+    }
   }
 }
 

@@ -129,7 +129,70 @@ $extract-knowhow
 
 ---
 
-<h2 align="center">3. 成为审稿人</h2>
+<h2 align="center">3. Skill 架构设计</h2>
+
+OpenScientist 的 Skill 设计基于认知架构理论 — [Soar](https://en.wikipedia.org/wiki/Soar_(cognitive_architecture)) (Laird, 2012)、[ACT-R](https://en.wikipedia.org/wiki/ACT-R) (Anderson, 1996) 和[基于案例的推理](https://en.wikipedia.org/wiki/Case-based_reasoning) (Kolodner, 1993)。Skill 按照**研究者大脑实际存储和检索专业知识的方式**来组织，而非任意分类。
+
+### 三种记忆类型
+
+| 类型 | 存储内容 | 触发时机 |
+|------|---------|---------|
+| **程序性记忆** | 应对科研困境的 IF-THEN 规则 | Agent 面临决策、卡住或假设失效时 |
+| **语义记忆** | LLM 训练数据中缺失的事实 | Agent 需要它不具备的领域知识时 |
+| **情景记忆** | 具体的科研经历 | Agent 遇到与过去经验相似的情境时 |
+
+### 程序性记忆 — "如何决策"
+
+按**科研僵局类型**分类（改编自 Soar 的 impasse 分类体系）：
+
+| 子类型 | 僵局 | 示例 |
+|--------|------|------|
+| `tie` | 多条路径，不知道选哪个 | "消融实验 vs 完全重训 — 先做哪个？" |
+| `no-change` | 完全卡住，不知道下一步 | "结果很诡异，完全看不懂" |
+| `constraint-failure` | 方法论假设不成立 | "数据不满足 i.i.d. 假设" |
+| `operator-fail` | 选对了方法但执行失败 | "方法正确，但大 batch 时 CUDA OOM" |
+
+每个程序性 Skill 包含：**When**（触发条件 + 排除项）→ **Decision**（首选行动 + 被拒替代方案 + 推理）→ **Local Verifiers**（如何验证）→ **Failure Handling**（失败后怎么办）→ **Anti-exemplars**（什么时候不该用）。
+
+### 语义记忆 — "LLM 不知道的事"
+
+只有三种子类型 — 其他内容 LLM 训练数据里已经有了：
+
+| 子类型 | 存储内容 | 示例 |
+|--------|---------|------|
+| `frontier` | 训练截止后的新知识 | "Flash Attention 3 把 `causal` 参数改名了" |
+| `non-public` | 实验室内部未发表的知识 | "这批 H100 的 NCCL 拓扑有问题" |
+| `correction` | 纠正 LLM 的错误默认信念 | "Adam eps=1e-8 在混合精度下不稳定，应该用 1e-5" |
+
+### 情景记忆 — "发生了什么"
+
+使用基于案例推理（CBR）术语分类：
+
+| 子类型 | 信号 | 检索触发 |
+|--------|------|---------|
+| `failure` | "做了 X，因为隐藏原因 Y 失败了" | Agent 准备做类似的事 |
+| `adaptation` | "标准方法不行，但变通方法 Z 行得通" | Agent 用标准方法卡住了 |
+| `anomalous` | "预期 A，观察到 B — 后来发现很重要" | Agent 观察到类似的异常 |
+
+### 目录结构
+
+```
+skills/
+└── {domain}/                    # 8 个 arXiv 对齐的顶层领域
+    └── {subdomain}/             # 155 个子领域
+        └── {contributor}/       # 你的名字
+            ├── procedural/      # tie--, no-change--, constraint-failure--, operator-fail--
+            ├── semantic/        # frontier--, non-public--, correction--
+            └── episodic/        # failure--, adaptation--, anomalous--
+```
+
+### 理论基础
+
+完整论述 — 为什么科研困难、为什么 LLM 在科研上力不从心、以及 Skill 如何改变 Agent 行为 — 参见[《为什么科研是困难的》](docs/why-research-is-hard.md)。完整 Schema 规范参见 [Skill Schema Design](docs/superpowers/specs/2026-04-11-skill-schema-design.md)。
+
+---
+
+<h2 align="center">4. 成为审稿人</h2>
 
 审稿人是守护其子领域 Skill 科学质量的领域专家。需要在相关领域有充分的同行评审经验。
 
@@ -141,7 +204,7 @@ $extract-knowhow
 
 ---
 
-<h2 align="center">4. 领域列表</h2>
+<h2 align="center">5. 领域列表</h2>
 
 <div align="center">
 

@@ -34,6 +34,8 @@ This installs the command automatically to both platforms:
 $extract-knowhow
 ```
 
+> 💡 **For best results:** use the most powerful model with the highest reasoning effort — **Claude Code:** Opus 4.6 + max effort. **Codex:** GPT-5.4 + x-high. Don't worry about token usage — conversations are heavily compressed before analysis, and per-session extraction is delegated to lighter models behind the scenes. Your chosen model mainly orchestrates the pipeline.
+
 The command runs a 7-stage pipeline:
 
 1. **Scan** — discover all Claude Code and Codex sessions

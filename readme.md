@@ -60,6 +60,8 @@ npm install -g @openscientist/extract-knowhow
 $extract-knowhow
 ```
 
+> 💡 **For best results:** use the most powerful model with the highest reasoning effort — **Claude Code:** Opus 4.6 + max effort. **Codex:** GPT-5.4 + x-high. Don't worry about token usage — conversations are heavily compressed before analysis, and the per-session extraction is delegated to lighter models behind the scenes. Your chosen model mainly orchestrates the pipeline.
+
 The command scans your conversation history and extracts **research skills** organized by cognitive memory type:
 
 - **Procedural memory:** IF-THEN rules for navigating research impasses (e.g., "IF gradient explodes THEN check learning rate before architecture")
@@ -83,39 +85,83 @@ Then paste this prompt into a **new conversation**:
 <details>
 <summary><b>Click to expand the full prompt</b></summary>
 
+````
+You have access to my full conversation history. Review ALL of it and extract **research skills** — the tacit know-how from my scientific work that a frontier LLM doesn't already know. Be comprehensive, not selective: a typical researcher accumulates dozens of worthwhile skills across a year of conversations.
+
+## Three memory types (with required subtypes)
+
+Pick exactly ONE subtype per skill. If nothing fits, don't force it — skip.
+
+### 1. Procedural — IF-THEN rules for research impasses
+- `tie` — multiple viable paths, unclear which to try first (e.g., "ablation vs. full retrain?")
+- `no-change` — completely stuck, no hypothesis about what to try (e.g., "results are bizarre, nothing makes sense")
+- `constraint-failure` — a methodological assumption breaks (e.g., "data violates i.i.d.")
+- `operator-fail` — right method chosen, execution fails (e.g., "CUDA OOM at large batch")
+
+### 2. Semantic — Facts a frontier LLM doesn't reliably know
+- `frontier` — post-training-cutoff knowledge (e.g., "Flash Attention 3 renamed the `causal` parameter")
+- `non-public` — lab-internal or unpublished findings (e.g., "this H100 batch has NCCL topology issues")
+- `correction` — fixes for an incorrect LLM default belief (e.g., "Adam eps=1e-8 is unstable under fp16; use 1e-5")
+
+### 3. Episodic — Concrete episodes with a transferable lesson
+- `failure` — "did X, broke because of hidden reason Y"
+- `adaptation` — "standard method failed; workaround Z worked"
+- `anomalous` — "expected A, observed B — turned out to be important"
+
+## Hard filters (DO NOT extract)
+
+- Engineering / DevOps / deployment / CI / UI / database / Docker
+- Generic programming: git, npm, React, debugging build errors
+- Textbook knowledge any LLM knows
+- Casual chat, setup, file organization, project naming
+
+A skill that an LLM could have generated itself is worth zero. Only extract what **corrects or extends** what a frontier model already knows.
+
+## Output format
+
+For each skill, output ONE YAML+markdown block separated by `===`:
+
 ```
-Review all our past conversations and extract research skills organized by cognitive memory type. Focus exclusively on research activities — ignore general programming, setup, or casual conversations.
+---
+name: gradient-explosion-under-fp16
+memory_type: procedural
+subtype: operator-fail
+domain: computer-science      # arXiv top-level: physics, math, computer-science, q-bio, stat, eess, econ, q-fin
+subdomain: machine-learning   # see https://arxiv.org/category_taxonomy
+tags: [adam, mixed-precision, numerical-stability]
+---
 
-Extract three types of research knowledge:
+## When
+Training deep transformers with Adam under fp16; loss spikes to NaN within the first few epochs despite gradient clipping.
 
-1. **Procedural memory** — IF-THEN rules for navigating research impasses:
-   - Format: "IF [situation] THEN [action] BECAUSE [reasoning]"
-   - Focus on: decision points, failure recovery, method selection heuristics
-   - Example: "IF model loss plateaus after 50 epochs THEN try reducing learning rate by 10x before changing architecture BECAUSE architecture changes are expensive and LR is the most common culprit"
+## Decision
+Raise Adam's `eps` from 1e-8 to 1e-5 BEFORE lowering the learning rate or touching architecture. Rejected: lowering LR (masks the symptom), switching to SGD (loses Adam's benefits).
 
-2. **Semantic memory** — Domain facts that LLMs don't reliably know:
-   - Calibration constants, undocumented tool behaviors, method limitations
-   - Example: "Library X's default tokenizer silently truncates inputs over 512 tokens without warning"
+## Why
+At fp16 resolution, 1e-8 denormalizes to zero, so Adam's update divides by ~0. Most "gradient explosion" under mixed precision is this, not true instability.
 
-3. **Episodic memory** — Concrete research episodes:
-   - What was tried, what failed, what was learned
-   - Include dead ends and abandoned approaches — these are the most valuable
+## Local Verifiers
+- NaN appears in optimizer state BEFORE gradient clipping fires
+- Symptom disappears under bf16 (wider dynamic range) — confirms the eps hypothesis
 
-For each skill, include:
-- The research context (what problem was being solved)
-- The domain/subdomain (e.g., physics/quantum-physics)
-- Confidence level: high | medium | low
-
-Output as a markdown document with sections for each memory type.
-
-Rules:
-- Extract the FULL research trajectory, including dead ends and abandoned paths
-- DE-IDENTIFY all output: remove file paths, usernames, project names, private URLs, collaborator names. Keep scientific content (materials, parameters, methods)
-- Focus on capturing the reasoning and judgment behind each action — the kind of intuition that never makes it into papers
-- DO NOT skip failed attempts or abandoned directions — they reveal tacit knowledge
-- DO NOT extract generic programming knowledge, AI tool usage patterns, or textbook basics
-- After the output, ask if there are research conversations that were missed
+## Anti-exemplars
+Don't apply if using bf16 or fp32 — eps=1e-8 is fine there.
+===
 ```
+
+## Rules
+
+- **De-identify**: strip file paths, usernames, project names, private URLs, collaborator names. KEEP scientific content (materials, parameters, methods, model names).
+- **Dead ends are gold**: failed experiments and abandoned approaches are often the most valuable skills. Don't skip them.
+- **Favor specificity**: "IF loss plateaus THEN try X" is weak. "IF Adam loss plateaus on transformers >1B params after warmup THEN X because Y" is strong.
+- **Aim for coverage, not brevity**: if you only found 3 skills across a year of research conversations, you missed most of them.
+
+## After you finish
+
+1. Count how many skills you extracted and briefly summarize the distribution (X procedural / Y semantic / Z episodic).
+2. List any research threads you're uncertain about — ask me whether to revisit them.
+3. Tell me to submit via: https://github.com/OpenScientists/OpenScientist/issues/new?template=01-submit-skill.yml
+````
 
 </details>
 

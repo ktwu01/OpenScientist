@@ -60,6 +60,8 @@ npm install -g @openscientist/extract-knowhow
 $extract-knowhow
 ```
 
+> 💡 **为了最佳效果：** 使用最强模型 + 最高推理强度 — **Claude Code：** Opus 4.6 + max effort。**Codex：** GPT-5.4 + x-high。不必担心 token 消耗 — 对话会被充分压缩后再分析，每个会话的提取会交给较小的模型处理。你选的模型主要负责编排流水线。
+
 该命令会扫描你的对话历史，提取按认知记忆类型组织的**科研技能**：
 
 - **程序性记忆：** 应对科研困境的 IF-THEN 规则（如"IF 梯度爆炸 THEN 先检查学习率再改架构"）
@@ -83,39 +85,83 @@ $extract-knowhow
 <details>
 <summary><b>点击展开完整 prompt</b></summary>
 
+````
+你可以访问我所有的历史对话。请完整回顾它们，提取**科研技能** — 我科研工作中的隐性 know-how，那些前沿 LLM 本身不具备的知识。要求覆盖全面，不要保守：一个典型研究者一年的对话中会累积几十条值得提取的技能。
+
+## 三种记忆类型（每种必须指定子类型）
+
+每条技能只能归入一个子类型。如果都不匹配，就跳过该条目 — 不要勉强套。
+
+### 1. 程序性（Procedural） — 应对科研困境的 IF-THEN 规则
+- `tie` — 多条可行路径，不确定先走哪一条（如"消融实验还是完整重训？"）
+- `no-change` — 完全卡住，没有可尝试的假设（如"结果很诡异，完全讲不通"）
+- `constraint-failure` — 某个方法学前提不成立（如"数据违反 i.i.d. 假设"）
+- `operator-fail` — 方法选对了，执行失败（如"大 batch size 下 CUDA OOM"）
+
+### 2. 语义（Semantic） — 前沿 LLM 不可靠掌握的事实
+- `frontier` — 训练截止日期之后的知识（如"Flash Attention 3 把 `causal` 参数改名了"）
+- `non-public` — 实验室内部或未发表的发现（如"这批 H100 有 NCCL 拓扑问题"）
+- `correction` — 纠正 LLM 默认的错误信念（如"fp16 下 Adam 的 eps=1e-8 不稳定，应该用 1e-5"）
+
+### 3. 情景（Episodic） — 具有可迁移教训的具体经历
+- `failure` — "做了 X，因为隐藏原因 Y 失败了"
+- `adaptation` — "标准方法失败；权宜方案 Z 成功了"
+- `anomalous` — "预期 A，观察到 B — 最后发现这很重要"
+
+## 硬过滤（绝对不要提取）
+
+- 工程 / DevOps / 部署 / CI / UI / 数据库 / Docker
+- 通用编程：git、npm、React、构建错误调试
+- 任何 LLM 都已熟知的教科书知识
+- 闲聊、环境配置、文件组织、项目命名
+
+LLM 自己就能生成的技能，价值为零。只提取那些**纠正或扩展**前沿模型已有认知的内容。
+
+## 输出格式
+
+每条技能输出一个 YAML+markdown 块，用 `===` 分隔：
+
 ```
-回顾我们所有的历史对话，按认知记忆类型提取科研技能。只关注科研活动，忽略通用编程、环境配置或闲聊内容。
+---
+name: gradient-explosion-under-fp16
+memory_type: procedural
+subtype: operator-fail
+domain: computer-science      # arXiv 顶级分类：physics, math, computer-science, q-bio, stat, eess, econ, q-fin
+subdomain: machine-learning   # 参考 https://arxiv.org/category_taxonomy
+tags: [adam, mixed-precision, numerical-stability]
+---
 
-提取三种科研知识：
+## When
+在 fp16 下用 Adam 训练深度 Transformer；尽管有梯度裁剪，前几个 epoch 损失仍会突然变 NaN。
 
-1. **程序性记忆** — 应对科研困境的 IF-THEN 规则：
-   - 格式："IF [情境] THEN [行动] BECAUSE [原因]"
-   - 重点关注：决策点、失败恢复、方法选择启发式
-   - 示例："IF 模型损失在 50 轮后停滞 THEN 先尝试将学习率降低 10 倍再改架构 BECAUSE 架构变更代价高昂，学习率是最常见的原因"
+## Decision
+先把 Adam 的 `eps` 从 1e-8 提到 1e-5，再考虑降学习率或改架构。已拒绝的方案：降 LR（只是掩盖症状）、换 SGD（丢掉 Adam 的优点）。
 
-2. **语义记忆** — LLM 不可靠掌握的领域事实：
-   - 校准常数、未记录的工具行为、方法局限性
-   - 示例："库 X 的默认分词器会静默截断超过 512 个 token 的输入，不会发出警告"
+## Why
+fp16 精度下 1e-8 会被规约为 0，Adam 的更新步骤相当于除以零。混合精度下多数"梯度爆炸"其实是这个问题，而不是真正的梯度不稳定。
 
-3. **情景记忆** — 具体的科研经历：
-   - 尝试了什么、失败了什么、学到了什么
-   - 包含死胡同和被放弃的方向 — 这些是最有价值的
+## Local Verifiers
+- 梯度裁剪触发**之前**，optimizer state 里就出现了 NaN
+- 换成 bf16（动态范围更大）后症状消失 — 印证 eps 假设
 
-对每个技能，包含：
-- 科研上下文（在解决什么问题）
-- 领域/子领域（如 physics/quantum-physics）
-- 置信度：high | medium | low
-
-输出为 markdown 文档，按记忆类型分节。
-
-规则：
-- 提取完整的科研轨迹，包括死胡同和被放弃的方向
-- 脱敏处理：去除文件路径、用户名、项目名、私有 URL、合作者姓名。保留科学内容（材料、参数、方法）
-- 重点捕捉每个动作背后的推理和判断 — 那些永远不会写进论文的直觉
-- 不要跳过失败的尝试或放弃的方向 — 它们蕴含隐性知识
-- 不要提取通用编程知识、AI 工具使用技巧或教科书基础内容
-- 输出之后，询问是否有遗漏的科研对话
+## Anti-exemplars
+如果是 bf16 或 fp32，不要套用这条 — 那种情况下 eps=1e-8 是正常的。
+===
 ```
+
+## 规则
+
+- **脱敏处理**：去除文件路径、用户名、项目名、私有 URL、合作者姓名。保留科学内容（材料、参数、方法、模型名）。
+- **死胡同最珍贵**：失败的实验、放弃的方向往往是最高价值的技能来源，不要跳过。
+- **要具体**："IF 损失停滞 THEN 试 X" 是弱技能。"IF Adam 训练 >1B 参数 Transformer 在 warmup 后损失停滞 THEN 试 X 因为 Y" 是强技能。
+- **追求覆盖而非精简**：如果你在一年的科研对话里只挑出了 3 条技能，说明绝大多数都被你漏了。
+
+## 完成后
+
+1. 报告一下提取总数和分布（X 条程序性 / Y 条语义 / Z 条情景）。
+2. 列出你不确定要不要挖的对话话题 — 问我是否要重新回顾。
+3. 提醒我提交：https://github.com/OpenScientists/OpenScientist/issues/new?template=01-submit-skill.yml
+````
 
 </details>
 

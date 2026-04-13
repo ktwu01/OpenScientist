@@ -36,7 +36,7 @@ try {
   // ignore
 }
 
-// --- Codex CLI ---
+// --- Codex ---
 const CODEX_SKILL_DIR = path.join(os.homedir(), ".codex", "skills", "extract-knowhow");
 const CODEX_SKILL_TARGET = path.join(CODEX_SKILL_DIR, "SKILL.md");
 const CODEX_SCRIPTS_DIR = path.join(CODEX_SKILL_DIR, "scripts");
@@ -44,7 +44,7 @@ const CODEX_SCRIPTS_DIR = path.join(CODEX_SKILL_DIR, "scripts");
 try {
   if (fs.existsSync(CODEX_SKILL_TARGET)) {
     fs.unlinkSync(CODEX_SKILL_TARGET);
-    console.log("✓ Codex CLI: /extract-knowhow SKILL.md removed");
+    console.log("✓ Codex: /extract-knowhow SKILL.md removed");
   }
   for (const script of HELPER_SCRIPTS) {
     const p = path.join(CODEX_SCRIPTS_DIR, script);
@@ -57,7 +57,7 @@ try {
     const skillRemaining = fs.readdirSync(CODEX_SKILL_DIR);
     if (skillRemaining.length === 0) fs.rmdirSync(CODEX_SKILL_DIR);
   } catch (_) { /* best effort */ }
-  console.log("✓ Codex CLI: helper scripts removed");
+  console.log("✓ Codex: helper scripts removed");
 } catch (err) {
   // ignore
 }

@@ -1,10 +1,10 @@
 # @openscientist/extract-knowhow
 
-> Automatically extract **research skills** from Claude Code conversation history and submit them to [OpenScientist](https://github.com/OpenScientists/OpenScientist).
+> Automatically extract **research skills** from Claude Code / Codex conversation history and submit them to [OpenScientist](https://github.com/OpenScientists/OpenScientist).
 
 ## What It Does
 
-When you use Claude Code for scientific research — data analysis, paper writing, experiment design, theoretical derivation — your conversations contain valuable tacit knowledge: judgment calls, abandoned approaches, tool choices, and reasoning patterns.
+When you use Claude Code or Codex for scientific research — data analysis, paper writing, experiment design, theoretical derivation — your conversations contain valuable tacit knowledge: judgment calls, abandoned approaches, tool choices, and reasoning patterns.
 
 `/extract-knowhow` extracts three types of cognitive memory from your research sessions:
 
@@ -18,18 +18,25 @@ When you use Claude Code for scientific research — data analysis, paper writin
 npm install -g @openscientist/extract-knowhow
 ```
 
-This installs the command automatically:
+This installs the command automatically to both platforms:
 - **Claude Code** → `~/.claude/commands/extract-knowhow.md`
+- **Codex** → `~/.codex/skills/extract-knowhow/SKILL.md`
 
 ## Usage
 
+**Claude Code:**
 ```
 /extract-knowhow
 ```
 
+**Codex** (start with `codex -a never -s danger-full-access`):
+```
+$extract-knowhow
+```
+
 The command runs a 7-stage pipeline:
 
-1. **Scan** — discover all Claude Code sessions
+1. **Scan** — discover all Claude Code and Codex sessions
 2. **Classify** — identify research vs. engineering projects (Sonnet)
 3. **Extract** — extract research skills per session (Sonnet), organized by cognitive memory type
 4. **Clean** — review extracted skills with Opus: reject engineering content, fix PII, merge duplicates
@@ -88,8 +95,8 @@ npm uninstall -g @openscientist/extract-knowhow
 
 ## Privacy
 
-- All analysis happens locally via your Claude Code session
-- Session data is read from `~/.claude/projects/` on your machine
+- All analysis happens locally via your Claude Code / Codex session
+- Session data is read from `~/.claude/projects/` and `~/.codex/` on your machine
 - No data is sent to external servers beyond your normal Claude Code API usage
 - AI auto-strips personal information; you review before submitting
 - You choose what to submit — nothing is sent without your explicit action

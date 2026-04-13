@@ -47,7 +47,7 @@ try {
   console.error("⚠ Claude Code: could not install —", err.message);
 }
 
-// --- Codex CLI ---
+// --- Codex ---
 const CODEX_SKILL_DIR = path.join(os.homedir(), ".codex", "skills", "extract-knowhow");
 const CODEX_SKILL_TARGET = path.join(CODEX_SKILL_DIR, "SKILL.md");
 const CODEX_SCRIPTS_DIR = path.join(CODEX_SKILL_DIR, "scripts");
@@ -56,7 +56,7 @@ try {
   fs.mkdirSync(CODEX_SKILL_DIR, { recursive: true });
   fs.mkdirSync(CODEX_SCRIPTS_DIR, { recursive: true });
   fs.copyFileSync(SOURCE_CODEX_SKILL, CODEX_SKILL_TARGET);
-  console.log("✓ Codex CLI:   /extract-knowhow installed to ~/.codex/skills/extract-knowhow/");
+  console.log("✓ Codex:   /extract-knowhow installed to ~/.codex/skills/extract-knowhow/");
 
   for (const script of HELPER_SCRIPTS) {
     const src = path.join(__dirname, script);
@@ -64,12 +64,12 @@ try {
     if (fs.existsSync(src)) {
       fs.copyFileSync(src, dst);
     } else {
-      console.warn(`⚠ Codex CLI: ${script} not found in package, skipping`);
+      console.warn(`⚠ Codex: ${script} not found in package, skipping`);
     }
   }
-  console.log(`✓ Codex CLI:   ${HELPER_SCRIPTS.length} scripts installed to ~/.codex/skills/extract-knowhow/scripts/`);
+  console.log(`✓ Codex:   ${HELPER_SCRIPTS.length} scripts installed to ~/.codex/skills/extract-knowhow/scripts/`);
 } catch (err) {
-  console.error("⚠ Codex CLI: could not install —", err.message);
+  console.error("⚠ Codex: could not install —", err.message);
 }
 
 // --- Cache directory ---
@@ -83,4 +83,4 @@ try {
   console.error("⚠ Cache: could not prepare —", err.message);
 }
 
-console.log("\n  Usage: /extract-knowhow (Claude Code) or $extract-knowhow (Codex CLI)");
+console.log("\n  Usage: /extract-knowhow (Claude Code) or $extract-knowhow (Codex)");

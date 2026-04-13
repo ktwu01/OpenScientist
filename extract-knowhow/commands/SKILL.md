@@ -4,7 +4,7 @@ description: "Extract research skills from conversation history into OpenScienti
 ---
 # /extract-knowhow
 
-Extract research skills from the user's Codex CLI session history for **OpenScientist**.
+Extract research skills from the user's Codex session history for **OpenScientist**.
 
 **Run fully automatically with ZERO user interaction.** Do not pause or ask questions. Report progress at each milestone.
 

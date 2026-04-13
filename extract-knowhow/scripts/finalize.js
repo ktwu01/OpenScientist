@@ -96,19 +96,63 @@ function finalize(metaPath, options = {}) {
 // CLI
 if (require.main === module) {
   const args = process.argv.slice(2);
-  if (args.length < 1) {
+
+  // Parse CLI args — supports both JSON file and inline flags
+  let metaPath = null;
+  const cliOpts = {};
+  for (let i = 0; i < args.length; i++) {
+    switch (args[i]) {
+      case '--domain':         cliOpts.domain = args[++i]; break;
+      case '--subdomain':      cliOpts.subdomain = args[++i]; break;
+      case '--contributor':    cliOpts.contributor = args[++i]; break;
+      case '--session-ids':    cliOpts.sessionIds = args[++i].split(','); break;
+      case '--project-name':   cliOpts.projectName = args[++i]; break;
+      case '--project-slug':   cliOpts.projectSlug = args[++i]; break;
+      case '--description':    cliOpts.description = args[++i]; break;
+      case '--test':           cliOpts.isTest = true; break;
+      case '--no-upload':      cliOpts.noUpload = true; break;
+      case '--no-open':        cliOpts.noOpen = true; break;
+      default:
+        if (!args[i].startsWith('-') && !metaPath) metaPath = args[i];
+    }
+  }
+
+  // Build meta from CLI args or read from JSON file
+  let resolvedMetaPath;
+  if (metaPath) {
+    resolvedMetaPath = path.resolve(metaPath);
+    if (!fs.existsSync(resolvedMetaPath)) {
+      console.error(`Error: not found: ${resolvedMetaPath}`);
+      process.exit(1);
+    }
+  } else if (cliOpts.sessionIds && cliOpts.sessionIds.length > 0) {
+    // Build meta JSON from CLI flags and write to temp file
+    const name = cliOpts.projectName || 'project';
+    const meta = {
+      project_slug: cliOpts.projectSlug || slugify(name),
+      session_ids: cliOpts.sessionIds,
+      anchor: {
+        type: 'project',
+        project_name: name,
+        project_description: cliOpts.description || '',
+      },
+      domain: cliOpts.domain || 'computer-science',
+      subdomain: cliOpts.subdomain || 'general',
+      contributor: cliOpts.contributor || 'anonymous',
+      is_test: cliOpts.isTest || false,
+    };
+    resolvedMetaPath = path.join(os.tmpdir(), `finalize-meta-${Date.now()}.json`);
+    fs.writeFileSync(resolvedMetaPath, JSON.stringify(meta, null, 2));
+  } else {
     console.error('Usage: finalize.js <project-meta.json> [--no-upload] [--no-open]');
+    console.error('   or: finalize.js --session-ids id1,id2 --domain ... --project-name ...');
     process.exit(1);
   }
-  const metaPath = path.resolve(args[0]);
-  if (!fs.existsSync(metaPath)) {
-    console.error(`Error: not found: ${metaPath}`);
-    process.exit(1);
-  }
+
   try {
-    finalize(metaPath, {
-      noUpload: args.includes('--no-upload'),
-      noOpen: args.includes('--no-open'),
+    finalize(resolvedMetaPath, {
+      noUpload: cliOpts.noUpload || false,
+      noOpen: cliOpts.noOpen || false,
     });
   } catch (err) {
     console.error(`Error: ${err.message}`);

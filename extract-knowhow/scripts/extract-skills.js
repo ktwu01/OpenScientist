@@ -63,6 +63,7 @@ function parseArgs() {
     batchSize: Infinity,
     concurrency: 10,
     sessionIds: null,
+    singleBatch: false,
     test: false,
     verbose: false,
   };
@@ -77,6 +78,7 @@ function parseArgs() {
       case '--batch-size':    opts.batchSize = parseInt(args[++i], 10); break;
       case '--concurrency':   opts.concurrency = parseInt(args[++i], 10); break;
       case '--session-ids':   opts.sessionIds = args[++i].split(','); break;
+      case '--single-batch':  opts.singleBatch = true; break;
       case '--test':          opts.test = true; break;
       case '--verbose':       opts.verbose = true; break;
       default:
@@ -141,190 +143,51 @@ function slugify(s) {
     .substring(0, 60);
 }
 
-function buildPrompt(session, segmentFile, segmentInfo, opts) {
-  const date = new Date().toISOString().split('T')[0];
-  const domain = opts.domain || 'computer-science';
-  const subdomain = opts.subdomain || 'general';
-  const contributor = opts.contributor || 'anonymous';
-  const sessionId = session.session_id;
-
-  // Read formatted text — will be called once per segment for multi-segment sessions
+function buildPrompt(segmentFile) {
   const sessionText = fs.readFileSync(segmentFile, 'utf-8');
 
-  const segLabel = segmentInfo ? ` (segment ${segmentInfo.index}/${segmentInfo.total})` : '';
+  return `You extract research skills from scientist-AI conversations. Output AT MOST 3 skills per segment. 0 is acceptable and often correct.
 
-  return `You are a research skill extractor for OpenScientist.
+## Quality Gate — every candidate must pass ALL three
 
-## Your Task
+1. **Non-obvious** — would a domain expert find this surprising? If not, skip.
+2. **Session-specific** — grounded in a concrete event here, not generic advice you could write without the session? If not, skip.
+3. **Research-relevant** — about research methodology, scientific reasoning, knowledge extraction, or academic writing? Reject all standard software engineering (debugging, git, CI/CD, deployment, npm, Docker, frontend, CSS, platform API quirks) and textbook-level advice.
 
-Analyze the session text below${segLabel}. Identify research impasse moments and knowledge gaps, then output skill markdown blocks.
+## What to look for
 
-## Input
+- **Impasse moments**: researcher got stuck, assumptions failed, had to choose between approaches
+- **Knowledge gaps**: facts the human provided that an LLM wouldn't know from training
+- **Notable episodes**: failures, adaptations, or anomalous findings with transferable lessons
 
-Session ID: ${sessionId}${segLabel}
-Domain: ${domain}
-Subdomain: ${subdomain}
-Contributor: ${contributor}
-Date: ${date}
+## Skill types and required sections
+
+Output each skill as a \`\`\`skill-md fenced block with YAML frontmatter (name, memory_type, subtype, llm_score 0-5, tags) followed by markdown sections:
+
+**episodic** — subtypes: failure (tried and failed), adaptation (hit obstacle, changed approach), anomalous (unexpected/counterintuitive result)
+Sections: Situation → Action → Outcome → Lesson → Retrieval Cues
+
+**semantic** — subtypes: frontier (cutting-edge, not in textbooks), non-public (internal/unpublished knowledge), correction (LLM believes X but Y is true)
+Sections: Fact → Evidence → LLM Default Belief (correction only) → Expiry Signal
+
+**procedural** — subtypes: tie (two viable options, one better), no-change (tempting to act but should hold), constraint-failure (plan failed due to hidden constraint), operator-fail (right strategy, wrong execution)
+Sections: When + Exclusions → Decision (Preferred / Rejected alternatives / Reasoning) → Local Verifiers → Failure Handling → Anti-exemplars
+
+## Rules
+
+- Specific to THIS session. No generic advice.
+- De-identify: strip file paths, usernames, project names, private URLs. Preserve scientific content.
+- llm_score: 4-5 = genuinely novel, 3 = useful, 0-2 = probably should not extract.
+
+## Final line
+
+After all blocks: SKILLS_EXTRACTED: <total> (E:<episodic> S:<semantic> P:<procedural>)
 
 ## Session Text
 
 <session>
 ${sessionText}
-</session>
-
-## Instructions
-
-Scan the conversation chronologically. Identify:
-- **Impasse moments**: researcher got stuck, had to choose, assumptions failed, or execution broke
-- **Knowledge gaps**: facts the human provided that an LLM wouldn't know
-- **Notable episodes**: failures, workarounds, or surprising findings
-
-For each finding, output a skill as a fenced markdown block.
-
-### Episodic skills
-
-\`\`\`
----
-name: "<descriptive-slug>"
-memory_type: episodic
-subtype: failure | adaptation | anomalous
-domain: ${domain}
-subdomain: ${subdomain}
-contributor: ${contributor}
-source:
-  type: session
-  session_id: "${sessionId}"
-extracted_at: "${date}"
-confidence:
-  llm_score: <0-5>
-tags: [<relevant-tags>]
----
-
-## Situation
-[What was happening — specific, de-identified]
-
-## Action
-[What was done]
-
-## Outcome
-[What happened]
-
-## Lesson
-[What was learned]
-
-## Retrieval Cues
-- [When should an agent recall this?]
-\`\`\`
-
-### Semantic skills
-
-\`\`\`
----
-name: "<descriptive-slug>"
-memory_type: semantic
-subtype: frontier | non-public | correction
-domain: ${domain}
-subdomain: ${subdomain}
-contributor: ${contributor}
-source:
-  type: session
-  session_id: "${sessionId}"
-extracted_at: "${date}"
-confidence:
-  llm_score: <0-5>
-tags: [<relevant-tags>]
----
-
-## Fact
-[Specific knowledge point]
-
-## Evidence
-- Source: [origin]
-- Verified by: [method]
-
-## LLM Default Belief
-[For correction only: what the LLM wrongly assumes]
-
-## Expiry Signal
-[When this becomes outdated]
-\`\`\`
-
-### Procedural skills
-
-\`\`\`
----
-name: "<descriptive-slug>"
-memory_type: procedural
-subtype: tie | no-change | constraint-failure | operator-fail
-domain: ${domain}
-subdomain: ${subdomain}
-contributor: ${contributor}
-source:
-  type: session
-  session_id: "${sessionId}"
-extracted_at: "${date}"
-confidence:
-  llm_score: <0-5>
-tags: [<relevant-tags>]
----
-
-## When
-[What situation triggers this — specific]
-
-### Exclusions
-- [Similar but should NOT trigger]
-
-## Decision
-
-### Preferred action
-[What to do]
-
-### Rejected alternatives
-- [Alt] — [why wrong]
-
-### Reasoning
-[Tacit knowledge — why preferred is better]
-
-## Local Verifiers
-1. [Check to run after acting]
-
-## Failure Handling
-[What if verifiers fail]
-
-## Anti-exemplars
-- [Where this skill would be harmful]
-\`\`\`
-
-## Output Format
-
-Output each skill as a fenced markdown block with \`\`\`skill-md markers. Example:
-
-\`\`\`skill-md
----
-name: "example-slug"
-memory_type: episodic
-subtype: failure
-...
----
-
-## Situation
-...
-\`\`\`
-
-Output as many \`\`\`skill-md blocks as you find. If no meaningful content, output zero blocks.
-
-## Rules
-
-- Skills must be specific to THIS conversation. No generic advice.
-- De-identify: strip file paths, usernames, project names, private URLs.
-- Preserve: scientific content, methods, tools, parameters.
-- If the session is about general software engineering (not research) in test mode, still extract — focus on problem-solving patterns, not routine coding.
-
-## Final line
-
-After all skill blocks, print exactly:
-SKILLS_EXTRACTED: <total> (E:<episodic> S:<semantic> P:<procedural>)`;
+</session>`;
 }
 
 // ---------------------------------------------------------------------------
@@ -376,6 +239,16 @@ function injectProjectMeta(content, projectMeta) {
   const endIdx = lines.indexOf('---', 1);
   if (endIdx <= 0) return content;
   const insert = [];
+  // Inject fixed fields that Haiku no longer outputs
+  if (projectMeta.domain) insert.push(`domain: ${projectMeta.domain}`);
+  if (projectMeta.subdomain) insert.push(`subdomain: ${projectMeta.subdomain}`);
+  if (projectMeta.contributor) insert.push(`contributor: ${projectMeta.contributor}`);
+  if (projectMeta.sessionId) {
+    insert.push(`source:`);
+    insert.push(`  type: session`);
+    insert.push(`  session_id: "${projectMeta.sessionId}"`);
+  }
+  if (projectMeta.extractedAt) insert.push(`extracted_at: "${projectMeta.extractedAt}"`);
   if (projectMeta.projectName) insert.push(`project_name: "${projectMeta.projectName}"`);
   if (projectMeta.projectSlug) insert.push(`project_slug: "${projectMeta.projectSlug}"`);
   if (insert.length === 0) return content;
@@ -544,10 +417,18 @@ async function main() {
       const segInfo = totalSegs > 1 ? { index: si + 1, total: totalSegs } : null;
       // Find the original session object to pass to buildPrompt
       const session = batch.find(s => s.session_id === sid);
-      const prompt = buildPrompt(session, formattedFiles[si], segInfo, opts);
+      const prompt = buildPrompt(formattedFiles[si]);
       const projectName = deriveProjectName(session, opts) || 'unknown';
       const projectSlug = opts.projectSlug || slugify(projectName) || 'unknown';
-      workUnits.push({ sid, prompt, segFile: formattedFiles[si], segInfo, projectMeta: { projectName, projectSlug } });
+      const projectMeta = {
+        projectName, projectSlug,
+        domain: opts.domain || 'computer-science',
+        subdomain: opts.subdomain || 'general',
+        contributor: opts.contributor || 'anonymous',
+        sessionId: sid,
+        extractedAt: new Date().toISOString().split('T')[0],
+      };
+      workUnits.push({ sid, prompt, segFile: formattedFiles[si], segInfo, projectMeta });
     }
   }
 
@@ -600,6 +481,12 @@ async function main() {
     results.push(...chunkResults.filter(Boolean));
     completed += chunk.length;
     console.log(`  Progress: ${completed}/${workUnits.length}`);
+
+    if (opts.singleBatch) {
+      const remainingCalls = workUnits.length - completed;
+      console.log(`\n  --single-batch: stopping after batch ${batchNum}. ${remainingCalls} Haiku calls remaining.`);
+      break;
+    }
   }
 
   // Clean up any remaining formatted files

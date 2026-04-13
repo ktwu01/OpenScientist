@@ -4,42 +4,7 @@ Extract research skills from the user's Claude Code session history for **OpenSc
 
 **Run fully automatically with ZERO user interaction.** Do not pause or ask questions. Report progress at each milestone.
 
-You extract three types of cognitive memory from research conversations:
-- **Procedural** — IF-THEN rules for **scientific research** decisions: methodology choices, data interpretation strategies, research direction pivots. NOT engineering workflows.
-- **Semantic** — **Frontier scientific knowledge** the LLM doesn't have: domain-specific constraints, unpublished findings, corrections to scientific misconceptions. NOT tool/API behaviors.
-- **Episodic** — **Research cognitive turning points**: hypothesis overturned, methodology abandoned for scientific reasons, unexpected findings that changed direction. NOT debugging episodes.
-
-Everything else — discovery, formatting, validation, upload — is done by helper scripts. Do not reimplement their work.
-
----
-
-## Pipeline
-
-```
-scan-sessions.js    ─┐
-extract-skills.js   ─┤  deterministic scripts (you call them)
-  └─ claude -p       │  ← Haiku CLI call per session, inside the script
-finalize.js         ─┘
-
-You (main agent)    ← call scripts, read summaries, report
-```
-
-Helper scripts (installed at `~/.claude/utils/`):
-
-| Script | What it does |
-|--------|-------------|
-| `scan-sessions.js` | Discover sessions, extract metadata, filter, group by project |
-| `extract-skills.js` | **The core loop**: format each session → call `claude -p --model haiku` → validate + cache skills |
-| `validate-skills.js` | Validate skill markdown and cache to `~/.openscientist/cache/skills/` |
-| `finalize.js` | Collect cached skills → upload to researchskills.ai |
-
----
-
-## The Three Hard Rules
-
-1. **Use the Read tool** on formatted text produced by `format-session.js`. Never pattern-match or grep raw `.jsonl` files.
-2. **Timestamps** come from the `[ISO-timestamp]` prefix on each line of formatted text. Never fabricate timestamps.
-3. **Skills must be specific** to what actually happened in the conversation. Never write generic textbook-style advice.
+Everything — formatting, extraction, validation, upload — is done by helper scripts. Do not reimplement their work.
 
 ---
 
@@ -50,16 +15,12 @@ Helper scripts (installed at `~/.claude/utils/`):
 
 Detect mode at start. Announce: `"Running in TEST MODE"` or `"Running in production mode"`.
 
-Create cache directory:
-```bash
-mkdir -p ~/.openscientist/cache/meta ~/.openscientist/cache/skills
-```
-
 ---
 
 ## Stage 1 — Scan
 
 ```bash
+mkdir -p ~/.openscientist/cache/meta ~/.openscientist/cache/skills
 node ~/.claude/utils/scan-sessions.js
 ```
 
@@ -67,130 +28,64 @@ Reads `~/.openscientist/cache/work-list.json` output. Report: `"Found N sessions
 
 ---
 
-## Stage 2 — Classify & Pick Domain (AI)
+## Stage 2 — Classify Projects
 
-First, fetch the canonical domain/subdomain list:
 ```bash
-curl -s https://researchskills.ai/taxonomy.json | python3 -c "import sys,json; t=json.load(sys.stdin)['taxonomy']; [print(f'{d}: {subs}') for d,subs in sorted(t.items())]"
+node ~/.claude/utils/classify-projects.js ~/.openscientist/cache/work-list.json --verbose
 ```
 
-For each project in the work-list:
-1. Read the first_prompt of representative sessions
-2. Classify as research / engineering / other
-3. Pick the best-matching domain and subdomain **from the taxonomy list above**. Do NOT invent new domains — use the closest match from the list.
-4. In test mode: engineering sessions accepted, mapped to `computer-science/test-data`
+For test mode, add `--test`.
 
-Report: `"Classified N projects. Proceeding with M."`
+The script calls Haiku to classify each project as research/engineering and picks domain/subdomain from the taxonomy. Output: `~/.openscientist/cache/classification.json`.
+
+Read the output file. For each project with `type: "research"`, use its `research_session_ids`, `domain`, and `subdomain` in Stage 3.
 
 ---
 
 ## Stage 3 — Extract Skills Per Session (script + Haiku CLI)
 
-**Architecture:** A single script handles the entire extraction loop. For each session it formats the text, calls `claude -p --model haiku` to extract skills, then validates and caches the results. Each Haiku call is independent — no context accumulation. Your context stays clean.
+### CRITICAL execution rules (you MUST follow ALL of these):
 
-**Do NOT loop through sessions yourself.** Call the script once and let it handle everything.
+1. **NEVER use `run_in_background`** for the extraction script. The user needs to see progress after each batch.
+2. **ALWAYS use `--single-batch`** flag. This makes the script run ONE batch (10 parallel Haiku calls) then exit.
+3. **Loop with separate Bash calls.** After each call, report progress, then call the script again. Repeat until it reports "All sessions already cached" or "0 Haiku calls remaining".
+4. **Pass ALL research session IDs** from Stage 2. Do NOT drop sessions or pick a subset.
+
+### Execution pattern:
 
 ```bash
+# Call this in a LOOP, one Bash call per iteration. NEVER run_in_background.
 node ~/.claude/utils/extract-skills.js ~/.openscientist/cache/work-list.json \
   --domain <domain> \
   --subdomain <subdomain> \
   --contributor "$(git config user.name)" \
+  --session-ids <ALL-research-session-ids-csv> \
+  --single-batch \
   --verbose
 ```
 
-For test mode, add `--test`. To process specific sessions only, use `--session-ids <csv>`. To limit batch size, use `--batch-size <n>`.
-
-The script:
-1. Reads work-list.json, skips cached sessions
-2. For each uncached session (up to batch-size):
-   - Formats via `format-session.js`
-   - Calls `claude -p --model haiku` with the extraction prompt
-   - Haiku reads the formatted text, writes skill `.md` files, validates them
-   - Parses the `SKILLS_EXTRACTED:` line from Haiku's output
-3. Prints a summary with counts per memory type
-4. Writes `/tmp/extract-skills-summary.json` for you to read
-
-If you need to process multiple projects with different domains, call the script once per project with `--session-ids` filtering to that project's sessions.
-
-After the script finishes, read `/tmp/extract-skills-summary.json` for the totals.
+After each call completes:
+1. Report the batch result to the user (e.g. "Batch 2/7 done: 45 skills so far, 21 Haiku calls remaining")
+2. If output contains "0 Haiku calls remaining" or "All sessions already cached" → stop looping
+3. Otherwise → call the script again (same command, it auto-skips cached work)
 
 ---
 
 ## Stage 4 — Finalize Per Project
 
-For each project, write a project-meta.json and call finalize.js:
-
 ```bash
-cat > /tmp/<slug>-meta.json <<'EOF'
-{
-  "project_slug": "<slug>",
-  "session_ids": ["<id1>", "<id2>"],
-  "anchor": { "type": "project", "project_name": "<name>", "project_description": "<desc>" },
-  "domain": "<domain>",
-  "subdomain": "<subdomain>",
-  "contributor": "<git user.name>",
-  "is_test": false
-}
-EOF
-
-node ~/.claude/utils/finalize.js /tmp/<slug>-meta.json
+node ~/.claude/utils/finalize.js \
+  --session-ids <ALL-research-session-ids-csv> \
+  --domain <domain> \
+  --subdomain <subdomain> \
+  --contributor "$(git config user.name)" \
+  --project-name "<name>" \
+  --project-slug "<slug>"
 ```
 
 ---
 
 ## Stage 5 — Terminal Summary
 
-```
-═══════════════════════════════════════════════════════
-  /extract-knowhow Complete!
-═══════════════════════════════════════════════════════
+Print a summary: total skills by type (episodic/semantic/procedural), sessions processed, and the batch review URL from finalize.js output.
 
-Extracted N skills from M sessions across P projects:
-  • Episodic:   E skills (F failure, A adaptation, X anomalous)
-  • Semantic:   S skills (Fr frontier, Np non-public, C correction)
-  • Procedural: Pr skills (T tie, Nc no-change, Cf constraint-failure, Of operator-fail)
-
-Review your skills:
-  → https://researchskills.ai/review/skill/abc123
-═══════════════════════════════════════════════════════
-```
-
----
-
-## De-identification
-
-All skills must be de-identified. Strip:
-- File paths, directory names, usernames
-- Project-specific names, dataset names, internal identifiers
-- Email addresses, URLs to private resources
-- Names of collaborators or lab members
-
-Preserve: Scientific content — materials, compounds, parameters, methods, tool/library names.
-
----
-
-## What to Extract vs What to Skip
-
-**DO extract (scientific research skills only):**
-- Research impasse moments where the researcher's **scientific understanding** changed
-- Hypothesis formation, testing, revision, or abandonment and the reasoning behind it
-- Methodology/experiment design trade-offs (why method A over method B)
-- Domain expertise the human provided that LLMs wouldn't know (frontier science, field norms)
-- Data interpretation judgment calls (what counts as significant, when to redo)
-- Cross-disciplinary knowledge transfer (applying one field's methods to another)
-- Research direction strategy (why pursue A not B, when to pivot, how to scope)
-- Meta-research methodology (how to extract tacit knowledge, organize skill taxonomies)
-- Anti-exemplars and exclusions (as important as the skill itself)
-
-**DO NOT extract (engineering/tooling — regardless of difficulty):**
-- Git/GitHub operations (CI, PR, branch, permissions, Actions, CODEOWNERS)
-- Deployment, DNS, TLS, CDN, hosting, network debugging
-- UI/CSS/frontend styling, responsive design
-- Package management, build tools, version compatibility
-- Documentation formatting, markdown, bilingual content, emoji
-- Database config, OAuth, authentication flows
-- IDE/CLI tool usage, agent timeouts, model selection
-- Generic programming (even if the debugging was clever)
-- Textbook-level knowledge (LLMs already know this)
-- Small talk, casual conversation
-- The same impasse repeated across sessions (deduplicate)

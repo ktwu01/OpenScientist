@@ -148,10 +148,11 @@ ${isTest
     : 'PRODUCTION MODE: Only classify as "research" if the sessions involve genuine scientific inquiry, research methodology, hypothesis testing, or academic writing. Software engineering (web dev, deployment, debugging, UI work) is NOT research regardless of difficulty.'}
 
 Respond with EXACTLY this JSON (no markdown fences, no other text):
-{"type":"research","domain":"...","subdomain":"...","reason":"one sentence why","skip_patterns":["pattern1"]}
+{"type":"research","domain":"...","subdomain":"...","project_name":"...","reason":"one sentence why","skip_patterns":["pattern1"]}
 
 - type: "research" or "engineering" or "other"
 - domain/subdomain: from the taxonomy list above. For engineering use "computer-science/software-engineering"
+- project_name: a short, descriptive name (3-8 words) summarizing the research topic of this project based on the session content. Do NOT use the folder name. Examples: "Protein Folding Simulation Pipeline", "Neural ODE Parameter Estimation", "Galaxy Merger Classification". For engineering projects, describe the tool/system being built.
 - reason: one sentence explaining classification
 - skip_patterns: substrings in first_prompt that indicate non-research sessions to skip (e.g. "extract-knowhow", "npm run build"). Empty array if none.`;
 }
@@ -250,6 +251,7 @@ async function main() {
       type: classification.type || 'other',
       domain: classification.domain || null,
       subdomain: classification.subdomain || null,
+      project_name: classification.project_name || null,
       session_ids: projSessions.map(s => s.session_id),
       research_session_ids: researchIds,
       skipped_session_ids: skippedIds,
@@ -267,6 +269,7 @@ async function main() {
                 c.type === 'engineering' ? '✗ engineering' :
                 c.type === 'error' ? '✗ ERROR' : '? other';
     console.log(`  ${c.slug} (${c.session_ids.length} sessions): ${tag}`);
+    if (c.project_name) console.log(`    → "${c.project_name}"`);
     if (c.domain) console.log(`    → ${c.domain}/${c.subdomain}`);
     if (c.skipped_session_ids.length > 0) {
       console.log(`    → ${c.research_session_ids.length} research, ${c.skipped_session_ids.length} skipped`);

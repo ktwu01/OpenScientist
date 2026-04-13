@@ -75,7 +75,9 @@ The script calls Sonnet to classify each project as research/engineering and pic
 
 Output: `~/.openscientist/cache/classification.json`.
 
-Read the output file. For each project with `type: "research"`, use its `research_session_ids` (NOT `session_ids`), `domain`, and `subdomain` in Stage 3. Do NOT include skipped sessions.
+Read the output file. For each project with `type: "research"`, use its `research_session_ids` (NOT `session_ids`), `domain`, `subdomain`, and `project_name` in later stages. Do NOT include skipped sessions.
+
+The script generates an AI-summarized `project_name` for each project (e.g. "Protein Folding Simulation Pipeline") instead of using the raw folder name. Use this `project_name` in Stage 6 finalize. If `project_name` is null, fall back to the `slug`.
 
 Report: `"Classified N projects. Proceeding with M."`
 
@@ -151,13 +153,15 @@ Report: `"Scored N skills. Avg: procedural X.X, semantic X.X, episodic X.X."`
 
 ## Stage 6 — Finalize Per Project
 
+Use the AI-generated `project_name` from classification.json (Stage 2). Do NOT use the raw folder name.
+
 ```bash
 node ~/.claude/utils/finalize.js \
   --session-ids <ALL-research-session-ids-csv> \
   --domain <domain> \
   --subdomain <subdomain> \
   --contributor "$(git config user.name)" \
-  --project-name "<name>" \
+  --project-name "<project_name from classification>" \
   --project-slug "<slug>"
 ```
 

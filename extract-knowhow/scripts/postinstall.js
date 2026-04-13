@@ -10,6 +10,7 @@ const SOURCE_COMMAND = path.join(__dirname, "..", "commands", "extract-knowhow.m
 // Helper scripts that must be available at runtime
 const HELPER_SCRIPTS = [
   "scan-sessions.js",
+  "classify-projects.js",
   "format-session.js",
   "extract-skills.js",
   "validate-skills.js",

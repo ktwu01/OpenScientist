@@ -3,9 +3,9 @@
  * extract-skills.js
  *
  * Orchestrates per-session skill extraction using Claude Code CLI.
- * For each uncached session: format → call `claude -p` with Haiku → validate.
+ * For each uncached session: format → call `claude -p` with Sonnet → validate.
  *
- * This script is the deterministic loop; Haiku does the AI judgment.
+ * This script is the deterministic loop; Sonnet does the AI judgment.
  * The main /extract-knowhow agent calls this script once with Bash,
  * keeping its own context clean.
  *
@@ -61,7 +61,7 @@ function parseArgs() {
     projectName: null,
     projectSlug: null,
     batchSize: Infinity,
-    concurrency: 10,
+    concurrency: 5,
     sessionIds: null,
     singleBatch: false,
     test: false,
@@ -165,44 +165,45 @@ function slugify(s) {
 function buildPrompt(segmentFile) {
   const sessionText = fs.readFileSync(segmentFile, 'utf-8');
 
-  return `You extract research skills from scientist-AI conversations. Output AT MOST 3 skills per segment. 0 is acceptable and often correct.
+  return `Extract research skills from this scientist-AI conversation. Output 0–10 skills. 0 is often correct.
 
-## Quality Gate — every candidate must pass ALL three
+## Quality Gate — ALL three must pass
 
-1. **Non-obvious** — would a domain expert find this surprising? If not, skip.
-2. **Session-specific** — grounded in a concrete event here, not generic advice you could write without the session? If not, skip.
-3. **Research-relevant** — about research methodology, scientific reasoning, knowledge extraction, or academic writing? Reject all standard software engineering (debugging, git, CI/CD, deployment, npm, Docker, frontend, CSS, platform API quirks) and textbook-level advice.
+1. **Non-obvious** — would a domain expert find this surprising?
+2. **Session-specific** — grounded in a concrete event here, not generic advice?
+3. **Research-only** — about scientific methodology, reasoning, or knowledge? Reject all engineering (UI, DevOps, database, build tools, git, auth, package management, visualization) even if the project is research-related.
 
-## What to look for
+## Skill types
 
-- **Impasse moments**: researcher got stuck, assumptions failed, had to choose between approaches
-- **Knowledge gaps**: facts the human provided that an LLM wouldn't know from training
-- **Notable episodes**: failures, adaptations, or anomalous findings with transferable lessons
+Output each skill as a \`\`\`skill-md fenced block. YAML frontmatter: name, memory_type, subtype, llm_score (0–5), tags. Then markdown sections.
 
-## Skill types and required sections
+**procedural** — IF-THEN rules for research impasses (Soar impasse taxonomy):
+- \`tie\`: Multiple viable paths, agent cannot rank them. Provide decision heuristics to break the tie.
+- \`no-change\`: Completely stuck, no candidate action. Provide exploration strategies or problem reframing.
+- \`constraint-failure\`: A methodological assumption turns out violated. Provide applicability boundaries and alternatives.
+- \`operator-fail\`: Correct approach selected but execution fails. Provide diagnostics and failure patterns.
+Sections: When + Exclusions → Decision (Preferred / Rejected / Reasoning) → Local Verifiers → Failure Handling → Anti-exemplars
 
-Output each skill as a \`\`\`skill-md fenced block with YAML frontmatter (name, memory_type, subtype, llm_score 0-5, tags) followed by markdown sections:
-
-**episodic** — subtypes: failure (tried and failed), adaptation (hit obstacle, changed approach), anomalous (unexpected/counterintuitive result)
-Sections: Situation → Action → Outcome → Lesson → Retrieval Cues
-
-**semantic** — subtypes: frontier (cutting-edge, not in textbooks), non-public (internal/unpublished knowledge), correction (LLM believes X but Y is true)
+**semantic** — Facts missing from LLM training data (ACT-R declarative memory):
+- \`frontier\`: Post-training-cutoff knowledge — fact does not exist in model weights.
+- \`non-public\`: Lab-internal or unpublished — never in any training corpus.
+- \`correction\`: LLM actively gets this wrong — confident but incorrect default belief.
 Sections: Fact → Evidence → LLM Default Belief (correction only) → Expiry Signal
 
-**procedural** — subtypes: tie (two viable options, one better), no-change (tempting to act but should hold), constraint-failure (plan failed due to hidden constraint), operator-fail (right strategy, wrong execution)
-Sections: When + Exclusions → Decision (Preferred / Rejected alternatives / Reasoning) → Local Verifiers → Failure Handling → Anti-exemplars
+**episodic** — Concrete research episodes as situation-action-outcome triples (CBR, Kolodner 1993):
+- \`failure\`: Attempted X, failed due to hidden reason Y. Trigger: agent about to do something similar.
+- \`adaptation\`: Standard method failed, workaround Z succeeded. Trigger: agent stuck with standard approach.
+- \`anomalous\`: Expected A, observed B, turned out important. Trigger: agent observes similar anomaly.
+Sections: Situation → Action → Outcome → Lesson → Retrieval Cues
 
 ## Rules
 
-- Specific to THIS session. No generic advice.
-- De-identify: strip file paths, usernames, project names, private URLs. Preserve scientific content.
-- llm_score: 4-5 = genuinely novel, 3 = useful, 0-2 = probably should not extract.
+- De-identify: strip paths, usernames, project names, private URLs. Paraphrase non-English quotes in English. Preserve scientific content (materials, parameters, methods, public libraries).
+- llm_score: 4–5 genuinely novel, 3 useful, 0–2 skip.
 
 ## Final line
 
-After all blocks: SKILLS_EXTRACTED: <total> (E:<episodic> S:<semantic> P:<procedural>)
-
-## Session Text
+SKILLS_EXTRACTED: <total> (E:<episodic> S:<semantic> P:<procedural>)
 
 <session>
 ${sessionText}
@@ -213,13 +214,13 @@ ${sessionText}
 // Async claude runner (non-blocking)
 // ---------------------------------------------------------------------------
 
-function runClaudeAsync(prompt, timeoutMs = 180_000) {
+function runClaudeAsync(prompt, timeoutMs = 600_000) {
   return new Promise((resolve) => {
     const chunks = [];
     // Pass prompt via stdin instead of command arg (avoids arg length issues)
     const proc = spawn('claude', [
       '-p',
-      '--model', 'haiku',
+      '--model', 'sonnet',
       '--no-session-persistence',
     ], { stdio: ['pipe', 'pipe', 'pipe'] });
 
@@ -249,7 +250,7 @@ function runClaudeAsync(prompt, timeoutMs = 180_000) {
 }
 
 // ---------------------------------------------------------------------------
-// Parse skill-md blocks from Haiku output → write files → validate
+// Parse skill-md blocks from Sonnet output → write files → validate
 // ---------------------------------------------------------------------------
 
 function injectProjectMeta(content, projectMeta) {
@@ -258,7 +259,7 @@ function injectProjectMeta(content, projectMeta) {
   const endIdx = lines.indexOf('---', 1);
   if (endIdx <= 0) return content;
   const insert = [];
-  // Inject fixed fields that Haiku no longer outputs
+  // Inject fixed fields that Sonnet no longer outputs
   if (projectMeta.domain) insert.push(`domain: ${projectMeta.domain}`);
   if (projectMeta.subdomain) insert.push(`subdomain: ${projectMeta.subdomain}`);
   if (projectMeta.contributor) insert.push(`contributor: ${projectMeta.contributor}`);
@@ -347,7 +348,7 @@ function prepareSession(session) {
 }
 
 // ---------------------------------------------------------------------------
-// Parse Haiku output and collect result
+// Parse Sonnet output and collect result
 // ---------------------------------------------------------------------------
 
 function parseResult(sid, output, verbose) {
@@ -387,7 +388,7 @@ async function main() {
   }
 
   console.log(`\nSessions: ${sessions.length} total`);
-  console.log(`Concurrency: ${opts.concurrency} parallel Haiku calls\n`);
+  console.log(`Concurrency: ${opts.concurrency} parallel Sonnet calls\n`);
 
   // Phase 1: Pre-filter and format all sessions (fast, serial)
   // Segment-level caching is checked later in Phase 2
@@ -461,7 +462,7 @@ async function main() {
     process.exit(0);
   }
 
-  console.log(`\nPhase 2: Extracting skills (${prepared.length} sessions → ${workUnits.length} Haiku calls, ${opts.concurrency} at a time)...`);
+  console.log(`\nPhase 2: Extracting skills (${prepared.length} sessions → ${workUnits.length} Sonnet calls, ${opts.concurrency} at a time)...`);
   const results = [];
   let completed = 0;
 
@@ -513,7 +514,7 @@ async function main() {
 
     if (opts.singleBatch) {
       const remainingCalls = workUnits.length - completed;
-      console.log(`\n  --single-batch: stopping after batch ${batchNum}. ${remainingCalls} Haiku calls remaining.`);
+      console.log(`\n  --single-batch: stopping after batch ${batchNum}. ${remainingCalls} Sonnet calls remaining.`);
       break;
     }
   }
@@ -542,15 +543,15 @@ async function main() {
     } catch {}
   }
 
-  // Haiku-reported totals (what Haiku claimed to extract)
-  const haikuTotal = totals.episodic + totals.semantic + totals.procedural;
+  // Sonnet-reported totals (what Sonnet claimed to extract)
+  const sonnetTotal = totals.episodic + totals.semantic + totals.procedural;
 
   console.log(`
 ═══════════════════════════════════════════════
   Extraction Complete
 ═══════════════════════════════════════════════
   Sessions processed: ${prepared.length}
-  Haiku reported:     ${haikuTotal} skills (E:${totals.episodic} S:${totals.semantic} P:${totals.procedural})
+  Sonnet reported:     ${sonnetTotal} skills (E:${totals.episodic} S:${totals.semantic} P:${totals.procedural})
   Actually cached:    ${cachedCounts.total} skills (E:${cachedCounts.episodic} S:${cachedCounts.semantic} P:${cachedCounts.procedural})
   Skipped:            ${totals.skipped} (trivial/too short)
   Errors:             ${totals.errors}
@@ -560,7 +561,7 @@ ${remaining > 0 ? `  Remaining:          ${remaining} (run again to continue)` :
   const summaryPath = path.join(os.tmpdir(), 'extract-skills-summary.json');
   fs.writeFileSync(summaryPath, JSON.stringify({
     batch_size: prepared.length,
-    haiku_reported: haikuTotal,
+    model_reported: sonnetTotal,
     cached: cachedCounts,
     totals,
     remaining,

@@ -3,7 +3,7 @@
  * classify-projects.js
  *
  * Classifies projects from work-list.json as research vs engineering
- * using Haiku, then picks domain/subdomain from the taxonomy.
+ * using Sonnet, then picks domain/subdomain from the taxonomy.
  *
  * Usage:
  *   classify-projects.js <work-list.json> [--test] [--verbose]
@@ -76,14 +76,14 @@ function fetchTaxonomy() {
 }
 
 // ---------------------------------------------------------------------------
-// Call Haiku
+// Call Sonnet
 // ---------------------------------------------------------------------------
 
-function callHaiku(prompt, timeoutMs = 60_000) {
+function callSonnet(prompt, timeoutMs = 120_000) {
   return new Promise((resolve) => {
     const chunks = [];
     const proc = spawn('claude', [
-      '-p', '--model', 'haiku', '--no-session-persistence',
+      '-p', '--model', 'sonnet', '--no-session-persistence',
     ], { stdio: ['pipe', 'pipe', 'pipe'] });
 
     proc.stdin.write(prompt);
@@ -197,13 +197,13 @@ async function main() {
 
   console.log(`\nClassifying ${projectPaths.length} projects in parallel...\n`);
 
-  // Classify all projects via Haiku in parallel
+  // Classify all projects via Sonnet in parallel
   const classifyOne = async (projPath) => {
     const projSessions = byProject[projPath];
     const slug = projPath.split('/').filter(Boolean).pop() || 'unknown';
 
     const prompt = buildPrompt(projPath, projSessions, taxonomyStr, opts.test);
-    const { ok, output, error } = await callHaiku(prompt);
+    const { ok, output, error } = await callSonnet(prompt);
 
     if (!ok) {
       return {
@@ -215,7 +215,7 @@ async function main() {
       };
     }
 
-    // Parse JSON from Haiku output
+    // Parse JSON from Sonnet output
     let classification;
     try {
       const jsonMatch = output.match(/\{[\s\S]*\}/);

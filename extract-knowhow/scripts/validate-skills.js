@@ -28,6 +28,7 @@
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
+const crypto = require('crypto');
 
 const CACHE_DIR = path.join(os.homedir(), '.openscientist', 'cache', 'skills');
 
@@ -48,6 +49,24 @@ const REQUIRED_SECTIONS = {
 const REQUIRED_FRONTMATTER_FIELDS = [
   'name', 'memory_type', 'subtype', 'domain', 'subdomain', 'contributor',
 ];
+
+// Engineering tags — if a skill's tags hit 2+ of these, reject as engineering
+const ENGINEERING_TAGS = new Set([
+  'canvas', 'canvas-2d', 'css', 'frontend', 'deployment', 'railway', 'vercel',
+  'docker', 'supabase', 'database', 'npm', 'webpack', 'vite', 'browser',
+  'rendering', 'ui', 'devops', 'ci-cd', 'hosting', 'dns', 'tls',
+  'postgresql', 'redis', 'connection-pooling', 'responsive-design',
+  'svg', 'animations', 'websocket', 'localstorage', 'typescript-config',
+  'github-actions', 'codeowners', 'pr-workflows', 'git',
+  'ui-performance', 'fractal-geometry', 'browser-quirks', 'color-formats',
+  'environment-variables', 'nodejs',
+  'mermaid', 'diagram', 'visualization', 'd3', 'chart',
+  'oauth', 'jwt', 'authentication', 'session-management',
+  'logging', 'debugging', 'error-handling', 'stack-trace',
+  'naming-convention', 'terminology', 'ux-copy', 'localization',
+]);
+
+const MIN_LLM_SCORE = 3;
 
 /**
  * Parse simple YAML frontmatter from markdown content.
@@ -166,6 +185,44 @@ function validateSkill(content, filename) {
     }
   }
 
+  // Reject low llm_score
+  const score = Number(fm.llm_score);
+  if (!isNaN(score) && score < MIN_LLM_SCORE) {
+    errors.push(`${filename}: rejected (llm_score ${score} < ${MIN_LLM_SCORE})`);
+  }
+
+  // Reject engineering content by tag overlap
+  const tags = Array.isArray(fm.tags) ? fm.tags.map(t => String(t).toLowerCase()) : [];
+  const engHits = tags.filter(t => ENGINEERING_TAGS.has(t));
+  if (engHits.length >= 2) {
+    errors.push(`${filename}: rejected as engineering (tags: ${engHits.join(', ')})`);
+  }
+
+  // PII detection — reject skills with leaked personal/private data
+  const bodyText = body || '';
+  const SAFE_URL_HOSTS = /^https?:\/\/(?:arxiv\.org|doi\.org|github\.com|en\.wikipedia\.org|researchskills\.ai)/;
+  const PLACEHOLDER_EMAIL = /^[a-z]@[a-z]\.[a-z]+$/; // e.g. x@y.com
+  const piiChecks = [
+    {
+      pattern: /https?:\/\/[^\s)"`]+/g,
+      label: 'private URL',
+      filter: (m) => !SAFE_URL_HOSTS.test(m),
+    },
+    { pattern: /[\u4e00-\u9fff]{4,}/g, label: 'CJK text (possible direct quote)', filter: null },
+    {
+      pattern: /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g,
+      label: 'email address',
+      filter: (m) => !PLACEHOLDER_EMAIL.test(m.toLowerCase()),
+    },
+  ];
+  for (const { pattern, label, filter } of piiChecks) {
+    const matches = bodyText.match(pattern) || [];
+    const real = filter ? matches.filter(filter) : matches;
+    if (real.length > 0) {
+      errors.push(`${filename}: potential PII — ${label}: "${real[0].substring(0, 60)}"`);
+    }
+  }
+
   return errors;
 }
 
@@ -173,12 +230,20 @@ function escapeRegExp(str) {
   return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+function hashContributor(content) {
+  const match = content.match(/^contributor:\s*(.+)$/m);
+  if (!match) return content;
+  const raw = match[1].trim().replace(/^["']|["']$/g, '');
+  const hash = crypto.createHash('sha256').update(raw).digest('hex').substring(0, 8);
+  return content.replace(/^contributor:\s*.+$/m, `contributor: anon-${hash}`);
+}
+
 function sessionCacheDir(sessionId) {
   return path.join(CACHE_DIR, sessionId);
 }
 
 function saveSkill(sessionId, filePath) {
-  const content = fs.readFileSync(filePath, 'utf-8');
+  let content = fs.readFileSync(filePath, 'utf-8');
   const filename = path.basename(filePath);
   const errors = validateSkill(content, filename);
 
@@ -186,9 +251,12 @@ function saveSkill(sessionId, filePath) {
     return { ok: false, errors, filename };
   }
 
+  // Hash contributor at save time so cached skills never expose raw names
+  content = hashContributor(content);
+
   const dest = sessionCacheDir(sessionId);
   fs.mkdirSync(dest, { recursive: true });
-  fs.copyFileSync(filePath, path.join(dest, filename));
+  fs.writeFileSync(path.join(dest, filename), content);
   return { ok: true, errors: [], filename };
 }
 
@@ -261,9 +329,11 @@ function collectSkills(outputDir, filterIds) {
     }
   }
 
-  // Copy deduplicated skills
+  // Copy deduplicated skills, hashing contributor for de-identification
   for (const { file, srcPath } of seenNames.values()) {
-    fs.copyFileSync(srcPath, path.join(outputDir, file));
+    let content = fs.readFileSync(srcPath, 'utf-8');
+    content = hashContributor(content);
+    fs.writeFileSync(path.join(outputDir, file), content);
     count++;
   }
 
@@ -271,6 +341,38 @@ function collectSkills(outputDir, filterIds) {
     console.log(`  Deduplicated: ${duplicates} duplicate skills removed`);
   }
   return count;
+}
+
+function revalidateCache(filterSessionId) {
+  const sessions = filterSessionId ? [filterSessionId] : listCachedSessions();
+  let total = 0, removed = 0;
+
+  for (const sid of sessions) {
+    const dir = sessionCacheDir(sid);
+    if (!fs.existsSync(dir)) continue;
+    const files = fs.readdirSync(dir).filter((f) => f.endsWith('.md'));
+
+    for (const file of files) {
+      total++;
+      const filePath = path.join(dir, file);
+      const content = fs.readFileSync(filePath, 'utf-8');
+      const errors = validateSkill(content, file);
+      if (errors.length > 0) {
+        removed++;
+        fs.unlinkSync(filePath);
+        console.log(`  ✗ ${sid}/${file}`);
+        errors.forEach((e) => console.log(`    ${e}`));
+      }
+    }
+
+    // Clean up empty session dirs
+    if (fs.existsSync(dir) && fs.readdirSync(dir).filter(f => f.endsWith('.md')).length === 0) {
+      fs.rmdirSync(dir);
+    }
+  }
+
+  console.log(`\nRevalidated ${total} skills: ${removed} removed, ${total - removed} kept.`);
+  return { total, removed };
 }
 
 function printUsage() {
@@ -285,6 +387,8 @@ function printUsage() {
   console.error('      Copy cached skills to output dir.');
   console.error('  is-cached <session_id>');
   console.error('      Exit 0 if cached skills exist, 1 otherwise.');
+  console.error('  revalidate [session_id]');
+  console.error('      Re-validate cached skills with current rules. Removes failures.');
 }
 
 // CLI
@@ -337,6 +441,8 @@ if (require.main === module) {
         process.exit(1);
       }
       process.exit(isCached(args[1]) ? 0 : 1);
+    } else if (cmd === 'revalidate') {
+      revalidateCache(args[1] || null);
     } else {
       printUsage();
       process.exit(1);

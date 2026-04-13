@@ -30,8 +30,8 @@ const USER_MAX_CHARS = 1000;
 const ASSISTANT_MAX_CHARS = 80;
 const BASH_ERROR_MAX_CHARS = 120;
 const BASH_NORMAL_MAX_CHARS = 60;
-const SEGMENT_THRESHOLD = 30000;
-const SEGMENT_SIZE = 25000;
+const SEGMENT_THRESHOLD = 200000;
+const SEGMENT_SIZE = 100000;
 
 function truncate(text, max) {
   if (!text) return '';

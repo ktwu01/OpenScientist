@@ -4,7 +4,36 @@ Extract research skills from the user's Claude Code session history for **OpenSc
 
 **Run fully automatically with ZERO user interaction.** Do not pause or ask questions. Report progress at each milestone.
 
-Everything — formatting, extraction, validation, upload — is done by helper scripts. Do not reimplement their work.
+You extract three types of cognitive memory from research conversations:
+- **Procedural** — IF-THEN rules for **scientific research** decisions: methodology choices, data interpretation strategies, research direction pivots. NOT engineering workflows.
+- **Semantic** — **Frontier scientific knowledge** the LLM doesn't have: domain-specific constraints, unpublished findings, corrections to scientific misconceptions. NOT tool/API behaviors.
+- **Episodic** — **Research cognitive turning points**: hypothesis overturned, methodology abandoned for scientific reasons, unexpected findings that changed direction. NOT debugging episodes.
+
+Everything else — discovery, formatting, validation, upload — is done by helper scripts. Do not reimplement their work.
+
+---
+
+## Pipeline
+
+```
+scan-sessions.js       ─┐
+classify-projects.js   ─┤  deterministic scripts (you call them)
+extract-skills.js      ─┤
+  └─ claude -p          │  ← Sonnet CLI call per session, inside the script
+finalize.js            ─┘
+
+You (main agent)       ← call scripts, read summaries, report
+```
+
+Helper scripts (installed at `~/.claude/utils/`):
+
+| Script | What it does |
+|--------|-------------|
+| `scan-sessions.js` | Discover sessions, extract metadata, filter, group by project |
+| `classify-projects.js` | Classify projects as research/engineering via Sonnet, pick domain/subdomain |
+| `extract-skills.js` | **The core loop**: format each session → call `claude -p --model sonnet` → validate + cache skills |
+| `validate-skills.js` | Validate skill markdown and cache to `~/.openscientist/cache/skills/` |
+| `finalize.js` | Collect cached skills → upload to researchskills.ai |
 
 ---
 
@@ -30,31 +59,39 @@ Reads `~/.openscientist/cache/work-list.json` output. Report: `"Found N sessions
 
 ## Stage 2 — Classify Projects
 
+**YOU MUST call this script. Do NOT classify projects yourself.**
+
 ```bash
 node ~/.claude/utils/classify-projects.js ~/.openscientist/cache/work-list.json --verbose
 ```
 
 For test mode, add `--test`.
 
-The script calls Haiku to classify each project as research/engineering and picks domain/subdomain from the taxonomy. Output: `~/.openscientist/cache/classification.json`.
+The script calls Sonnet to classify each project as research/engineering and picks domain/subdomain from the taxonomy. It also filters out non-research sessions (e.g., extract-knowhow runs, build/deploy tasks) via `skip_patterns`.
 
-Read the output file. For each project with `type: "research"`, use its `research_session_ids`, `domain`, and `subdomain` in Stage 3.
+Output: `~/.openscientist/cache/classification.json`.
+
+Read the output file. For each project with `type: "research"`, use its `research_session_ids` (NOT `session_ids`), `domain`, and `subdomain` in Stage 3. Do NOT include skipped sessions.
+
+Report: `"Classified N projects. Proceeding with M."`
 
 ---
 
-## Stage 3 — Extract Skills Per Session (script + Haiku CLI)
+## Stage 3 — Extract Skills Per Session
 
-### CRITICAL execution rules (you MUST follow ALL of these):
+### MANDATORY: Use --single-batch and loop. NEVER run all at once.
 
-1. **NEVER use `run_in_background`** for the extraction script. The user needs to see progress after each batch.
-2. **ALWAYS use `--single-batch`** flag. This makes the script run ONE batch (10 parallel Haiku calls) then exit.
-3. **Loop with separate Bash calls.** After each call, report progress, then call the script again. Repeat until it reports "All sessions already cached" or "0 Haiku calls remaining".
-4. **Pass ALL research session IDs** from Stage 2. Do NOT drop sessions or pick a subset.
+The extraction script MUST be called in a loop with `--single-batch`. Each call processes ONE batch (~5 parallel Sonnet calls) then exits. You call it again in a new Bash tool call. This keeps the user informed of progress and prevents the UI from freezing.
 
-### Execution pattern:
+**FORBIDDEN patterns (will cause long freezes):**
+- `run_in_background: true` — user sees nothing for 10+ minutes
+- Omitting `--single-batch` — script runs all batches internally, no progress visible
+- Using Monitor tool to watch output — still freezes, just with delayed notifications
+
+**REQUIRED pattern:**
 
 ```bash
-# Call this in a LOOP, one Bash call per iteration. NEVER run_in_background.
+# REPEAT this exact Bash call in a loop. Each call = 1 batch.
 node ~/.claude/utils/extract-skills.js ~/.openscientist/cache/work-list.json \
   --domain <domain> \
   --subdomain <subdomain> \
@@ -64,10 +101,15 @@ node ~/.claude/utils/extract-skills.js ~/.openscientist/cache/work-list.json \
   --verbose
 ```
 
-After each call completes:
-1. Report the batch result to the user (e.g. "Batch 2/7 done: 45 skills so far, 21 Haiku calls remaining")
-2. If output contains "0 Haiku calls remaining" or "All sessions already cached" → stop looping
-3. Otherwise → call the script again (same command, it auto-skips cached work)
+**Loop logic:**
+1. Run the command above (foreground Bash, NOT background)
+2. Read the output. Report to user: "Batch N/M done: X skills extracted, Y calls remaining"
+3. If output says `0 Sonnet calls remaining` or `All sessions already cached` → **stop, go to Stage 4**
+4. Otherwise → run the **same command again** (it auto-skips cached segments)
+
+Pass ALL research session IDs from Stage 2. Do NOT drop sessions or pick a subset.
+
+If you need to process multiple projects with different domains, call the script once per project with `--session-ids` filtering to that project's sessions.
 
 ---
 
@@ -87,5 +129,18 @@ node ~/.claude/utils/finalize.js \
 
 ## Stage 5 — Terminal Summary
 
-Print a summary: total skills by type (episodic/semantic/procedural), sessions processed, and the batch review URL from finalize.js output.
+```
+═══════════════════════════════════════════════════════
+  /extract-knowhow Complete!
+═══════════════════════════════════════════════════════
+
+Extracted N skills from M sessions across P projects:
+  • Episodic:   E skills (F failure, A adaptation, X anomalous)
+  • Semantic:   S skills (Fr frontier, Np non-public, C correction)
+  • Procedural: Pr skills (T tie, Nc no-change, Cf constraint-failure, Of operator-fail)
+
+Review your skills:
+  → https://researchskills.ai/review/batch/<batchId>
+═══════════════════════════════════════════════════════
+```
 

@@ -4,7 +4,7 @@
  *
  * Stage 1 + 2 of /extract-knowhow, as a single deterministic script.
  *
- * Discovers Claude Code session files, extracts per-session
+ * Discovers Claude Code and Codex CLI session files, extracts per-session
  * metadata, filters out garbage (too-small, too-short, sub-agent, duplicate),
  * groups by project path, and emits a work list that the AI phase iterates
  * over.
@@ -67,8 +67,25 @@ function discoverClaude() {
   );
 }
 
-function extractSessionId(filePath) {
-  return path.basename(filePath, '.jsonl');
+function discoverCodex() {
+  const archived = walk(
+    path.join(os.homedir(), '.codex', 'archived_sessions'),
+    (p) => /rollout-.*\.jsonl$/.test(p)
+  );
+  const sessions = walk(
+    path.join(os.homedir(), '.codex', 'sessions'),
+    (p) => p.endsWith('.jsonl')
+  );
+  return [...archived, ...sessions];
+}
+
+function extractSessionId(filePath, source) {
+  const base = path.basename(filePath, '.jsonl');
+  if (source === 'codex') {
+    const m = base.match(/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/);
+    if (m) return m[1];
+  }
+  return base;
 }
 
 function claudeProjectDirName(filePath) {
@@ -96,11 +113,18 @@ const BOILERPLATE_PREFIXES = [
   '<command-name>',
   '<local-command',
   '[Tool Result',
+  '<turn_aborted>',
 ];
+
+// Regex to strip IDE context header block from user messages.
+// Matches "# Context from my IDE setup:" followed by ## sections, up to the
+// first line that doesn't start with # or - or is blank after a blank line gap.
+const IDE_CONTEXT_RE = /^# Context from my IDE.*?\n(?:(?:##[^\n]*|  ?- [^\n]*|-[^\n]*|\s*)\n)*\s*/s;
 
 function firstPromptText(entry) {
   // Claude Code: { type, message: { role, content } }
-  const msg = entry.message || entry;
+  // Codex CLI:   { type: "response_item", payload: { type: "message", role, content } }
+  const msg = entry.message || entry.payload || entry;
   const role =
     msg.role ||
     entry.role ||
@@ -122,11 +146,16 @@ function firstPromptText(entry) {
   if (!text) return null;
   if (BOILERPLATE_PREFIXES.some((b) => text.startsWith(b))) return null;
   if (text.includes('RESPOND WITH ONLY A VALID JSON OBJECT')) return null;
+
+  // Strip IDE context header to surface the actual user intent
+  text = text.replace(IDE_CONTEXT_RE, '').trim();
+  if (!text) return null;
+
   return text;
 }
 
 function timestampOf(entry) {
-  const msg = entry.message || {};
+  const msg = entry.message || entry.payload || {};
   return entry.timestamp || entry.ts || msg.timestamp || null;
 }
 
@@ -152,6 +181,7 @@ function extractMeta(filePath) {
     if (!cwd) {
       cwd =
         entry.cwd ||
+        (entry.payload && entry.payload.cwd) ||
         (entry.message && entry.message.cwd) ||
         null;
     }
@@ -177,11 +207,32 @@ function extractMeta(filePath) {
     }
   }
 
-  // Cheap user-message count (substring scan, no JSON parse per line)
-  let userCount = 0;
-  for (const line of lines) {
-    if (line.includes('"role":"user"') || line.includes('"type":"user"')) {
-      userCount += 1;
+  // Collect all user-message line indices for count + sampling
+  const userLineIndices = [];
+  for (let li = 0; li < lines.length; li++) {
+    if (lines[li].includes('"role":"user"') || lines[li].includes('"type":"user"')) {
+      userLineIndices.push(li);
+    }
+  }
+  const userCount = userLineIndices.length;
+
+  // Sample up to 5 user prompts (first, 25%, 50%, 75%, last) for project classification
+  const SAMPLE_COUNT = 5;
+  const sampledPrompts = [];
+  if (userLineIndices.length > 0) {
+    const pickIndices = new Set();
+    for (let s = 0; s < SAMPLE_COUNT; s++) {
+      const idx = Math.min(
+        Math.round(s * (userLineIndices.length - 1) / Math.max(SAMPLE_COUNT - 1, 1)),
+        userLineIndices.length - 1
+      );
+      pickIndices.add(userLineIndices[idx]);
+    }
+    for (const li of pickIndices) {
+      const entry = parseLine(lines[li]);
+      if (!entry) continue;
+      const t = firstPromptText(entry);
+      if (t) sampledPrompts.push(t.substring(0, 300));
     }
   }
 
@@ -197,6 +248,7 @@ function extractMeta(filePath) {
     file_size: stats.size,
     is_sub_agent: isSubAgent,
     first_prompt: firstPrompt,
+    sampled_prompts: sampledPrompts,
     user_message_count: userCount,
     cwd,
     start_timestamp: firstTs,
@@ -227,7 +279,10 @@ function saveCachedMeta(sessionId, meta) {
 }
 
 function scan() {
-  const candidates = discoverClaude();
+  const candidates = [
+    ...discoverClaude().map((f) => ({ file: f, source: 'claude' })),
+    ...discoverCodex().map((f) => ({ file: f, source: 'codex' })),
+  ];
 
   const skipped = {
     tooSmall: 0,
@@ -239,7 +294,7 @@ function scan() {
   const accepted = [];
   const byFingerprint = new Map();
 
-  for (const file of candidates) {
+  for (const { file, source } of candidates) {
     let stats;
     try {
       stats = fs.statSync(file);
@@ -252,7 +307,7 @@ function scan() {
       continue;
     }
 
-    const sessionId = extractSessionId(file);
+    const sessionId = extractSessionId(file, source);
     let meta = loadCachedMeta(sessionId, stats.size);
     if (!meta) {
       try {
@@ -262,7 +317,7 @@ function scan() {
         continue;
       }
       meta.session_id = sessionId;
-      meta.source = 'claude';
+      meta.source = source;
       meta.file_path = file;
       saveCachedMeta(sessionId, meta);
     }
@@ -280,17 +335,22 @@ function scan() {
       continue;
     }
 
-    // Prefer cwd from the jsonl. Only fall back to the on-disk directory
-    // name when cwd is missing.
-    const projectPath = meta.cwd || claudeProjectDirName(file);
+    // Prefer cwd from the jsonl (authoritative for both sources). Only fall
+    // back to the on-disk directory name when cwd is missing.
+    const projectPath =
+      meta.cwd ||
+      (source === 'claude'
+        ? claudeProjectDirName(file)
+        : path.basename(path.dirname(file)));
 
     const record = {
       session_id: sessionId,
-      source: 'claude',
+      source,
       file_path: file,
       file_size: meta.file_size,
       project_path: projectPath,
       first_prompt: meta.first_prompt,
+      sampled_prompts: meta.sampled_prompts || [],
       user_message_count: meta.user_message_count,
       duration_minutes: meta.duration_minutes,
       start_timestamp: meta.start_timestamp,

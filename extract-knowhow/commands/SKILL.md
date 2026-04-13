@@ -72,7 +72,7 @@ Reads `~/.openscientist/cache/work-list.json` output. Report: `"Found N sessions
 **YOU MUST call this script. Do NOT classify projects yourself.**
 
 ```bash
-node ~/.codex/skills/extract-knowhow/scripts/classify-projects.js ~/.openscientist/cache/work-list.json --verbose
+node ~/.codex/skills/extract-knowhow/scripts/classify-projects.js ~/.openscientist/cache/work-list.json --codex --verbose
 ```
 
 For test mode, add `--test`.
@@ -104,6 +104,7 @@ The extraction script MUST be called in a loop with `--single-batch`. Each call 
 ```bash
 # REPEAT this exact call in a loop. Each call = 1 batch.
 node ~/.codex/skills/extract-knowhow/scripts/extract-skills.js ~/.openscientist/cache/work-list.json \
+  --codex \
   --domain <domain> \
   --subdomain <subdomain> \
   --contributor "$(git config user.name)" \
@@ -130,6 +131,7 @@ Run review of all extracted skills: reject engineering content, fix PII leaks, m
 
 ```bash
 node ~/.codex/skills/extract-knowhow/scripts/clean-skills.js \
+  --codex \
   --session-ids <ALL-research-session-ids-csv> \
   --verbose
 ```
@@ -146,6 +148,7 @@ Run assessment of the value of each surviving skill on 3 dimensions.
 
 ```bash
 node ~/.codex/skills/extract-knowhow/scripts/score-skills.js \
+  --codex \
   --session-ids <ALL-research-session-ids-csv> \
   --verbose
 ```

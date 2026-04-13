@@ -2,8 +2,10 @@
 /**
  * format-session.js
  *
- * Preprocess a raw Claude Code .jsonl session file into
+ * Preprocess a raw Claude Code or Codex CLI .jsonl session file into
  * compact text optimized for research skill extraction.
+ *
+ * Supports both Claude Code and Codex CLI JSONL formats.
  *
  * Design principle: We're extracting HUMAN tacit knowledge. The human's
  * inputs, corrections, and decisions are the signal. AI outputs and tool
@@ -47,15 +49,35 @@ function basename(filepath) {
 }
 
 // ---------------------------------------------------------------------------
+// Detect session format
+// ---------------------------------------------------------------------------
+
+function detectFormat(lines) {
+  for (const line of lines.slice(0, 5)) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+    try {
+      const entry = JSON.parse(trimmed);
+      if (entry.type === 'session_meta') return 'codex';
+      if (entry.type === 'event_msg') return 'codex';
+      if (entry.type === 'response_item') return 'codex';
+      if (entry.type === 'turn_context') return 'codex';
+      if (entry.type === 'user' || entry.type === 'assistant') return 'claude';
+      if (entry.message && entry.message.role) return 'claude';
+    } catch { continue; }
+  }
+  return 'claude'; // default fallback
+}
+
+// ---------------------------------------------------------------------------
 // Pass 0: Parse JSONL into structured messages
 // ---------------------------------------------------------------------------
 
-// Extract tool_use params (file_path, command) for richer context
+// Extract tool_use params (file_path, command) for richer context — Claude Code
 function extractToolInfo(item) {
   if (item.type !== 'tool_use' || !item.name) return null;
   const info = { name: item.name };
   const inp = item.input || {};
-  // Extract the most useful param for each tool type
   if (inp.file_path) info.file = basename(inp.file_path);
   if (inp.command) info.cmd = truncate(inp.command, 60);
   if (inp.pattern) info.pattern = truncate(inp.pattern, 40);
@@ -80,7 +102,6 @@ function extractContentParts(content) {
     } else if (item.type === 'tool_use' && item.name) {
       const info = extractToolInfo(item);
       if (info) toolInfos.push(info);
-      // Build a richer tool label
       let label = `[Tool: ${item.name}`;
       if (info && info.file) label += ` ${info.file}`;
       else if (info && info.cmd) label += ` ${info.cmd}`;
@@ -102,7 +123,8 @@ function extractContentParts(content) {
   return { parts, toolInfos };
 }
 
-function extractMessage(entry) {
+// Claude Code message extractor
+function extractMessageClaude(entry) {
   if (!entry) return null;
   if (entry.payload && entry.payload.type && entry.payload.type !== 'message') return null;
   const msg = entry.message || entry.payload || entry;
@@ -118,41 +140,190 @@ function extractMessage(entry) {
 }
 
 // ---------------------------------------------------------------------------
+// Codex CLI message extractor
+// ---------------------------------------------------------------------------
+
+// Parse Codex exec_command output: strip metadata prefix, extract exit code
+function parseExecOutput(output) {
+  if (!output || typeof output !== 'string') return { exitCode: 0, content: String(output || '') };
+  const lines = output.split('\n');
+  let exitCode = 0;
+  let outputStartIdx = 0;
+
+  for (let i = 0; i < Math.min(lines.length, 10); i++) {
+    const line = lines[i];
+    const exitMatch = line.match(/^Process exited with code (\d+)/);
+    if (exitMatch) {
+      exitCode = parseInt(exitMatch[1], 10);
+    }
+    if (line.startsWith('Output:')) {
+      outputStartIdx = i + 1;
+      break;
+    }
+  }
+
+  const content = lines.slice(outputStartIdx).join('\n').trim();
+  return { exitCode, content };
+}
+
+// Classify Codex exec_command by cmd string
+function classifyExecCommand(cmd) {
+  if (!cmd) return 'shell';
+  const trimmed = cmd.trim();
+  if (/^(cat|head|tail|less|bat)\s/.test(trimmed)) return 'read';
+  if (/^(grep|rg|ag)\s/.test(trimmed)) return 'search';
+  if (/^(find|fd|ls)\s/.test(trimmed)) return 'discover';
+  if (/^git\s/.test(trimmed)) return 'git';
+  return 'shell';
+}
+
+// Extract file target from exec_command cmd string
+function extractCmdTarget(cmd) {
+  if (!cmd) return null;
+  // cat/head/tail <file>
+  const readMatch = cmd.match(/^(?:cat|head|tail|less|bat)\s+(?:-[^\s]+\s+)*(\S+)/);
+  if (readMatch) return basename(readMatch[1]);
+  return null;
+}
+
+function extractMessageCodex(entry) {
+  if (!entry) return null;
+  const ts = entry.timestamp || null;
+
+  // event_msg — user message
+  if (entry.type === 'event_msg' && entry.payload) {
+    if (entry.payload.type === 'user_message') {
+      const text = (entry.payload.message || '').trim();
+      if (!text) return null;
+      return { role: 'user', text, timestamp: ts, toolInfos: [] };
+    }
+    if (entry.payload.type === 'agent_message') {
+      const text = (entry.payload.message || '').trim();
+      if (!text) return null;
+      return { role: 'assistant', text, timestamp: ts, toolInfos: [] };
+    }
+    // Skip token_count, task_started, task_complete
+    return null;
+  }
+
+  // response_item — assistant message
+  if (entry.type === 'response_item' && entry.payload) {
+    const p = entry.payload;
+
+    // Assistant text message
+    if (p.type === 'message' && p.role === 'assistant') {
+      const parts = [];
+      if (Array.isArray(p.content)) {
+        for (const c of p.content) {
+          if (c && c.type === 'output_text' && c.text) parts.push(c.text);
+        }
+      }
+      const text = parts.join(' ').replace(/\s+/g, ' ').trim();
+      if (!text) return null;
+      return { role: 'assistant', text, timestamp: ts, toolInfos: [] };
+    }
+
+    // Function call (tool use)
+    if (p.type === 'function_call') {
+      const name = p.name || 'unknown';
+      let args = {};
+      try { args = JSON.parse(p.arguments || '{}'); } catch {}
+
+      // Build tool label similar to Claude Code format
+      let label;
+      if (name === 'exec_command') {
+        const cmd = args.cmd || '';
+        const cmdType = classifyExecCommand(cmd);
+        const target = extractCmdTarget(cmd);
+        if (cmdType === 'read' && target) {
+          label = `[Tool: Read ${target}]`;
+        } else if (cmdType === 'git') {
+          label = `[Tool: Bash git ${truncate(cmd, 40)}]`;
+        } else {
+          label = `[Tool: Bash ${truncate(cmd, 60)}]`;
+        }
+      } else if (name === 'apply_patch') {
+        // Extract filename from patch
+        const patchInput = p.input || args.patch || '';
+        const fileMatch = patchInput.match(/\*\*\* (?:Add|Update|Delete) File:\s*(\S+)/);
+        const file = fileMatch ? basename(fileMatch[1]) : null;
+        label = file ? `[Tool: Edit ${file}]` : '[Tool: Edit]';
+      } else {
+        label = `[Tool: ${name}]`;
+      }
+
+      return {
+        role: 'assistant',
+        text: label,
+        timestamp: ts,
+        toolInfos: [{ name: name === 'exec_command' ? 'Bash' : name }],
+      };
+    }
+
+    // Function call output (tool result)
+    if (p.type === 'function_call_output') {
+      const rawOutput = typeof p.output === 'string' ? p.output : JSON.stringify(p.output || '');
+      const parsed = parseExecOutput(rawOutput);
+      const content = parsed.content || rawOutput;
+      return {
+        role: 'user',
+        text: `[Tool Result: ${content}]`,
+        timestamp: ts,
+        toolInfos: [],
+        _exitCode: parsed.exitCode,
+      };
+    }
+
+    // custom_tool_call (apply_patch)
+    if (p.type === 'custom_tool_call') {
+      if (p.name === 'apply_patch') {
+        const status = p.status === 'completed' ? 'ok' : (p.status || 'unknown');
+        const fileMatch = (p.input || '').match(/\*\*\* (?:Add|Update|Delete) File:\s*(\S+)/);
+        const file = fileMatch ? basename(fileMatch[1]) : null;
+        const label = file ? `[Tool: Edit ${file} → ${status}]` : `[Tool: Edit → ${status}]`;
+        return { role: 'tool', text: label, timestamp: ts, toolInfos: [] };
+      }
+      return null;
+    }
+
+    // Skip reasoning (encrypted)
+    if (p.type === 'reasoning') return null;
+  }
+
+  // Skip session_meta, turn_context
+  return null;
+}
+
+// Unified message extractor
+function extractMessage(entry, format) {
+  if (format === 'codex') return extractMessageCodex(entry);
+  return extractMessageClaude(entry);
+}
+
+// ---------------------------------------------------------------------------
 // Pass 1.5: Clean USER messages (strip IDE tags, commands, git noise)
 // ---------------------------------------------------------------------------
 
-// Patterns for git-only user messages
 const GIT_USER_PATTERNS = [
-  /^(嗯\s*)?commit\s*(and\s*push)?/i,   // "commit", "commit and push", "嗯commit and push吧"
+  /^(嗯\s*)?commit\s*(and\s*push)?/i,
   /^push/i,
   /^git\s/i,
 ];
 
 function cleanUserMessage(text) {
   let t = text;
-
-  // Strip <ide_opened_file>...</ide_opened_file> tags, keep any text after them
   t = t.replace(/<ide_opened_file>.*?<\/ide_opened_file>\s*/g, '').trim();
-
-  // Strip <ide_selection>...</ide_selection> tags, keep any text after them
   t = t.replace(/<ide_selection>.*?<\/ide_selection>\s*/g, '').trim();
-
-  // Strip slash/local command messages entirely
   if (/^<command-name>/.test(t)) return null;
   if (/^<local-command/.test(t)) return null;
-
-  // Empty after stripping
   if (!t) return null;
-
   return t;
 }
 
 function classifyUserMessage(text) {
-  // Context continuation summary (AI-generated, not human input)
   if (/^This session is being continued from a previous conversation/.test(text)) {
     return 'context';
   }
-  // Git instruction — drop
   if (GIT_USER_PATTERNS.some(p => p.test(text.trim()))) {
     return 'git';
   }
@@ -194,36 +365,30 @@ function compressToolResult(text, toolName, toolInfo) {
   if (DROP_TOOLS.has(toolName)) return null;
   const clean = text.trim();
 
-  // Read → drop content, but show filename (from toolInfo or result)
   if (toolName === 'Read') {
     if (/error|not found|does not exist/i.test(clean.substring(0, 80))) {
       return truncate(clean, BASH_ERROR_MAX_CHARS);
     }
-    return null; // filename comes from tool_use params via toolInfo
+    return null;
   }
 
-  // Edit/Write → show filename from result
   if (toolName === 'Edit' || toolName === 'Write') {
     if (/doesn't want to proceed/.test(clean)) return 'rejected';
     if (/error|<tool_use_error>/i.test(clean.substring(0, 80))) return 'error';
-    return null; // filename comes from tool_use params via toolInfo
+    return null;
   }
 
-  // Grep → drop
   if (toolName === 'Grep') return null;
 
-  // Agent → short summary or rejected
   if (toolName === 'Agent') {
     if (/doesn't want to proceed/.test(clean)) return 'rejected';
     return truncate(clean, BASH_NORMAL_MAX_CHARS);
   }
 
-  // AskUserQuestion → preserve (human's answers = signal)
   if (toolName === 'AskUserQuestion') {
     return truncate(clean, 200);
   }
 
-  // Bash
   if (toolName === 'Bash') {
     if (/^\(Bash completed with no output\)$/.test(clean)) return null;
     if (isGitOutput(clean)) return null;
@@ -233,8 +398,6 @@ function compressToolResult(text, toolName, toolInfo) {
     return truncate(clean, BASH_NORMAL_MAX_CHARS);
   }
 
-
-  // Everything else
   if (/^\(Bash completed/.test(clean)) return null;
   if (/^Wasted call/.test(clean)) return null;
   if (/^\[Request interrupted/.test(clean)) return null;
@@ -255,7 +418,6 @@ function getToolName(msg) {
 }
 
 function getToolFile(msg) {
-  // [Tool: Read field_equations.py] → field_equations.py
   const m = msg.text.match(/^\[Tool: \w+ (.+)\]$/);
   return m ? m[1] : null;
 }
@@ -275,6 +437,13 @@ function mergeAndCompress(messages) {
 
   while (i < messages.length) {
     const msg = messages[i];
+
+    // Codex custom_tool_call results are already role:'tool' — pass through
+    if (msg.role === 'tool') {
+      output.push(msg);
+      i++;
+      continue;
+    }
 
     if (isToolCall(msg)) {
       const toolName = getToolName(msg);
@@ -296,7 +465,6 @@ function mergeAndCompress(messages) {
       }
 
       if (resultMsg) {
-        // Drop git bash commands entirely
         if (toolName === 'Bash' && toolFile && /^git\s/.test(toolFile)) {
           i = lookAhead + 1;
           continue;
@@ -306,14 +474,12 @@ function mergeAndCompress(messages) {
         const compressed = compressToolResult(resultContent, toolName);
 
         if (compressed === null && !toolFile) {
-          // No result AND no file info — drop entirely
           i = lookAhead + 1;
           continue;
         }
 
         const isRejected = compressed === 'rejected';
 
-        // Build compact label: [Read field_equations.py] or [Bash → error msg]
         let label;
         if (compressed && compressed !== 'rejected' && compressed !== 'error') {
           label = toolFile
@@ -324,7 +490,6 @@ function mergeAndCompress(messages) {
             ? `[${toolName} ${toolFile} → ${compressed}]`
             : `[${toolName} → ${compressed}]`;
         } else {
-          // No result but has file info
           label = `[${toolName} ${toolFile}]`;
         }
 
@@ -333,9 +498,7 @@ function mergeAndCompress(messages) {
         continue;
       }
 
-      // No result found
       if (DROP_TOOLS.has(toolName)) { i++; continue; }
-      // Drop git bash commands without results too
       if (toolName === 'Bash' && toolFile && /^git\s/.test(toolFile)) { i++; continue; }
       const label = toolFile ? `[${toolName} ${toolFile}]` : `[${toolName}]`;
       output.push({ role: 'tool', text: label, timestamp: ts });
@@ -359,9 +522,8 @@ function mergeAndCompress(messages) {
 
 function isLowValueTool(msg) {
   if (msg.highValue) return false;
-  // Short tool lines (filename-only, ok, Nx tools)
-  if (/^\[\w+( [\w._-]+)?\]$/.test(msg.text)) return true;     // [Read file.py] or [Edit]
-  if (/^\[\w+ → .{1,20}\]$/.test(msg.text)) return true;        // [Bash → short output]
+  if (/^\[\w+( [\w._-]+)?\]$/.test(msg.text)) return true;
+  if (/^\[\w+ → .{1,20}\]$/.test(msg.text)) return true;
   if (/^\[\d+x \w+\]$/.test(msg.text)) return true;
   return false;
 }
@@ -428,6 +590,9 @@ function formatSession(jsonlPath) {
   const content = fs.readFileSync(jsonlPath, 'utf-8');
   const lines = content.split('\n');
 
+  // Detect format from first few lines
+  const format = detectFormat(lines);
+
   // Pass 1: parse all messages
   const rawMessages = [];
   let startTimestamp = null;
@@ -438,7 +603,7 @@ function formatSession(jsonlPath) {
     if (!trimmed) continue;
     let entry;
     try { entry = JSON.parse(trimmed); } catch { continue; }
-    const msg = extractMessage(entry);
+    const msg = extractMessage(entry, format);
     if (!msg) continue;
     if (!startTimestamp && msg.timestamp) startTimestamp = msg.timestamp;
     rawMessages.push(msg);
@@ -450,9 +615,8 @@ function formatSession(jsonlPath) {
   for (const msg of rawMessages) {
     if (msg.role === 'user' && !msg.text.startsWith('[Tool Result:')) {
       const cls = classifyUserMessage(msg.text);
-      if (cls === 'git') continue; // drop git instructions
+      if (cls === 'git') continue;
       if (cls === 'context') {
-        // Mark as CONTEXT, truncate generously (it's a useful summary)
         cleaned.push({ ...msg, role: 'context', text: truncate(msg.text, USER_MAX_CHARS) });
         continue;
       }
@@ -496,8 +660,6 @@ function splitIntoSegments(text) {
   let current = '';
 
   for (const line of lines) {
-    // If adding this line would exceed the segment size AND we already have content,
-    // start a new segment. Always add at least one line to avoid empty segments.
     if (current.length > 0 && current.length + line.length + 1 > SEGMENT_SIZE) {
       segments.push(current);
       current = line;
@@ -561,6 +723,7 @@ if (require.main === module) {
 }
 
 module.exports = {
-  formatSession, splitIntoSegments, extractMessage, truncate,
+  formatSession, splitIntoSegments, extractMessage: extractMessageClaude,
+  extractMessageCodex, detectFormat, truncate,
   USER_MAX_CHARS, ASSISTANT_MAX_CHARS, SEGMENT_THRESHOLD, SEGMENT_SIZE,
 };

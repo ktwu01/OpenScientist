@@ -89,10 +89,6 @@ function extractSessionId(filePath, source) {
 }
 
 function claudeProjectDirName(filePath) {
-  // Fallback when cwd isn't in the jsonl. Claude encodes '/' as '-', but
-  // original '-' characters also become '-', so the encoding is not
-  // reversible. Return the raw encoded directory name to avoid producing
-  // bogus paths like "/Users/x/Desktop/ai/lawyer" for "ai-lawyer".
   return path.basename(path.dirname(filePath));
 }
 
@@ -116,19 +112,26 @@ const BOILERPLATE_PREFIXES = [
   '<turn_aborted>',
 ];
 
-// Regex to strip IDE context header block from user messages.
-// Matches "# Context from my IDE setup:" followed by ## sections, up to the
-// first line that doesn't start with # or - or is blank after a blank line gap.
 const IDE_CONTEXT_RE = /^# Context from my IDE.*?\n(?:(?:##[^\n]*|  ?- [^\n]*|-[^\n]*|\s*)\n)*\s*/s;
 
 function firstPromptText(entry) {
   // Claude Code: { type, message: { role, content } }
-  // Codex CLI:   { type: "response_item", payload: { type: "message", role, content } }
+  // Codex CLI:   { type: "event_msg", payload: { type: "user_message", message } }
   const msg = entry.message || entry.payload || entry;
   const role =
     msg.role ||
     entry.role ||
     (entry.type === 'user' ? 'user' : entry.type === 'assistant' ? 'assistant' : null);
+
+  // Codex user_message
+  if (entry.type === 'event_msg' && entry.payload && entry.payload.type === 'user_message') {
+    const text = (entry.payload.message || '').trim();
+    if (!text) return null;
+    if (BOILERPLATE_PREFIXES.some((b) => text.startsWith(b))) return null;
+    if (text.includes('RESPOND WITH ONLY A VALID JSON OBJECT')) return null;
+    return text.replace(IDE_CONTEXT_RE, '').trim() || null;
+  }
+
   if (role !== 'user') return null;
 
   const content = msg.content;
@@ -147,7 +150,6 @@ function firstPromptText(entry) {
   if (BOILERPLATE_PREFIXES.some((b) => text.startsWith(b))) return null;
   if (text.includes('RESPOND WITH ONLY A VALID JSON OBJECT')) return null;
 
-  // Strip IDE context header to surface the actual user intent
   text = text.replace(IDE_CONTEXT_RE, '').trim();
   if (!text) return null;
 
@@ -167,7 +169,6 @@ function extractMeta(filePath) {
   const head = lines.slice(0, HEAD_LINES);
   const tail = lines.slice(-TAIL_LINES);
 
-  // sub-agent detection (first 5 lines)
   const firstFive = lines.slice(0, 5).join('\n');
   const isSubAgent = SUBAGENT_MARKERS.some((m) => firstFive.includes(m));
 
@@ -207,16 +208,16 @@ function extractMeta(filePath) {
     }
   }
 
-  // Collect all user-message line indices for count + sampling
   const userLineIndices = [];
   for (let li = 0; li < lines.length; li++) {
-    if (lines[li].includes('"role":"user"') || lines[li].includes('"type":"user"')) {
+    if (lines[li].includes('"role":"user"') ||
+        lines[li].includes('"type":"user"') ||
+        lines[li].includes('"type":"user_message"')) {
       userLineIndices.push(li);
     }
   }
   const userCount = userLineIndices.length;
 
-  // Sample up to 5 user prompts (first, 25%, 50%, 75%, last) for project classification
   const SAMPLE_COUNT = 5;
   const sampledPrompts = [];
   if (userLineIndices.length > 0) {
@@ -335,8 +336,6 @@ function scan() {
       continue;
     }
 
-    // Prefer cwd from the jsonl (authoritative for both sources). Only fall
-    // back to the on-disk directory name when cwd is missing.
     const projectPath =
       meta.cwd ||
       (source === 'claude'

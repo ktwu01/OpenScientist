@@ -3,7 +3,7 @@
  * classify-projects.js
  *
  * Classifies projects from work-list.json as research vs engineering
- * using Sonnet, then picks domain/subdomain from the taxonomy.
+ * using AI (via platform.js), then picks domain/subdomain from the taxonomy.
  *
  * Usage:
  *   classify-projects.js <work-list.json> [--test] [--verbose]
@@ -30,8 +30,8 @@
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
-const { spawn } = require('child_process');
 const https = require('https');
+const { parsePlatformFlag, createRunner } = require('./platform');
 
 const OUTPUT_PATH = path.join(os.homedir(), '.openscientist', 'cache', 'classification.json');
 
@@ -72,41 +72,6 @@ function fetchTaxonomy() {
         }
       });
     }).on('error', reject);
-  });
-}
-
-// ---------------------------------------------------------------------------
-// Call Sonnet
-// ---------------------------------------------------------------------------
-
-function callSonnet(prompt, timeoutMs = 120_000) {
-  return new Promise((resolve) => {
-    const chunks = [];
-    const proc = spawn('claude', [
-      '-p', '--model', 'sonnet', '--no-session-persistence',
-    ], { stdio: ['pipe', 'pipe', 'pipe'] });
-
-    proc.stdin.write(prompt);
-    proc.stdin.end();
-
-    proc.stdout.on('data', (d) => chunks.push(d));
-    proc.stderr.on('data', (d) => chunks.push(d));
-
-    const timer = setTimeout(() => {
-      proc.kill('SIGTERM');
-      resolve({ ok: false, output: '', error: 'timeout' });
-    }, timeoutMs);
-
-    proc.on('close', (code) => {
-      clearTimeout(timer);
-      const output = Buffer.concat(chunks).toString('utf-8');
-      resolve({ ok: code === 0, output, error: code !== 0 ? `exit ${code}` : null });
-    });
-
-    proc.on('error', (err) => {
-      clearTimeout(timer);
-      resolve({ ok: false, output: '', error: err.message });
-    });
   });
 }
 
@@ -162,9 +127,11 @@ Respond with EXACTLY this JSON (no markdown fences, no other text):
 // ---------------------------------------------------------------------------
 
 async function main() {
+  const platform = parsePlatformFlag();
+  const runner = createRunner(platform);
   const opts = parseArgs();
   if (!opts.workListPath) {
-    console.error('Usage: classify-projects.js <work-list.json> [--test] [--verbose]');
+    console.error('Usage: classify-projects.js <work-list.json> [--cc|--codex] [--test] [--verbose]');
     process.exit(1);
   }
 
@@ -204,7 +171,7 @@ async function main() {
     const slug = projPath.split('/').filter(Boolean).pop() || 'unknown';
 
     const prompt = buildPrompt(projPath, projSessions, taxonomyStr, opts.test);
-    const { ok, output, error } = await callSonnet(prompt);
+    const { ok, output, error } = await runner.classify(prompt);
 
     if (!ok) {
       return {

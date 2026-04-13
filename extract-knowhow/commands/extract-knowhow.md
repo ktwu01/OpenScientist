@@ -66,7 +66,7 @@ Reads `~/.openscientist/cache/work-list.json` output. Report: `"Found N sessions
 **YOU MUST call this script. Do NOT classify projects yourself.**
 
 ```bash
-node ~/.claude/utils/classify-projects.js ~/.openscientist/cache/work-list.json --verbose
+node ~/.claude/utils/classify-projects.js ~/.openscientist/cache/work-list.json --cc --verbose
 ```
 
 For test mode, add `--test`.
@@ -99,6 +99,7 @@ The extraction script MUST be called in a loop with `--single-batch`. Each call 
 ```bash
 # REPEAT this exact Bash call in a loop. Each call = 1 batch.
 node ~/.claude/utils/extract-skills.js ~/.openscientist/cache/work-list.json \
+  --cc \
   --domain <domain> \
   --subdomain <subdomain> \
   --contributor "$(git config user.name)" \
@@ -125,6 +126,7 @@ Run Opus to review all extracted skills: reject engineering content, fix PII lea
 
 ```bash
 node ~/.claude/utils/clean-skills.js \
+  --cc \
   --session-ids <ALL-research-session-ids-csv> \
   --verbose
 ```
@@ -141,6 +143,7 @@ Run Opus to assess the value of each surviving skill on 3 dimensions.
 
 ```bash
 node ~/.claude/utils/score-skills.js \
+  --cc \
   --session-ids <ALL-research-session-ids-csv> \
   --verbose
 ```

@@ -2,8 +2,8 @@
 /**
  * extract-skills.js
  *
- * Orchestrates per-session skill extraction using Claude Code CLI.
- * For each uncached session: format → call `claude -p` with Sonnet → validate.
+ * Orchestrates per-session skill extraction using AI CLI (via platform.js).
+ * For each uncached session: format → call AI → validate.
  *
  * This script is the deterministic loop; Sonnet does the AI judgment.
  * The main /extract-knowhow agent calls this script once with Bash,
@@ -30,11 +30,11 @@
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
-const { execFileSync, spawn } = require('child_process');
+const { execFileSync } = require('child_process');
+const { parsePlatformFlag, createRunner } = require('./platform');
 
-const UTILS_DIR = path.join(os.homedir(), '.claude', 'utils');
-const FORMAT_SCRIPT = path.join(UTILS_DIR, 'format-session.js');
-const VALIDATE_SCRIPT = path.join(UTILS_DIR, 'validate-skills.js');
+const FORMAT_SCRIPT = path.join(__dirname, 'format-session.js');
+const VALIDATE_SCRIPT = path.join(__dirname, 'validate-skills.js');
 
 // Pre-filter: skip sessions too short to contain meaningful research content
 const MIN_FORMATTED_CHARS = 2000;
@@ -229,45 +229,6 @@ ${sessionText}
 }
 
 // ---------------------------------------------------------------------------
-// Async claude runner (non-blocking)
-// ---------------------------------------------------------------------------
-
-function runClaudeAsync(prompt, timeoutMs = 600_000) {
-  return new Promise((resolve) => {
-    const chunks = [];
-    // Pass prompt via stdin instead of command arg (avoids arg length issues)
-    const proc = spawn('claude', [
-      '-p',
-      '--model', 'sonnet',
-      '--no-session-persistence',
-    ], { stdio: ['pipe', 'pipe', 'pipe'] });
-
-    // Write prompt to stdin then close
-    proc.stdin.write(prompt);
-    proc.stdin.end();
-
-    proc.stdout.on('data', (d) => chunks.push(d));
-    proc.stderr.on('data', (d) => chunks.push(d));
-
-    const timer = setTimeout(() => {
-      proc.kill('SIGTERM');
-      resolve({ ok: false, output: '', error: 'timeout' });
-    }, timeoutMs);
-
-    proc.on('close', (code) => {
-      clearTimeout(timer);
-      const output = Buffer.concat(chunks).toString('utf-8');
-      resolve({ ok: code === 0, output, error: code !== 0 ? `exit ${code}` : null });
-    });
-
-    proc.on('error', (err) => {
-      clearTimeout(timer);
-      resolve({ ok: false, output: '', error: err.message });
-    });
-  });
-}
-
-// ---------------------------------------------------------------------------
 // Parse skill-md blocks from Sonnet output → write files → validate
 // ---------------------------------------------------------------------------
 
@@ -400,6 +361,8 @@ function parseResult(sid, output, verbose) {
 // ---------------------------------------------------------------------------
 
 async function main() {
+  const platform = parsePlatformFlag();
+  const runner = createRunner(platform);
   const opts = parseArgs();
 
   if (!opts.workListPath) {
@@ -504,7 +467,7 @@ async function main() {
     const promises = chunk.map(async ({ sid, prompt, segFile, segInfo, projectMeta }) => {
       const segLabel = segInfo ? ` seg${segInfo.index}/${segInfo.total}` : '';
       const startTime = Date.now();
-      const { ok, output, error } = await runClaudeAsync(prompt, 300_000);
+      const { ok, output, error } = await runner.extract(prompt, 300_000);
       const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
 
       // Clean up segment file

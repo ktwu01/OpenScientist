@@ -2,8 +2,8 @@
 /**
  * clean-skills.js
  *
- * Stage 4 of /extract-knowhow: review extracted skills with Opus.
- * Spawns a Claude Code instance (Opus, bypass permissions) that directly
+ * Stage 4 of /extract-knowhow: review extracted skills.
+ * Spawns an AI instance (via platform.js) that directly
  * reads, deletes, edits, and merges skill files on disk.
  *
  * Operations:
@@ -20,7 +20,7 @@
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
-const { spawn } = require('child_process');
+const { parsePlatformFlag, createRunner } = require('./platform');
 
 const CACHE_DIR = path.join(os.homedir(), '.openscientist', 'cache', 'skills');
 
@@ -131,50 +131,7 @@ Now begin. Read each file and process them systematically.`;
 }
 
 // ---------------------------------------------------------------------------
-// Run Claude Code (Opus)
-// ---------------------------------------------------------------------------
-
-function runOpus(prompt, verbose, timeoutMs = 900_000) {
-  return new Promise((resolve) => {
-    const chunks = [];
-    const proc = spawn('claude', [
-      '-p',
-      '--model', 'opus',
-      '--dangerously-skip-permissions',
-      '--allowedTools', 'Read,Edit,Write,Bash',
-    ], { stdio: ['pipe', 'pipe', 'pipe'] });
-
-    proc.stdin.write(prompt);
-    proc.stdin.end();
-
-    proc.stdout.on('data', (d) => {
-      chunks.push(d);
-      if (verbose) process.stderr.write(d);
-    });
-    proc.stderr.on('data', (d) => {
-      if (verbose) process.stderr.write(d);
-    });
-
-    const timer = setTimeout(() => {
-      proc.kill('SIGTERM');
-      resolve({ ok: false, output: Buffer.concat(chunks).toString('utf-8'), error: 'timeout' });
-    }, timeoutMs);
-
-    proc.on('close', (code) => {
-      clearTimeout(timer);
-      const output = Buffer.concat(chunks).toString('utf-8');
-      resolve({ ok: code === 0, output, error: code !== 0 ? `exit ${code}` : null });
-    });
-
-    proc.on('error', (err) => {
-      clearTimeout(timer);
-      resolve({ ok: false, output: '', error: err.message });
-    });
-  });
-}
-
-// ---------------------------------------------------------------------------
-// Parse summary from Opus output
+// Parse summary from output
 // ---------------------------------------------------------------------------
 
 function parseSummary(output) {
@@ -193,10 +150,12 @@ function parseSummary(output) {
 // ---------------------------------------------------------------------------
 
 async function main() {
+  const platform = parsePlatformFlag();
+  const runner = createRunner(platform);
   const opts = parseArgs();
 
   if (!opts.sessionIds || opts.sessionIds.length === 0) {
-    console.error('Usage: clean-skills.js --session-ids id1,id2,... [--verbose]');
+    console.error('Usage: clean-skills.js --session-ids id1,id2,... [--cc|--codex] [--verbose]');
     process.exit(1);
   }
 
@@ -208,12 +167,12 @@ async function main() {
     process.exit(0);
   }
 
-  console.log('Spawning Opus for review...\n');
+  console.log('Spawning AI for review...\n');
   const prompt = buildPrompt(files);
-  const { ok, output, error } = await runOpus(prompt, opts.verbose);
+  const { ok, output, error } = await runner.clean(prompt, opts.verbose);
 
   if (!ok) {
-    console.error(`\nOpus review failed: ${error}`);
+    console.error(`\nReview failed: ${error}`);
     process.exit(1);
   }
 
@@ -229,9 +188,9 @@ async function main() {
   PII fixed: ${summary.pii_fixed}
 ═══════════════════════════════════════════════`);
   } else {
-    console.log('\nOpus completed but no CLEAN_SUMMARY found in output.');
+    console.log('\nCompleted but no CLEAN_SUMMARY found in output.');
     if (!opts.verbose) {
-      console.log('Re-run with --verbose to see full Opus output.');
+      console.log('Re-run with --verbose to see full output.');
     }
   }
 }

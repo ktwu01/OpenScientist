@@ -251,9 +251,6 @@ function saveSkill(sessionId, filePath) {
     return { ok: false, errors, filename };
   }
 
-  // Hash contributor at save time so cached skills never expose raw names
-  content = hashContributor(content);
-
   const dest = sessionCacheDir(sessionId);
   fs.mkdirSync(dest, { recursive: true });
   fs.writeFileSync(path.join(dest, filename), content);

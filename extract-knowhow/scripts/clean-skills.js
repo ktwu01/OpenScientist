@@ -94,17 +94,11 @@ KEEP skills about:
 - Concrete research turning points (hypothesis overturned, methodology abandoned, unexpected findings)
 - Knowledge representation methodology (schema design for capturing research decision trees) — ONLY when discussing "how to represent scientific knowledge", NOT "how to code the implementation"
 
-### 2. Fix anonymization
+### 2. Check for residual PII
 
-For each surviving skill, check the \`contributor\` field in YAML frontmatter.
-If it is NOT in \`anon-*\` format (e.g., it shows a real name like "HHHHHejia"), use Edit to replace it.
+The \`contributor\` field in YAML frontmatter should be the contributor's GitHub handle (real identity is expected here — it is stored separately in the DB column, not in the skill body).
 
-To compute the anonymous hash: use Bash to run:
-\`\`\`
-node -e "console.log('anon-' + require('crypto').createHash('sha256').update('<original_name>').digest('hex').substring(0, 8))"
-\`\`\`
-
-Also scan the body for residual PII:
+Scan the **body** for residual PII:
 - Real usernames or person names
 - Private URLs (not arxiv.org, doi.org, github.com, en.wikipedia.org, researchskills.ai)
 - Email addresses

@@ -17,13 +17,7 @@
 **— 🏛️ 为 AGI 建一座亚历山大图书馆，加速自动化科学发现。**
 
 <p align="center">
-  <a href="https://openscientists.github.io/OpenScientist/">
-    <img src="https://raw.githubusercontent.com/OpenScientists/OpenScientist/main/utils/assets/knowledge-tree-v2.png" alt="Knowledge Tree" width="100%">
-  </a>
-</p>
-
-<p align="center">
-  <a href="https://openscientists.github.io/OpenScientist/">查看交互式知识树 →</a>
+  <a href="https://researchskills.ai/">https://researchskills.ai/</a>
 </p>
 
 ---

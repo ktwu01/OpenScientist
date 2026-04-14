@@ -17,13 +17,7 @@ Today: We're launching the largest academic collaboration in human history
 **— 🏛️ Building the Library of Alexandria for AGI, Accelerating Automated Scientific Discovery.**
 
 <p align="center">
-  <a href="https://openscientists.github.io/OpenScientist/">
-    <img src="https://raw.githubusercontent.com/OpenScientists/OpenScientist/main/utils/assets/knowledge-tree-v2.png" alt="Knowledge Tree" width="100%">
-  </a>
-</p>
-
-<p align="center">
-  <a href="https://openscientists.github.io/OpenScientist/">View Interactive Knowledge Tree →</a>
+  <a href="https://researchskills.ai/">https://researchskills.ai/</a>
 </p>
 
 ---

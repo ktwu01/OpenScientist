@@ -1,5 +1,5 @@
 name: Submit a Skill (Manual)
-description: Submit a manually written skill file
+description: Submit a research skill with structured fields
 title: "Skill Submission: [skill name]"
 labels: ["skill-submission"]
 body:
@@ -8,7 +8,9 @@ body:
       value: |
         > **Using `/extract-knowhow`?** That tool now generates decision trees, not skill files. Please use the [**Submit a Decision Tree**](https://github.com/OpenScientists/OpenScientist/issues/new?template=02-submit-decision-tree.yml) template instead.
 
-        This form is for **manually written** skill files. Paste the full content of your `.md` skill file below.
+        This form is for **manually submitted** research skills. Fill in the structured fields below. Each skill captures a piece of tacit research knowledge — a decision rule, a frontier fact, or a cognitive turning point.
+
+        **Need help?** Use our [one-click prompt](https://researchskills.ai/submit-manually) to have ChatGPT, Claude, or Gemini extract skills from your research conversations, then paste the results here.
 
   - type: input
     id: english_name
@@ -190,23 +192,136 @@ body:
     validations:
       required: true
 
-  - type: textarea
-    id: skill_content
+  - type: markdown
     attributes:
-      label: Skill File Content
-      description: Paste the FULL content of your skill .md file here (including the YAML frontmatter between --- markers)
-      placeholder: |
+      value: |
         ---
-        name: your-skill-name
-        description: >
-          What this skill does...
-        domain: physics
-        subdomain: quantum-physics
-        author: "Your Name (Your Institution)"
-        expertise_level: intermediate
-        status: draft
-        ---
+        ## Skill Details
 
+  - type: input
+    id: skill_name
+    attributes:
+      label: Skill Name
+      description: A concise, descriptive name for this skill
+      placeholder: "e.g. Benchmark Paper Review Found Hidden Data-Manuscript Drift"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: memory_type
+    attributes:
+      label: Memory Type
+      description: |
+        What kind of knowledge does this skill encode?
+        - **Procedural** — IF-THEN rules for scientific research decisions
+        - **Semantic** — Frontier scientific knowledge the LLM doesn't have
+        - **Episodic** — Research cognitive turning points (uses Situation/Action/Outcome format)
+      options:
+        - "Procedural"
+        - "Semantic"
+        - "Episodic"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: subtype
+    attributes:
+      label: Subtype
+      description: |
+        Further categorize the skill:
+        - Procedural: tie, no-change, constraint-failure, operator-fail
+        - Semantic: frontier, non-public, correction
+        - Episodic: failure, adaptation, anomalous
+      options:
+        - "tie (Procedural — decision between equally viable options)"
+        - "no-change (Procedural — decision to keep current approach)"
+        - "constraint-failure (Procedural — when constraints block a plan)"
+        - "operator-fail (Procedural — when a tool or method fails)"
+        - "frontier (Semantic — cutting-edge knowledge not in training data)"
+        - "non-public (Semantic — knowledge not publicly documented)"
+        - "correction (Semantic — corrects a common misconception)"
+        - "failure (Episodic — a failed approach that taught something)"
+        - "adaptation (Episodic — adapting method to unexpected situation)"
+        - "anomalous (Episodic — an unexpected finding or result)"
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ## Skill Body
+
+        For **Episodic** skills, fill in the Situation → Action → Outcome → Implication → Lesson → Retrieval Cues sections below.
+
+        For **Procedural** or **Semantic** skills, you may use the free-form body field at the bottom instead (or fill in whichever sections apply).
+
+  - type: textarea
+    id: situation
+    attributes:
+      label: Situation
+      description: What was the research context? What was the researcher trying to do?
+      placeholder: "A reviewer was asked to assess an academic ML benchmark paper for factual consistency between manuscript claims and the underlying benchmark data."
+    validations:
+      required: false
+
+  - type: textarea
+    id: action
+    attributes:
+      label: Action
+      description: What did the researcher actually do?
+      placeholder: "They inspected the paper diff, then enumerated the benchmark task manifests, counted total items, and tallied task categories from the raw dataset artifacts before judging the manuscript text."
+    validations:
+      required: false
+
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Outcome
+      description: What was the result?
+      placeholder: "The audit surfaced a critical mismatch: the paper's reported task counts did not match the actual benchmark inventory."
+    validations:
+      required: false
+
+  - type: textarea
+    id: implication
+    attributes:
+      label: Implication
+      description: What does this mean for the research field?
+      placeholder: "Until the totals are regenerated from the same benchmark snapshot, the manuscript's count claims should be treated as untrusted rather than approximately correct."
+    validations:
+      required: false
+
+  - type: textarea
+    id: lesson
+    attributes:
+      label: Lesson
+      description: What generalizable lesson does this teach?
+      placeholder: "For benchmark papers, dataset-size claims are empirical claims. Review them against the underlying benchmark artifacts, not just against neighboring prose or tables."
+    validations:
+      required: false
+
+  - type: textarea
+    id: retrieval_cues
+    attributes:
+      label: Retrieval Cues
+      description: When should an AI agent recall this skill? List the trigger conditions, one per line.
+      placeholder: |
+        A paper revision changes benchmark totals or category statistics.
+        The abstract makes strong scope claims about a new benchmark.
+        The benchmark is assembled from many per-task JSON or manifest files.
+        Reviewer concern is "factual consistency," not just wording quality.
+    validations:
+      required: false
+
+  - type: textarea
+    id: free_body
+    attributes:
+      label: Free-form Body (for Procedural/Semantic skills)
+      description: |
+        If your skill is Procedural or Semantic, write the full body here using markdown sections (## Purpose, ## Domain Knowledge, ## Reasoning Protocol, ## Common Pitfalls, etc.).
+        For Episodic skills, you can leave this blank if you filled in the structured fields above.
+      placeholder: |
         ## Purpose
         ...
 
@@ -220,7 +335,7 @@ body:
         ...
       render: markdown
     validations:
-      required: true
+      required: false
 
   - type: dropdown
     id: generation_method
@@ -229,6 +344,7 @@ body:
       options:
         - "Written manually"
         - "Written with AI assistance"
+        - "Extracted from research conversation via one-click prompt"
     validations:
       required: true
 

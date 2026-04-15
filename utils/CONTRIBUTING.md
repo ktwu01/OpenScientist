@@ -22,7 +22,7 @@ The tool scans your conversation history, extracts research skills (procedural, 
 
 ### Via Web (ChatGPT / Claude / Gemini)
 
-Use the one-click prompt from the [README](https://github.com/OpenScientists/OpenScientist#method-b-one-click-prompt-for-web-users-chatgpt--claude--gemini), then submit via [**Submit a Skill →**](https://github.com/OpenScientists/OpenScientist/issues/new?template=01-submit-skill.yml)
+Use the one-click prompt from the [README](https://github.com/OpenScientists/OpenScientist#method-b-one-click-prompt-for-web-users-chatgpt--claude--gemini), then submit via [**Submit a Skill →**](https://researchskills.ai/)
 
 ---
 
@@ -126,7 +126,7 @@ npm install -g @openscientist/extract-knowhow
 
 ### 通过网页版（ChatGPT / Claude / Gemini）
 
-使用 [README](https://github.com/OpenScientists/OpenScientist#方式-b网页版用户一键提取chatgpt--claude--gemini) 中的一键 prompt，然后通过 [**提交 Skill →**](https://github.com/OpenScientists/OpenScientist/issues/new?template=01-submit-skill.yml) 提交。
+使用 [README](https://github.com/OpenScientists/OpenScientist#方式-b网页版用户一键提取chatgpt--claude--gemini) 中的一键 prompt，然后通过 [**提交 Skill →**](https://researchskills.ai/) 提交。
 
 ---
 

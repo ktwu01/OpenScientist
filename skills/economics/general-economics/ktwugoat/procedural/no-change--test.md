@@ -6,4 +6,4 @@ domain: economics
 subdomain: general-economics
 contributor: ktwugoat
 ---
-xx
+xxx

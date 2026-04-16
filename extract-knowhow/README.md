@@ -41,10 +41,11 @@ The command runs a 7-stage pipeline:
 1. **Scan** — discover all Claude Code and Codex sessions
 2. **Classify** — identify research vs. engineering projects (Sonnet)
 3. **Confirm** — you choose which projects to scan (multi-select)
-4. **Extract** — extract research skills per session (Sonnet)
-5. **Clean & Score** — Opus reviews, rejects, merges, and scores skills
-6. **Finalize** — collect results; upload only with your consent
-7. **Summary** — report results with review statistics
+4. **Extract** — extract research skills per session (Sonnet), organized by cognitive memory type
+5. **Clean** — review extracted skills with Opus: reject engineering content, fix PII, merge duplicates
+6. **Score** — assess each skill's value on 3 dimensions with Opus (procedural / semantic / episodic, 0-5)
+7. **Finalize** — upload cleaned, scored skills to [researchskills.ai](https://researchskills.ai)
+8. **Summary** — report results with review statistics
 
 ## Output
 

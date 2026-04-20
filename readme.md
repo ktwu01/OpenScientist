@@ -154,7 +154,7 @@ Don't apply if using bf16 or fp32 — eps=1e-8 is fine there.
 
 1. Count how many skills you extracted and briefly summarize the distribution (X procedural / Y semantic / Z episodic).
 2. List any research threads you're uncertain about — ask me whether to revisit them.
-3. Tell me to submit via: https://github.com/OpenScientists/OpenScientist/issues/new?template=01-submit-skill.yml
+3. Tell me to submit via: https://researchskills.ai/
 ````
 
 </details>

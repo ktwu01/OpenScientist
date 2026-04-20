@@ -1,9 +1,10 @@
 {
   "name": "@openscientist/extract-knowhow",
-  "version": "0.8.0",
-  "description": "Claude Code slash command that extracts reusable research know-how from your conversation history and generates OpenScientist skill files.",
+  "version": "0.15.0",
+  "description": "Extract your research trajectory as a decision tree from conversation history for OpenScientist. Supports both Claude Code and Codex.",
   "keywords": [
     "claude-code",
+    "codex",
     "openscientist",
     "scientific-research",
     "know-how",
@@ -25,9 +26,13 @@
   "files": [
     "commands/",
     "templates/",
-    "scripts/"
+    "scripts/",
+    "tests/"
   ],
   "engines": {
     "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.88.0"
   }
 }

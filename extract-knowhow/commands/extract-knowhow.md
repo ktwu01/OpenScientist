@@ -1,268 +1,265 @@
 # /extract-knowhow
 
-You are a research know-how extraction agent for **OpenScientist**. Analyze the user's conversation history (Claude Code and/or Codex CLI), identify scientific research sessions, extract reusable know-how, and present results as an interactive HTML report.
+Extract research skills from the user's Claude Code session history for **OpenScientist**.
 
-**Run fully automatically with ZERO user interaction.** Do not pause or ask questions. Report progress at each milestone.
+**Run automatically with TWO pauses for user consent:** once after classifying projects (Stage 2.5 — choose which projects to scan), and once before upload (Stage 7 — choose whether to submit). Report progress at each milestone.
 
-**Caching:** All intermediate results are cached to `~/.openscientist/cache/`. Re-running `/extract-knowhow` only processes new or modified sessions, saving significant time and tokens.
+You extract three types of cognitive memory from research conversations:
+- **Procedural** — IF-THEN rules for **scientific research** decisions: methodology choices, data interpretation strategies, research direction pivots. NOT engineering workflows.
+- **Semantic** — **Frontier scientific knowledge** the LLM doesn't have: domain-specific constraints, unpublished findings, corrections to scientific misconceptions. NOT tool/API behaviors.
+- **Episodic** — **Research cognitive turning points**: hypothesis overturned, methodology abandoned for scientific reasons, unexpected findings that changed direction. NOT debugging episodes.
 
-At the start, create the cache directory:
-```bash
-mkdir -p ~/.openscientist/cache/meta ~/.openscientist/cache/knowhow
-```
-
----
-
-## Stage 1: Session Discovery
-
-Scan for session files:
-
-**Claude Code:** Glob `~/.claude/projects/**/*.jsonl`
-- Extract `session_id` from filename, `project_path` from parent directory name (convert dashes to path separators)
-
-**Codex CLI:** Glob `~/.codex/archived_sessions/rollout-*.jsonl` and `~/.codex/sessions/**/*.jsonl`
-- Extract `session_id` from filename, `project_path` from `cwd` in first `session_meta` line
-
-Skip files < 500 bytes. Sort by modification time. Report: "Found N sessions across M projects."
+Everything else — discovery, formatting, validation, upload — is done by helper scripts. Do not reimplement their work.
 
 ---
 
-## Stage 2: Metadata Extraction & Filtering
+## Pipeline
 
-**Caching:** For each session, check if `~/.openscientist/cache/meta/<session_id>.json` exists AND the cached file's timestamp matches the `.jsonl` file size. If cache hit, load cached metadata and skip parsing. If cache miss, parse and save to cache.
+```
+scan-sessions.js       ─┐
+classify-projects.js   ─┤
+extract-skills.js      ─┤  deterministic scripts (you call them)
+  └─ claude -p sonnet   │  ← Sonnet CLI call per session, inside the script
+clean-skills.js        ─┤  ← Opus reviews: reject/fix/merge
+score-skills.js        ─┤  ← Opus scores: 3-dim value assessment
+finalize.js            ─┘
 
-For each uncached session, read first 50 lines and last 20 lines:
-1. Count user messages (lines with `"role":"user"`)
-2. Extract first user message text
-3. Calculate duration from timestamps
-4. Extract `cwd` field
-5. Classify as research / engineering / other (see Stage 3 rules below)
-
-Save the extracted metadata + classification to `~/.openscientist/cache/meta/<session_id>.json`:
-```json
-{
-  "session_id": "abc123",
-  "project_path": "/Users/x/project",
-  "first_prompt": "...",
-  "user_message_count": 15,
-  "duration_minutes": 45,
-  "file_size": 123456,
-  "classification": "research",
-  "research_topic": "...",
-  "activity_types": ["06-coding-and-execution", "07-result-analysis"]
-}
+You (main agent)       ← call scripts, read summaries, report
 ```
 
-**Deduplication:** If multiple sessions have the same content (identical `first_prompt` and similar `user_message_count`), keep the one with more user messages.
+Helper scripts (installed at `~/.claude/utils/`):
 
-**Filter out:** < 2 user messages, < 1 minute duration, agent sub-sessions (first 5 lines contain `"RESPOND WITH ONLY A VALID JSON OBJECT"` or `"record_facets"`)
-
-Report: "After filtering, N sessions remain (X from cache, Y newly analyzed)."
+| Script | What it does |
+|--------|-------------|
+| `scan-sessions.js` | Discover sessions, extract metadata, filter, group by project |
+| `classify-projects.js` | Classify projects as research/engineering via Sonnet, pick domain/subdomain |
+| `extract-skills.js` | **The core loop**: format each session → call `claude -p --model sonnet` → validate + cache skills |
+| `validate-skills.js` | Validate skill markdown and cache to `~/.openscientist/cache/skills/` |
+| `clean-skills.js` | Review extracted skills with Opus: reject engineering, fix PII, merge duplicates |
+| `score-skills.js` | Score surviving skills with Opus on 3 dimensions: procedural, semantic, episodic value |
+| `finalize.js` | Collect cached skills → upload to researchskills.ai |
 
 ---
 
-## Stage 3: Research Relevance Filter
+## Arguments
 
-**Note:** Classification is now done in Stage 2 (and cached). This stage simply aggregates the results.
+- `--test` (alias: `test`): Test mode. Accept engineering sessions too (not just research). Tag all output as test data.
+- No argument: Production mode. Only research sessions proceed.
 
-Classification rules for reference:
-
-**research:** literature search, hypothesis formation, derivation, experiment design, data collection, statistical analysis, scientific writing, peer review, scientific tool development, grant writing
-
-**engineering:** web/mobile dev, DevOps, general software, business logic
-
-**other:** casual, setup, unrelated
-
-For research sessions, also record `research_topic` (1-2 sentences) and likely `activity_types`.
-
-Only research sessions proceed. Report: "Identified N research sessions out of M total."
-
-If zero research sessions: report and stop.
+Detect mode at start. Announce: `"Running in TEST MODE"` or `"Running in production mode"`.
 
 ---
 
-## Stage 4: Project Clustering & Domain Mapping
-
-**Automatic — no user confirmation.**
-
-1. Group by `project_path`
-2. Merge sessions with same research topic across directories
-3. Map each project to OpenScientist taxonomy:
-   - **domain:** physics | mathematics | computer-science | quantitative-biology | statistics | eess | economics | quantitative-finance
-   - **subdomain:** arXiv-aligned (e.g. machine-learning, quantum-physics)
-
-Report: "Mapped N research projects to domains."
-
----
-
-## Stage 5: Know-How Extraction
-
-For each project, extract ALL know-how automatically.
-
-**Parallel processing:** If there are multiple research projects, process them in parallel using the Agent tool — dispatch one subagent per project. Each subagent receives the project's session file paths and the extraction instructions below, and returns the extracted know-how items as JSON. This significantly speeds up extraction when the user has many research projects.
-
-**Caching:** Check if `~/.openscientist/cache/knowhow/<session_id>.json` exists for each session in the project. If ALL sessions in a project have cached know-how AND no session files have changed, load from cache and skip extraction. Otherwise, re-extract for that project only.
-
-**Incremental limit:** Process at most 50 new (uncached) sessions per run. If more remain, report: "Processed 50 sessions. Run /extract-knowhow again to analyze the remaining N sessions."
-
-### Read Content
-Read full `.jsonl` files. For sessions > 30,000 chars, split into 25,000-char segments, summarize preserving methods/tools/parameters/pitfalls, merge.
-
-### Extract by 10 Categories
-
-| Category ID | What to look for |
-|-------------|-----------------|
-| `01-literature-search` | Search strategies, databases, filtering, citations |
-| `02-hypothesis-and-ideation` | Hypothesis formation, idea evaluation |
-| `03-math-and-modeling` | Proofs, modeling, mathematical formulations |
-| `04-experiment-planning` | Protocols, controls, variable selection |
-| `05-data-acquisition` | Data sources, cleaning, labeling |
-| `06-coding-and-execution` | Coding patterns, libraries, debugging |
-| `07-result-analysis` | Statistics, visualization, interpretation |
-| `08-reusable-tooling` | Tools built, method innovations, workflows |
-| `09-paper-writing` | Writing structure, figures, claims |
-| `10-review-and-rebuttal` | Self-critique, reviewer responses, revision |
-
-### Generalization Principle
-
-**The goal is to extract tacit knowledge — the hard-won intuition, thinking frameworks, and principles that experts carry in their heads but never write down.** Skills should be useful to ANY researcher in the same subdomain, not just the original author.
-
-When extracting from a specific project, always ask: "Would this help a new PhD student entering this field?" If yes, extract it. If it only makes sense in the context of this particular project, generalize it or skip it.
-
-**Generalize:** "For our LiFePO4 simulation, AMIX=0.05 worked" → "For GGA+U calculations on any transition metal oxide with localized d-electrons, reduce AMIX to 0.05"
-
-**Don't just copy:** "In /Users/jane/project-x/run3, I set ENCUT=520" → Extract the principle: "For transition metal oxides, converge ENCUT by testing 400-600 eV in 50 eV steps; most systems converge around 500-550 eV"
-
-### Privacy & De-identification
-
-**All generated skills must be fully de-identified.** Strip out:
-- File paths, directory names, usernames (e.g. `/Users/jane/project/`)
-- Project-specific names, dataset names, or internal identifiers
-- Email addresses, URLs to private resources
-- Names of collaborators or lab members
-- Any information that could identify the researcher (except the author field, which is intentionally public)
-
-Replace specific references with generic descriptions: "our internal dataset" → "a domain-specific dataset", "/home/user/exp3/results.csv" → "the results file"
-
-### What to extract
-
-**DO extract** — generalizable tacit knowledge:
-- Decision-making principles ("always do X before Y because...")
-- Diagnostic reasoning ("when you see symptom A, check B first, not C")
-- Parameter selection heuristics with scientific justification
-- Tool selection rationale applicable to the broader field
-- Domain conventions that newcomers wouldn't know
-- Methodological insights that transfer across projects in the subdomain
-- Thinking frameworks for approaching common problems in the field
-
-**DO NOT extract:**
-- Project-specific implementation details with no transferable value
-- Generic programming knowledge (git, for loops, package installation)
-- AI tool usage patterns (how to prompt Claude, how to use Codex)
-- Personal preferences with no scientific basis
-- Standard textbook knowledge with no novel application
-- Any personally identifiable information
-
-### Output per item
-```json
-{
-  "title": "Short descriptive title",
-  "category": "06-coding-and-execution",
-  "description": "2-3 sentences",
-  "domain_knowledge": "Key concepts and principles",
-  "reasoning_steps": ["Step 1...", "Step 2..."],
-  "tools": ["tool — what it does"],
-  "pitfalls": ["Mistake and how to avoid"],
-  "confidence": "high | medium | low"
-}
-```
-
-After extraction, save each session's know-how to `~/.openscientist/cache/knowhow/<session_id>.json`:
-```json
-{
-  "session_id": "abc123",
-  "project_name": "...",
-  "domain": "physics",
-  "subdomain": "computational-physics",
-  "skills": [ ...extracted items... ],
-  "file_size": 123456
-}
-```
-
-Report: "Extracted N know-how items across all projects (X from cache, Y newly extracted)."
-
----
-
-## Stage 6: HTML Report Generation
-
-### Step 6.1: Collect Author (automatic)
-
-Run silently via Bash:
-```
-git config user.name
-git config user.email
-```
-If unavailable, use "Anonymous Contributor".
-
-### Step 6.2: Build Data Object
-
-Assemble all results into a single JSON object:
-```json
-{
-  "author": "git user.name",
-  "email": "git user.email",
-  "total_sessions": 47,
-  "date": "2026-04-02",
-  "projects": [
-    {
-      "name": "Project Name",
-      "domain": "physics",
-      "subdomain": "computational-physics",
-      "session_count": 5,
-      "skills": [ ...array of know-how items from Stage 5... ]
-    }
-  ]
-}
-```
-
-### Step 6.3: Generate HTML
-
-Create directory: `mkdir -p ~/.openscientist`
-
-Read the HTML template from the npm package at `templates/report.html` (installed alongside this command). The template contains all CSS, JS, and the interactive UI. Replace the `__REPORT_DATA__` placeholder in the template with the actual JSON data object from Step 6.2.
-
-If the template file is not found, fall back to writing a minimal HTML page that embeds the JSON data and displays it.
-
-Write the result to `~/.openscientist/report.html`.
-
-The HTML template provides:
-1. Dark theme UI with project cards and skill rows
-2. Checkbox to accept/reject each skill
-3. Inline editing of all fields (title, description, domain knowledge, etc.)
-4. Per-skill **"Submit to GitHub"** button — opens a new browser tab with the `01-submit-skill.yml` issue template pre-filled with all fields
-5. **"Submit All Accepted"** button — opens one tab per accepted skill
-6. No terminal commands needed — submission is entirely browser-based
-
-### Step 6.4: Open Report
+## Stage 1 — Scan
 
 ```bash
-open ~/.openscientist/report.html  # macOS
-# or: xdg-open ~/.openscientist/report.html  # Linux
+mkdir -p ~/.openscientist/cache/meta ~/.openscientist/cache/skills
+node ~/.claude/utils/scan-sessions.js
 ```
 
-### Step 6.5: Terminal Summary
+Reads `~/.openscientist/cache/work-list.json` output. Report: `"Found N sessions across M projects."`
+
+---
+
+## Stage 2 — Classify Projects
+
+**YOU MUST call this script. Do NOT classify projects yourself.**
+
+```bash
+node ~/.claude/utils/classify-projects.js ~/.openscientist/cache/work-list.json --cc --verbose
+```
+
+For test mode, add `--test`.
+
+The script calls Sonnet to classify each project as research/engineering and picks domain/subdomain from the taxonomy. It also filters out non-research sessions (e.g., extract-knowhow runs, build/deploy tasks) via `skip_patterns`.
+
+Output: `~/.openscientist/cache/classification.json`.
+
+Read the output file. For each project with `type: "research"`, use its `research_session_ids` (NOT `session_ids`), `domain`, `subdomain`, and `project_name` in later stages. Do NOT include skipped sessions.
+
+The script generates an AI-summarized `project_name` for each project (e.g. "Protein Folding Simulation Pipeline") instead of using the raw folder name. Use this `project_name` in Stage 6 finalize. If `project_name` is null, fall back to the `slug`.
+
+Report: `"Classified N projects. Proceeding with M."`
+
+---
+
+## Stage 2.5 — Project Consent Gate
+
+**PAUSE and ask the user.** After classification, show all discovered projects and let the user choose which to scan.
+
+Read `~/.openscientist/cache/classification.json` and display:
+
+```
+Select which projects to scan for research skills:
+
+  [x] 1. Protein Folding Pipeline     (4 sessions, research, quantitative-biology)
+  [x] 2. Quantum Monte Carlo Study    (3 sessions, research, physics)
+  [ ] 3. Personal Website             (3 sessions, engineering)
+  [ ] 4. Dotfiles                     (2 sessions, other)
+
+Enter numbers to toggle, or press Enter to continue:
+```
+
+Research projects are pre-selected; engineering/other are deselected.
+
+**YOU MUST STOP HERE AND WAIT FOR THE USER TO RESPOND.** Use AskUserQuestion to present the project list and block until the user replies. Do NOT continue to Stage 3 without an explicit user response.
+
+Only pass user-approved projects to Stage 3+. Remove deselected project session IDs from all subsequent `--session-ids` arguments.
+
+Report: `"Proceeding with N projects (M sessions) after user confirmation."`
+
+---
+
+## Stage 3 — Extract Skills Per Session
+
+### MANDATORY: Use --single-batch and loop. NEVER run all at once.
+
+The extraction script MUST be called in a loop with `--single-batch`. Each call processes ONE batch (~5 parallel Sonnet calls) then exits. You call it again in a new Bash tool call. This keeps the user informed of progress and prevents the UI from freezing.
+
+**FORBIDDEN patterns (will cause long freezes):**
+- `run_in_background: true` — user sees nothing for 10+ minutes
+- Omitting `--single-batch` — script runs all batches internally, no progress visible
+- Using Monitor tool to watch output — still freezes, just with delayed notifications
+
+**REQUIRED pattern:**
+
+```bash
+# REPEAT this exact Bash call in a loop. Each call = 1 batch.
+node ~/.claude/utils/extract-skills.js ~/.openscientist/cache/work-list.json \
+  --cc \
+  --domain <domain> \
+  --subdomain <subdomain> \
+  --contributor "$(git config user.name)" \
+  --session-ids <ALL-research-session-ids-csv> \
+  --single-batch \
+  --verbose
+```
+
+**Loop logic:**
+1. Run the command above (foreground Bash, NOT background)
+2. Read the output. Report to user: "Batch N/M done: X skills extracted, Y calls remaining"
+3. If output says `0 Sonnet calls remaining` or `All sessions already cached` → **stop, go to Stage 4**
+4. Otherwise → run the **same command again** (it auto-skips cached segments)
+
+Pass ALL research session IDs from Stage 2. Do NOT drop sessions or pick a subset.
+
+If you need to process multiple projects with different domains, call the script once per project with `--session-ids` filtering to that project's sessions.
+
+---
+
+## Stage 4 — Clean Skills
+
+Run Opus to review all extracted skills: reject engineering content, fix PII leaks, merge duplicates.
+
+```bash
+node ~/.claude/utils/clean-skills.js \
+  --cc \
+  --session-ids <ALL-research-session-ids-csv> \
+  --verbose
+```
+
+This spawns a Claude Code instance with Opus that directly reads, deletes, and edits skill files on disk.
+
+Report: `"Clean: kept N, rejected M, merged K."`
+
+---
+
+## Stage 5 — Score Skills
+
+Run Opus to assess the value of each surviving skill on 3 dimensions.
+
+```bash
+node ~/.claude/utils/score-skills.js \
+  --cc \
+  --session-ids <ALL-research-session-ids-csv> \
+  --verbose
+```
+
+This spawns a Claude Code instance with Opus that reads each skill and writes `review_scores` (procedural, semantic, episodic — each 0-5) into the YAML frontmatter.
+
+Report: `"Scored N skills. Avg: procedural X.X, semantic X.X, episodic X.X."`
+
+---
+
+## Stage 6 — Finalize Per Project (collect only, no upload yet)
+
+Use the AI-generated `project_name` from classification.json (Stage 2). Do NOT use the raw folder name.
+
+**Do NOT pass `--upload` here.** Collect skills locally first. Upload requires explicit user consent in Stage 7.
+
+```bash
+node ~/.claude/utils/finalize.js \
+  --session-ids <ALL-research-session-ids-csv> \
+  --domain <domain> \
+  --subdomain <subdomain> \
+  --contributor "$(git config user.name)" \
+  --project-name "<project_name from classification>" \
+  --project-slug "<slug>"
+```
+
+---
+
+## Stage 7 — Consent and Upload
+
+**Second consent gate.** Pause and ask the user before uploading anything.
+
+Show the user what was extracted:
 
 ```
 ═══════════════════════════════════════════════════════
-  /extract-knowhow Complete!
+  /extract-knowhow — Extraction Complete!
 ═══════════════════════════════════════════════════════
 
-Extracted N know-how items from M research projects.
+Extracted N skills from M sessions across P projects:
+  • Episodic:   E skills
+  • Semantic:   S skills
+  • Procedural: Pr skills
 
-Report saved to: ~/.openscientist/report.html
+Review (Opus):
+  • Kept: K / Rejected: R / Merged: G
+  • Avg scores: procedural X.X, semantic X.X, episodic X.X
 
-In the report you can:
-  ✓ Review and edit each extracted skill
-  ✓ Accept or reject individual items
-  ✓ Submit directly to OpenScientist via GitHub (one click per skill)
+⚠ Nothing has been uploaded yet. Your skills are saved
+  locally. Would you like to submit them to OpenScientist
+  for reviewer review?
+
+  Skills will be stored on researchskills.ai and reviewed
+  by a maintainer before publication (CC-BY 4.0).
+═══════════════════════════════════════════════════════
 ```
+
+Then use AskUserQuestion to get explicit consent:
+- Question: "Submit your extracted skills to OpenScientist for review?"
+- Option A: "Yes, submit for review" — re-run finalize with `--upload`
+- Option B: "No, keep local only" — skip upload, tell user where files are saved
+
+If the user consents, re-run finalize with `--upload`.
+
+**Headless/SSH detection:** If running over SSH (SSH_CONNECTION or SSH_CLIENT env vars set) or on a headless Linux server (no DISPLAY), the upload script automatically detects this and:
+- Disables browser opening
+- Prints the review URL for the user to visit from any browser
+
+When the user has consented via the prompt above, pass `--consent` to include `consent: true` in the upload payload.
+
+```bash
+node ~/.claude/utils/finalize.js \
+  --session-ids <ALL-research-session-ids-csv> \
+  --domain <domain> \
+  --subdomain <subdomain> \
+  --contributor "$(git config user.name)" \
+  --project-name "<project_name from classification>" \
+  --project-slug "<slug>" \
+  --upload
+```
+
+Then show:
+```
+Review your skills:
+  → https://researchskills.ai/review/batch/<batchId>
+```
+
+If headless, also show:
+```
+  (Sign in with GitHub on the review page to claim credit and submit.)
+```
+

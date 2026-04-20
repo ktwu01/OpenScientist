@@ -4,15 +4,10 @@ name: your-skill-name                        # lowercase, hyphens only. This is 
 description: >                               # 1-2 sentences: when should this skill be used?
   Describe what this skill does and when to invoke it.
 domain: physics                              # physics | mathematics | computer-science | quantitative-biology | statistics | eess | economics | quantitative-finance
-subdomain: ""                                # optional: more specific area
-category: ""                                 # 01-literature-search | 02-hypothesis-and-ideation | 03-math-and-modeling | 04-experiment-planning | 05-data-acquisition | 06-coding-and-execution | 07-result-analysis | 08-reusable-tooling | 09-paper-writing | 10-review-and-rebuttal
+subdomain: ""                                # more specific area (e.g. quantum-physics)
 author: "Full Name (Institution)"            # e.g. "Dr. Albert Einstein (ETH Zürich Physics)"
 expertise_level: advanced                    # beginner | intermediate | advanced
-tags: []                                     # optional: [keyword1, keyword2, ...]
-dependencies: []                             # optional: names of other skills this builds on
-version: 1.0.0
 status: draft                                # leave as draft; reviewer will update after review
-reviewed_by: []
 ---
 
 <!--
@@ -21,8 +16,11 @@ reviewed_by: []
   1. Delete these comment blocks before submitting.
   2. Fill in ALL required frontmatter fields above.
   3. Complete each section below. "Required" sections must be present.
-  4. Run `python utils/tools/validate.py skills/<domain>/<subdomain>/<your-file>.md` before opening a PR.
+  4. Run `python utils/tools/validate.py skills/<domain>/<subdomain>/<your-skill>.md` before opening a PR.
   5. See utils/SKILL_SCHEMA.md for full field documentation.
+
+  NOTE: The primary contribution method is now skills via /extract-knowhow.
+  This template is for manually written skills only.
 -->
 
 ## Purpose

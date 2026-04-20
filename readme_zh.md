@@ -17,13 +17,7 @@
 **— 🏛️ 为 AGI 建一座亚历山大图书馆，加速自动化科学发现。**
 
 <p align="center">
-  <a href="https://openscientists.github.io/OpenScientist/">
-    <img src="https://raw.githubusercontent.com/OpenScientists/OpenScientist/main/utils/assets/knowledge-tree-v2.png" alt="Knowledge Tree" width="100%">
-  </a>
-</p>
-
-<p align="center">
-  <a href="https://openscientists.github.io/OpenScientist/">查看交互式知识树 →</a>
+  <a href="https://researchskills.ai/">https://researchskills.ai/</a>
 </p>
 
 ---
@@ -36,9 +30,9 @@
 
 这种直觉活在你的脑子里 — know-how、启发式方法、推理模式、"我就是知道这行不通"的第六感。它从不被写进论文。它会随着你的退休而消亡。
 
-**OpenScientist 在它消失之前把它留住。** 我们把全世界顶尖研究者的隐性知识 — 他们的技能、思维框架和原则 — 变成可复用的 AI agent 技能（兼容 **Claude Code** 和 **Codex CLI**）。每一份贡献，都让现在和未来的每一个 AI 科学家变得更聪明，永久地。
+**OpenScientist 在它消失之前把它留住。** 我们把全世界顶尖研究者的隐性知识 — 他们的技能、思维框架和原则 — 变成可复用的 AI agent 技能（兼容 **Claude Code** 和 **Codex**）。每一份贡献，都让现在和未来的每一个 AI 科学家变得更聪明，永久地。
 
-每个 Skill 编码了领域知识、工具、推理协议和常见陷阱。Skill 可以由领域专家手动撰写，也可以通过 `/extract-knowhow` **从你的科研对话中自动提取**。让 AI 调用一个 Skill，就能像领域专家一样思考。
+每个 Skill 编码了领域知识、工具、推理协议和常见陷阱。Skill 可以由领域专家手动撰写，也可以通过 `/extract-knowhow` **从你的科研对话中自动提取**。该命令从你的科研会话中提取三种认知记忆 — **程序性记忆**（应对科研困境的 IF-THEN 规则）、**语义记忆**（LLM 不知道的领域事实）和**情景记忆**（具体的科研经历）— 并将它们打包为可复用的 Skill。让 AI 调用一个 Skill，就能像领域专家一样思考。
 
 ---
 
@@ -55,12 +49,20 @@ npm install -g @openscientist/extract-knowhow
 /extract-knowhow
 ```
 
-**Codex CLI:**
+**Codex:**
 ```
 $extract-knowhow
 ```
 
-该命令会自动扫描你的对话历史，提取科研 know-how，并在浏览器中打开交互式报告 — 你可以在其中审核、编辑，并直接通过 GitHub 提交到 OpenScientist。
+> 💡 **为了最佳效果：** 使用最强模型 + 最高推理强度 — **Claude Code：** Opus 4.6 + max effort。**Codex：** GPT-5.4 + x-high。不必担心 token 消耗 — 对话会被充分压缩后再分析，每个会话的提取会交给较小的模型处理。你选的模型主要负责编排流水线。
+
+该命令会扫描你的对话历史，提取按认知记忆类型组织的**科研技能**：
+
+- **程序性记忆：** 应对科研困境的 IF-THEN 规则（如"IF 梯度爆炸 THEN 先检查学习率再改架构"）
+- **语义记忆：** LLM 不可靠掌握的领域事实（如校准常数、未记录的工具行为、方法局限性）
+- **情景记忆：** 具体的科研经历，记录尝试了什么、失败了什么、学到了什么
+
+浏览器交互页面让你审核提取的技能、检查脱敏处理、绑定论文（arXiv/DOI）或项目。提交你的技能到 OpenScientist，它将成为构建更强 AI 科学家的知识库的一部分。
 
 ### 方式 B：网页版用户一键提取（ChatGPT / Claude / Gemini）
 
@@ -77,84 +79,83 @@ $extract-knowhow
 <details>
 <summary><b>点击展开完整 prompt</b></summary>
 
+````
+你可以访问我所有的历史对话。请完整回顾它们，提取**科研技能** — 我科研工作中的隐性 know-how，那些前沿 LLM 本身不具备的知识。要求覆盖全面，不要保守：一个典型研究者一年的对话中会累积几十条值得提取的技能。
+
+## 三种记忆类型（每种必须指定子类型）
+
+每条技能只能归入一个子类型。如果都不匹配，就跳过该条目 — 不要勉强套。
+
+### 1. 程序性（Procedural） — 应对科研困境的 IF-THEN 规则
+- `tie` — 多条可行路径，不确定先走哪一条（如"消融实验还是完整重训？"）
+- `no-change` — 完全卡住，没有可尝试的假设（如"结果很诡异，完全讲不通"）
+- `constraint-failure` — 某个方法学前提不成立（如"数据违反 i.i.d. 假设"）
+- `operator-fail` — 方法选对了，执行失败（如"大 batch size 下 CUDA OOM"）
+
+### 2. 语义（Semantic） — 前沿 LLM 不可靠掌握的事实
+- `frontier` — 训练截止日期之后的知识（如"Flash Attention 3 把 `causal` 参数改名了"）
+- `non-public` — 实验室内部或未发表的发现（如"这批 H100 有 NCCL 拓扑问题"）
+- `correction` — 纠正 LLM 默认的错误信念（如"fp16 下 Adam 的 eps=1e-8 不稳定，应该用 1e-5"）
+
+### 3. 情景（Episodic） — 具有可迁移教训的具体经历
+- `failure` — "做了 X，因为隐藏原因 Y 失败了"
+- `adaptation` — "标准方法失败；权宜方案 Z 成功了"
+- `anomalous` — "预期 A，观察到 B — 最后发现这很重要"
+
+## 硬过滤（绝对不要提取）
+
+- 工程 / DevOps / 部署 / CI / UI / 数据库 / Docker
+- 通用编程：git、npm、React、构建错误调试
+- 任何 LLM 都已熟知的教科书知识
+- 闲聊、环境配置、文件组织、项目命名
+
+LLM 自己就能生成的技能，价值为零。只提取那些**纠正或扩展**前沿模型已有认知的内容。
+
+## 输出格式
+
+每条技能输出一个 YAML+markdown 块，用 `===` 分隔：
+
 ```
-回顾我们所有的历史对话，提取每一条可复用的科研 know-how。只关注科研活动，忽略通用编程、环境配置或闲聊内容。
-
-将每条 know-how 归入以下 10 个类别之一：
-1. 文献搜索 — 搜索策略、论文筛选、引用分析
-2. 假设与构思 — 假设构建、研究问题提炼
-3. 数学与建模 — 证明策略、推导、数学表述
-4. 实验规划 — 实验方案、控制策略、变量选择
-5. 数据采集 — 数据来源、清洗流程、标注策略
-6. 编码与执行 — 科研编码模式、库选择、调试
-7. 结果分析 — 统计方法、可视化、结果解读
-8. 可复用工具 — 你让我帮你构建的工具、方法或工作流
-9. 论文写作 — 写作结构、图表规范、论点构建
-10. 评审与修改 — 自我批判、回复审稿人、修改策略
-
-将每个条目输出在一个代码块中，使用以下格式，方便我直接复制粘贴：
-
 ---
-name: 简短描述性标题
-description: >
-  2-3 句话解释这条 know-how 是什么以及何时使用。
-domain: [physics|mathematics|computer-science|quantitative-biology|statistics|eess|economics|quantitative-finance]
-subdomain: 具体子领域
-category: [01-literature-search|02-hypothesis-and-ideation|03-math-and-modeling|04-experiment-planning|05-data-acquisition|06-coding-and-execution|07-result-analysis|08-reusable-tooling|09-paper-writing|10-review-and-rebuttal]
-author: "我的姓名 (我的机构)"
-expertise_level: intermediate
-tags: [关键词1, 关键词2]
-dependencies: []
-version: 1.0.0
-status: draft
-reviewed_by: []
+name: gradient-explosion-under-fp16
+memory_type: procedural
+subtype: operator-fail
+domain: computer-science      # arXiv 顶级分类：physics, math, computer-science, q-bio, stat, eess, econ, q-fin
+subdomain: machine-learning   # 参考 https://arxiv.org/category_taxonomy
+tags: [adam, mixed-precision, numerical-stability]
 ---
 
-## Purpose
+## When
+在 fp16 下用 Adam 训练深度 Transformer；尽管有梯度裁剪，前几个 epoch 损失仍会突然变 NaN。
 
-[将描述扩展为完整段落]
+## Decision
+先把 Adam 的 `eps` 从 1e-8 提到 1e-5，再考虑降学习率或改架构。已拒绝的方案：降 LR（只是掩盖症状）、换 SGD（丢掉 Adam 的优点）。
 
-## Tools
+## Why
+fp16 精度下 1e-8 会被规约为 0，Adam 的更新步骤相当于除以零。混合精度下多数"梯度爆炸"其实是这个问题，而不是真正的梯度不稳定。
 
-- **[工具名]**: 用途和使用时机
+## Local Verifiers
+- 梯度裁剪触发**之前**，optimizer state 里就出现了 NaN
+- 换成 bf16（动态范围更大）后症状消失 — 印证 eps 假设
 
-## Domain Knowledge
-
-### Key Concepts
-
-[与此 know-how 相关的核心概念]
-
-### Fundamental Principles
-
-[底层科学原理]
-
-## Reasoning Protocol
-
-Step 1: [具体步骤]
-Step 2: [具体步骤]
-Step 3: [具体步骤]
-
-## Common Pitfalls
-
-- [陷阱 1: 哪里会出错以及如何避免]
-- [陷阱 2: 哪里会出错以及如何避免]
-
-## References
-
-- 从对话历史中提取
-- 提取日期: [今天日期]
-
----
-
-规则：
-- 提取每一条科研 know-how，无论多小
-- 从项目细节中提炼通用原则：问自己"这对该领域的任何研究者都有用吗？"。例如："我们的 LiFePO4 模拟中 AMIX=0.05 有效" → "对于含 d 电子的过渡金属氧化物 GGA+U 计算，将 AMIX 降至 0.05"
-- 脱敏处理：去除所有文件路径、用户名、项目名、私有 URL、合作者姓名，用通用描述替代。唯一允许使用真名的是 author 字段
-- 聚焦于隐性知识：思维框架、决策原则、诊断推理、启发式方法 — 那些永远不会写进论文的直觉
-- 不要提取通用编程知识、AI 工具使用技巧或教科书基础内容
-- 不要合并或归纳多个条目 — 每条 know-how 单独一个 skill 文件
-- 代码块之后，确认是否已经提取完整，是否还有遗漏
+## Anti-exemplars
+如果是 bf16 或 fp32，不要套用这条 — 那种情况下 eps=1e-8 是正常的。
+===
 ```
+
+## 规则
+
+- **脱敏处理**：去除文件路径、用户名、项目名、私有 URL、合作者姓名。保留科学内容（材料、参数、方法、模型名）。
+- **死胡同最珍贵**：失败的实验、放弃的方向往往是最高价值的技能来源，不要跳过。
+- **要具体**："IF 损失停滞 THEN 试 X" 是弱技能。"IF Adam 训练 >1B 参数 Transformer 在 warmup 后损失停滞 THEN 试 X 因为 Y" 是强技能。
+- **追求覆盖而非精简**：如果你在一年的科研对话里只挑出了 3 条技能，说明绝大多数都被你漏了。
+
+## 完成后
+
+1. 报告一下提取总数和分布（X 条程序性 / Y 条语义 / Z 条情景）。
+2. 列出你不确定要不要挖的对话话题 — 问我是否要重新回顾。
+3. 提醒我提交：https://researchskills.ai/
+````
 
 </details>
 
@@ -162,13 +163,76 @@ Step 3: [具体步骤]
 
 ### 方式 C：手动撰写
 
-参照[模板](skills/_template.md)撰写，然后 [**提交 →**](https://researchskills.ai/submit-manually)
+参照[这个指南 →**](https://researchskills.ai/submit-manually)
 
 > 没有你的研究方向？[提议新领域 →](https://github.com/OpenScientists/OpenScientist/issues/new?template=04-propose-new-area.md) · 需要某个 Skill？[请求 Skill →](https://github.com/OpenScientists/OpenScientist/issues/new?template=02-skill-request.yml)
 
 ---
 
-<h2 align="center">3. 成为审稿人</h2>
+<h2 align="center">3. Skill 架构设计</h2>
+
+OpenScientist 的 Skill 设计基于认知架构理论 — [Soar](https://en.wikipedia.org/wiki/Soar_(cognitive_architecture)) (Laird, 2012)、[ACT-R](https://en.wikipedia.org/wiki/ACT-R) (Anderson, 1996) 和[基于案例的推理](https://en.wikipedia.org/wiki/Case-based_reasoning) (Kolodner, 1993)。Skill 按照**研究者大脑实际存储和检索专业知识的方式**来组织，而非任意分类。
+
+### 三种记忆类型
+
+| 类型 | 存储内容 | 触发时机 |
+|------|---------|---------|
+| **程序性记忆** | 应对科研困境的 IF-THEN 规则 | Agent 面临决策、卡住或假设失效时 |
+| **语义记忆** | LLM 训练数据中缺失的事实 | Agent 需要它不具备的领域知识时 |
+| **情景记忆** | 具体的科研经历 | Agent 遇到与过去经验相似的情境时 |
+
+### 程序性记忆 — "如何决策"
+
+按**科研僵局类型**分类（改编自 Soar 的 impasse 分类体系）：
+
+| 子类型 | 僵局 | 示例 |
+|--------|------|------|
+| `tie` | 多条路径，不知道选哪个 | "消融实验 vs 完全重训 — 先做哪个？" |
+| `no-change` | 完全卡住，不知道下一步 | "结果很诡异，完全看不懂" |
+| `constraint-failure` | 方法论假设不成立 | "数据不满足 i.i.d. 假设" |
+| `operator-fail` | 选对了方法但执行失败 | "方法正确，但大 batch 时 CUDA OOM" |
+
+每个程序性 Skill 包含：**When**（触发条件 + 排除项）→ **Decision**（首选行动 + 被拒替代方案 + 推理）→ **Local Verifiers**（如何验证）→ **Failure Handling**（失败后怎么办）→ **Anti-exemplars**（什么时候不该用）。
+
+### 语义记忆 — "LLM 不知道的事"
+
+只有三种子类型 — 其他内容 LLM 训练数据里已经有了：
+
+| 子类型 | 存储内容 | 示例 |
+|--------|---------|------|
+| `frontier` | 训练截止后的新知识 | "Flash Attention 3 把 `causal` 参数改名了" |
+| `non-public` | 实验室内部未发表的知识 | "这批 H100 的 NCCL 拓扑有问题" |
+| `correction` | 纠正 LLM 的错误默认信念 | "Adam eps=1e-8 在混合精度下不稳定，应该用 1e-5" |
+
+### 情景记忆 — "发生了什么"
+
+使用基于案例推理（CBR）术语分类：
+
+| 子类型 | 信号 | 检索触发 |
+|--------|------|---------|
+| `failure` | "做了 X，因为隐藏原因 Y 失败了" | Agent 准备做类似的事 |
+| `adaptation` | "标准方法不行，但变通方法 Z 行得通" | Agent 用标准方法卡住了 |
+| `anomalous` | "预期 A，观察到 B — 后来发现很重要" | Agent 观察到类似的异常 |
+
+### 目录结构
+
+```
+skills/
+└── {domain}/                    # 8 个 arXiv 对齐的顶层领域
+    └── {subdomain}/             # 155 个子领域
+        └── {contributor}/       # 你的名字
+            ├── procedural/      # tie--, no-change--, constraint-failure--, operator-fail--
+            ├── semantic/        # frontier--, non-public--, correction--
+            └── episodic/        # failure--, adaptation--, anomalous--
+```
+
+### 理论基础
+
+完整论述 — 为什么科研困难、为什么 LLM 在科研上力不从心、以及 Skill 如何改变 Agent 行为 — 参见[《为什么科研是困难的》](docs/why-research-is-hard.md)。完整 Schema 规范参见 [Skill Schema Design](docs/superpowers/specs/2026-04-11-skill-schema-design.md)。
+
+---
+
+<h2 align="center">4. 成为审稿人</h2>
 
 审稿人是守护其子领域 Skill 科学质量的领域专家。需要在相关领域有充分的同行评审经验。
 
@@ -180,7 +244,7 @@ Step 3: [具体步骤]
 
 ---
 
-<h2 align="center">4. 领域列表</h2>
+<h2 align="center">5. 领域列表</h2>
 
 <div align="center">
 

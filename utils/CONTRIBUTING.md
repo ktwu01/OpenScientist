@@ -1,16 +1,32 @@
 # Contributing to OpenScientist
 
-Thank you for contributing your expertise! This guide walks you through writing and submitting a skill.
+Thank you for contributing your expertise! There are two ways to contribute:
+
+1. **Research Skills (recommended):** Use `/extract-knowhow` to automatically extract research skills from AI conversation history. This is the primary contribution method.
+2. **Skills (manual):** Write a skill file by hand following the template.
 
 ---
 
-## 1. What is a Skill?
+## 1. Submit Research Skills (Recommended)
 
-A skill is a single Markdown file (`.md`) with YAML frontmatter that encodes expert-level domain knowledge for Claude Code. When invoked, the skill instructs the AI to reason as a domain expert would.
+### Via Claude Code / Codex
+
+```bash
+npm install -g @openscientist/extract-knowhow
+```
+
+Then in Claude Code: `/extract-knowhow`
+Or in Codex: `$extract-knowhow`
+
+The tool scans your conversation history, extracts research skills (procedural, semantic, and episodic), and opens a browser review page. After reviewing, submit via GitHub.
+
+### Via Web (ChatGPT / Claude / Gemini)
+
+Use the one-click prompt from the [README](https://github.com/OpenScientists/OpenScientist#method-b-one-click-prompt-for-web-users-chatgpt--claude--gemini), then submit via [**Submit a Skill →**](https://researchskills.ai/submit-manually)
 
 ---
 
-## 2. Step-by-Step Guide
+## 2. Write a Skill Manually
 
 ### 2.1 Fork & clone
 
@@ -36,7 +52,7 @@ cp skills/_template.md skills/<domain>/<subdomain>/<your-skill-name>.md
 Open your new file and complete every section. See [SKILL_SCHEMA.md](SKILL_SCHEMA.md) for a full description of each frontmatter field.
 
 Required frontmatter fields:
-- `name`, `description`, `domain`, `author`, `expertise_level`, `version`, `status`
+- `name`, `description`, `domain`, `author`, `expertise_level`, `status`
 
 ### 2.4 Validate locally (optional but recommended)
 
@@ -56,7 +72,7 @@ A domain reviewer listed in [CODEOWNERS](../.github/CODEOWNERS) will review your
 
 ## 3. Propose a New Area
 
-All 155 arXiv-aligned subcategory folders are pre-created under `skills/`. If you believe a subdomain is missing or want to propose a new top-level domain, [**open an issue →**](https://github.com/OpenScientists/OpenScientist/issues/new?template=propose-new-area.md)
+All 155 arXiv-aligned subcategory folders are pre-created under `skills/`. If you believe a subdomain is missing or want to propose a new top-level domain, [**open an issue →**](https://github.com/OpenScientists/OpenScientist/issues/new?template=04-propose-new-area.md)
 
 ---
 
@@ -64,11 +80,9 @@ All 155 arXiv-aligned subcategory folders are pre-created under `skills/`. If yo
 
 | Stage | Who | What they check |
 |---|---|---|
-| CI (automated) | GitHub Actions | Frontmatter schema validity |
+| CI (automated) | GitHub Actions | Schema validity |
 | Domain review | Domain reviewer | Scientific accuracy, completeness |
 | Merge | Domain reviewer | Approve + merge |
-
-After merge, `status` starts as `draft`. It becomes `reviewed` once a reviewer signs off, and `verified` after real-world testing.
 
 ---
 
@@ -90,17 +104,33 @@ Open a GitHub Discussion or reach out to the core team via issues.
 
 # 贡献指南（中文）
 
-感谢你贡献专业知识！本指南将引导你完成撰写和提交 Skill 的全流程。
+感谢你贡献专业知识！有两种贡献方式：
+
+1. **科研技能（推荐）：** 使用 `/extract-knowhow` 从 AI 对话历史中自动提取科研技能。这是主要的贡献方式。
+2. **Skill（手动）：** 参照模板手动撰写 Skill 文件。
 
 ---
 
-## 1. 什么是 Skill？
+## 1. 提交科研技能（推荐）
 
-Skill 是一个带有 YAML frontmatter 的 Markdown 文件，将专家级领域知识编码供 Claude Code 使用。调用时，Skill 会指示 AI 像领域专家一样进行推理。
+### 通过 Claude Code / Codex
+
+```bash
+npm install -g @openscientist/extract-knowhow
+```
+
+在 Claude Code 中运行: `/extract-knowhow`
+在 Codex 中运行: `$extract-knowhow`
+
+工具会扫描你的对话历史，提取科研技能（程序性、语义性和情景性），并在浏览器中打开审阅页面。审阅后通过 GitHub 提交。
+
+### 通过网页版（ChatGPT / Claude / Gemini）
+
+使用 [README](https://github.com/OpenScientists/OpenScientist#方式-b网页版用户一键提取chatgpt--claude--gemini) 中的一键 prompt，然后通过 [**提交 Skill →**](https://researchskills.ai/submit-manually) 提交。
 
 ---
 
-## 2. 操作步骤
+## 2. 手动撰写 Skill
 
 ### 2.1 Fork 并克隆仓库
 
@@ -117,16 +147,14 @@ cd OpenScientist
 cp skills/_template.md skills/<领域>/<子领域>/<你的skill名称>.md
 ```
 
-**命名规范：** 小写字母，用连字符分隔。例如：
-- `skills/physics/quantum-physics/quantum-entanglement.md`
-- `skills/computer-science/machine-learning/transformer-architectures.md`
+**命名规范：** 小写字母，用连字符分隔。
 
 ### 2.3 填写模板
 
 打开新文件，完成每个部分。参阅 [SKILL_SCHEMA.md](SKILL_SCHEMA.md) 了解各字段说明。
 
 必填 frontmatter 字段：
-- `name`、`description`、`domain`、`author`、`expertise_level`、`version`、`status`
+- `name`、`description`、`domain`、`author`、`expertise_level`、`status`
 
 ### 2.4 本地验证（推荐）
 
@@ -138,7 +166,6 @@ python utils/tools/validate.py skills/<领域>/<子领域>/<你的skill名称>.m
 
 - 目标分支：`main`
 - 标题格式：`[<领域>/<子领域>] Add <skill名称> skill`
-- PR 模板会提示你完成检查清单
 
 [CODEOWNERS](../.github/CODEOWNERS) 中列出的领域维护者将审核你的提交。
 
@@ -146,7 +173,7 @@ python utils/tools/validate.py skills/<领域>/<子领域>/<你的skill名称>.m
 
 ## 3. 提议新领域或子领域
 
-所有 155 个 arXiv 对齐的子领域文件夹已预创建在 `skills/` 下。如果你认为缺少某个子领域或想提议新的顶层领域，[**提交 Issue →**](https://github.com/OpenScientists/OpenScientist/issues/new?template=propose-new-area.md)
+所有 155 个 arXiv 对齐的子领域文件夹已预创建在 `skills/` 下。如果你认为缺少某个子领域或想提议新的顶层领域，[**提交 Issue →**](https://github.com/OpenScientists/OpenScientist/issues/new?template=04-propose-new-area.md)
 
 ---
 
@@ -154,6 +181,6 @@ python utils/tools/validate.py skills/<领域>/<子领域>/<你的skill名称>.m
 
 | 阶段 | 负责人 | 检查内容 |
 |---|---|---|
-| CI（自动）| GitHub Actions | Frontmatter schema 合规性 |
+| CI（自动）| GitHub Actions | Schema 合规性 |
 | 领域审核 | 领域维护者 | 科学准确性、完整性 |
 | 合并 | 领域维护者 | 批准并合并 |

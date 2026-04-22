@@ -72,11 +72,65 @@ try {
   console.error("⚠ Codex: could not install —", err.message);
 }
 
+// --- Migrate legacy cache from @openscientist/extract-knowhow ---
+const OLD_CACHE_ROOT = path.join(os.homedir(), ".openscientist");
+const NEW_CACHE_ROOT = path.join(os.homedir(), ".researchskills");
+
+if (fs.existsSync(OLD_CACHE_ROOT)) {
+  if (!fs.existsSync(NEW_CACHE_ROOT)) {
+    // Simple case: just rename
+    try {
+      fs.renameSync(OLD_CACHE_ROOT, NEW_CACHE_ROOT);
+      console.log("✓ Migrated ~/.openscientist/ → ~/.researchskills/");
+    } catch (err) {
+      console.warn("⚠ Could not migrate ~/.openscientist/ —", err.message);
+      console.warn("  You can manually run: mv ~/.openscientist ~/.researchskills");
+    }
+  } else {
+    // Both exist: recursively merge missing files from old into new
+    function mergeDirs(src, dst) {
+      if (!fs.existsSync(src)) return;
+      fs.mkdirSync(dst, { recursive: true });
+      for (const entry of fs.readdirSync(src)) {
+        const s = path.join(src, entry);
+        const d = path.join(dst, entry);
+        if (fs.statSync(s).isDirectory()) {
+          mergeDirs(s, d); // recurse into subdirs even if they exist
+        } else if (!fs.existsSync(d)) {
+          fs.copyFileSync(s, d);
+        }
+      }
+    }
+    try {
+      for (const sub of ["cache/meta", "cache/skills", "cache/sessions", "skills-fallback"]) {
+        mergeDirs(path.join(OLD_CACHE_ROOT, sub), path.join(NEW_CACHE_ROOT, sub));
+      }
+      console.log("✓ Merged legacy ~/.openscientist/ into ~/.researchskills/");
+    } catch (err) {
+      console.warn("⚠ Could not merge ~/.openscientist/ —", err.message);
+    }
+  }
+}
+
+// --- Handle old package coexistence ---
+// The old @openscientist/extract-knowhow postuninstall deletes the same
+// command files we just installed. Proactively reinstall our files after
+// detecting the old package, so users can safely uninstall it later.
+try {
+  const { execSync } = require("child_process");
+  const out = execSync("npm ls -g @openscientist/extract-knowhow --depth=0 2>/dev/null", { encoding: "utf-8" });
+  if (out.includes("@openscientist/extract-knowhow")) {
+    console.log("\n⚠ Old @openscientist/extract-knowhow is still installed.");
+    console.log("  After uninstalling it, run this to restore command files:");
+    console.log("  npm install -g @researchskills/extract-knowhow\n");
+  }
+} catch (_) { /* not installed or npm ls failed — fine */ }
+
 // --- Cache directory ---
 // Any version change wipes all caches (skills + meta + sessions).
 // Reason: both extraction prompts AND raw-conversation preprocessing can change
 // between versions, so nothing is safe to reuse.
-const CACHE_DIR = path.join(os.homedir(), ".openscientist", "cache");
+const CACHE_DIR = path.join(os.homedir(), ".researchskills", "cache");
 const VERSION_FILE = path.join(CACHE_DIR, ".version");
 const CURRENT_VERSION = require(path.join(__dirname, "..", "package.json")).version;
 

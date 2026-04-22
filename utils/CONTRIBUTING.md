@@ -12,7 +12,7 @@ Thank you for contributing your expertise! There are two ways to contribute:
 ### Via Claude Code / Codex
 
 ```bash
-npm install -g @researchskills/extract-knowhow
+npm install -g @scienceintelligence/researchskills-extract
 ```
 
 Then in Claude Code: `/extract-knowhow`
@@ -116,7 +116,7 @@ Open a GitHub Discussion or reach out to the core team via issues.
 ### 通过 Claude Code / Codex
 
 ```bash
-npm install -g @researchskills/extract-knowhow
+npm install -g @scienceintelligence/researchskills-extract
 ```
 
 在 Claude Code 中运行: `/extract-knowhow`

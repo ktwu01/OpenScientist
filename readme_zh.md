@@ -57,7 +57,7 @@
 ### 方式 A：用 `/extract-knowhow` 自动提取（推荐）
 
 ```bash
-npm install -g @researchskills/extract-knowhow
+npm install -g @scienceintelligence/researchskills-extract
 ```
 
 **Claude Code:**

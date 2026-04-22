@@ -59,7 +59,7 @@ Each skill encodes the knowledge, tools, reasoning protocols, and common pitfall
 ### Method A: Auto-Extract with `/extract-knowhow` (Recommended)
 
 ```bash
-npm install -g @researchskills/extract-knowhow
+npm install -g @scienceintelligence/researchskills-extract
 ```
 
 **Claude Code:**

@@ -1,4 +1,4 @@
-# @researchskills/extract-knowhow
+# @scienceintelligence/researchskills-extract
 
 > Automatically extract **research skills** from Claude Code / Codex conversation history and submit them to [ResearchSkills](https://github.com/ScienceIntelligence/ResearchSkills).
 
@@ -15,7 +15,7 @@ When you use Claude Code or Codex for scientific research — data analysis, pap
 ## Install
 
 ```bash
-npm install -g @researchskills/extract-knowhow
+npm install -g @scienceintelligence/researchskills-extract
 ```
 
 This installs the command automatically to both platforms:
@@ -93,7 +93,7 @@ After extraction, an interactive review page opens at `researchskills.ai/review/
 ## Uninstall
 
 ```bash
-npm uninstall -g @researchskills/extract-knowhow
+npm uninstall -g @scienceintelligence/researchskills-extract
 ```
 
 ## Privacy

@@ -122,7 +122,7 @@ try {
   if (out.includes("@openscientist/extract-knowhow")) {
     console.log("\n⚠ Old @openscientist/extract-knowhow is still installed.");
     console.log("  After uninstalling it, run this to restore command files:");
-    console.log("  npm install -g @researchskills/extract-knowhow\n");
+    console.log("  npm install -g @scienceintelligence/researchskills-extract\n");
   }
 } catch (_) { /* not installed or npm ls failed — fine */ }
 

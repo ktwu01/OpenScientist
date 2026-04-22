@@ -8,7 +8,7 @@
 
 # 🌍 OpenScientist
 
-[![GitHub stars](https://img.shields.io/github/stars/OpenScientists/OpenScientist?style=social)](https://github.com/OpenScientists/OpenScientist/stargazers) [![GitHub forks](https://img.shields.io/github/forks/OpenScientists/OpenScientist?style=social)](https://github.com/OpenScientists/OpenScientist/fork) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
+[![GitHub stars](https://img.shields.io/github/stars/ScienceIntelligence/ResearchSkills?style=social)](https://github.com/ScienceIntelligence/ResearchSkills/stargazers) [![GitHub forks](https://img.shields.io/github/forks/ScienceIntelligence/ResearchSkills?style=social)](https://github.com/ScienceIntelligence/ResearchSkills/fork) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
 
 2015: 5,154 scientists co-authored one paper on the Higgs boson.
 
@@ -89,7 +89,7 @@ After running, submit via [**here →**](https://researchskills.ai/submit-manual
 
 Write your own skill following the [**guide →**](https://researchskills.ai/submit-manually/#manual-entry)
 
-> Don't see your field? [Propose a new area →](https://github.com/OpenScientists/OpenScientist/issues/new?template=04-propose-new-area.md) · Need a skill but can't write it yourself? [Request a skill →](https://github.com/OpenScientists/OpenScientist/issues/new?template=02-skill-request.yml)
+> Don't see your field? [Propose a new area →](https://github.com/ScienceIntelligence/ResearchSkills/issues/new?template=04-propose-new-area.md) · Need a skill but can't write it yourself? [Request a skill →](https://github.com/ScienceIntelligence/ResearchSkills/issues/new?template=02-skill-request.yml)
 
 ---
 
@@ -164,7 +164,7 @@ Reviewers are domain experts who guard the scientific quality of skills in their
 
 **What you get:** Approve or request changes on submissions in your subdomain.
 
-[**Apply to become a reviewer →**](https://github.com/OpenScientists/OpenScientist/issues/new?template=03-maintainer-application.yml)
+[**Apply to become a reviewer →**](https://github.com/ScienceIntelligence/ResearchSkills/issues/new?template=03-maintainer-application.yml)
 
 ---
 
@@ -185,7 +185,7 @@ Aligned with the [arXiv category taxonomy](https://arxiv.org/category_taxonomy).
 | 📈 Economics                                | econ                                               | 3             | *Seeking reviewer* |
 | 💹 Quantitative Finance                     | q-fin                                              | 9             | *Seeking reviewer* |
 
-[View all 155 subcategories in the interactive knowledge tree →](https://openscientists.github.io/OpenScientist/)
+[View all 155 subcategories in the interactive knowledge tree →](https://scienceintelligence.github.io/ResearchSkills/)
 
 </div>
 
@@ -203,12 +203,12 @@ Aligned with the [arXiv category taxonomy](https://arxiv.org/category_taxonomy).
 
 With gratitude to everyone who makes this possible:
 
-[**Contributors →**](https://github.com/OpenScientists/OpenScientist/graphs/contributors) · [**Reviewers →**](https://openscientists.github.io/OpenScientist/reviewers.html) · [**Sponsors →**](https://openscientists.github.io/OpenScientist/organizers.html) · [**Organizers →**](https://openscientists.github.io/OpenScientist/organizers.html)
+[**Contributors →**](https://github.com/ScienceIntelligence/ResearchSkills/graphs/contributors) · [**Reviewers →**](https://scienceintelligence.github.io/ResearchSkills/reviewers.html) · [**Sponsors →**](https://scienceintelligence.github.io/ResearchSkills/organizers.html) · [**Organizers →**](https://scienceintelligence.github.io/ResearchSkills/organizers.html)
 
 ---
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=OpenScientists/OpenScientist&type=Date)](https://star-history.com/#OpenScientists/OpenScientist&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=ScienceIntelligence/ResearchSkills&type=Date)](https://star-history.com/#ScienceIntelligence/ResearchSkills&Date)
 
 </div>

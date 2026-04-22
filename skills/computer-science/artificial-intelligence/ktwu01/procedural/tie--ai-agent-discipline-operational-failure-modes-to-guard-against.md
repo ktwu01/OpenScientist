@@ -7,7 +7,7 @@ subdomain: artificial-intelligence
 contributor: ktwu01
 source:
   type: session
-  ref: "OpenScientists/OpenScientist#61; practitioner field reports 2024-2026"
+  ref: "ScienceIntelligence/ResearchSkills#61; practitioner field reports 2024-2026"
 extracted_at: 2026-04-20
 ---
 

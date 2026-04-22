@@ -22,7 +22,7 @@ The tool scans your conversation history, extracts research skills (procedural, 
 
 ### Via Web (ChatGPT / Claude / Gemini)
 
-Use the one-click prompt from the [README](https://github.com/OpenScientists/OpenScientist#method-b-one-click-prompt-for-web-users-chatgpt--claude--gemini), then submit via [**Submit a Skill →**](https://researchskills.ai/submit-manually)
+Use the one-click prompt from the [README](https://github.com/ScienceIntelligence/ResearchSkills#method-b-one-click-prompt-for-web-users-chatgpt--claude--gemini), then submit via [**Submit a Skill →**](https://researchskills.ai/submit-manually)
 
 ---
 
@@ -72,7 +72,7 @@ A domain reviewer listed in [CODEOWNERS](../.github/CODEOWNERS) will review your
 
 ## 3. Propose a New Area
 
-All 155 arXiv-aligned subcategory folders are pre-created under `skills/`. If you believe a subdomain is missing or want to propose a new top-level domain, [**open an issue →**](https://github.com/OpenScientists/OpenScientist/issues/new?template=04-propose-new-area.md)
+All 155 arXiv-aligned subcategory folders are pre-created under `skills/`. If you believe a subdomain is missing or want to propose a new top-level domain, [**open an issue →**](https://github.com/ScienceIntelligence/ResearchSkills/issues/new?template=04-propose-new-area.md)
 
 ---
 
@@ -126,7 +126,7 @@ npm install -g @openscientist/extract-knowhow
 
 ### 通过网页版（ChatGPT / Claude / Gemini）
 
-使用 [README](https://github.com/OpenScientists/OpenScientist#方式-b网页版用户一键提取chatgpt--claude--gemini) 中的一键 prompt，然后通过 [**提交 Skill →**](https://researchskills.ai/submit-manually) 提交。
+使用 [README](https://github.com/ScienceIntelligence/ResearchSkills#方式-b网页版用户一键提取chatgpt--claude--gemini) 中的一键 prompt，然后通过 [**提交 Skill →**](https://researchskills.ai/submit-manually) 提交。
 
 ---
 
@@ -173,7 +173,7 @@ python utils/tools/validate.py skills/<领域>/<子领域>/<你的skill名称>.m
 
 ## 3. 提议新领域或子领域
 
-所有 155 个 arXiv 对齐的子领域文件夹已预创建在 `skills/` 下。如果你认为缺少某个子领域或想提议新的顶层领域，[**提交 Issue →**](https://github.com/OpenScientists/OpenScientist/issues/new?template=04-propose-new-area.md)
+所有 155 个 arXiv 对齐的子领域文件夹已预创建在 `skills/` 下。如果你认为缺少某个子领域或想提议新的顶层领域，[**提交 Issue →**](https://github.com/ScienceIntelligence/ResearchSkills/issues/new?template=04-propose-new-area.md)
 
 ---
 

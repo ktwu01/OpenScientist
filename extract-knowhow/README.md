@@ -1,6 +1,6 @@
 # @openscientist/extract-knowhow
 
-> Automatically extract **research skills** from Claude Code / Codex conversation history and submit them to [OpenScientist](https://github.com/OpenScientists/OpenScientist).
+> Automatically extract **research skills** from Claude Code / Codex conversation history and submit them to [OpenScientist](https://github.com/ScienceIntelligence/ResearchSkills).
 
 ## What It Does
 
@@ -109,6 +109,6 @@ npm uninstall -g @openscientist/extract-knowhow
 
 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
 
-## Part of [OpenScientist](https://github.com/OpenScientists/OpenScientist)
+## Part of [OpenScientist](https://github.com/ScienceIntelligence/ResearchSkills)
 
 > Building the Library of Alexandria for AGI — Accelerating Automated Scientific Discovery.

@@ -87,15 +87,25 @@ if (fs.existsSync(OLD_CACHE_ROOT)) {
       console.warn("  You can manually run: mv ~/.openscientist ~/.researchskills");
     }
   } else {
-    // Both exist: copy any missing subdirs from old to new
+    // Both exist: merge individual entries from old subdirs into new
+    function copyMissing(src, dst) {
+      if (!fs.existsSync(src)) return;
+      fs.mkdirSync(dst, { recursive: true });
+      for (const entry of fs.readdirSync(src)) {
+        const s = path.join(src, entry);
+        const d = path.join(dst, entry);
+        if (!fs.existsSync(d)) {
+          if (fs.statSync(s).isDirectory()) {
+            fs.renameSync(s, d);
+          } else {
+            fs.copyFileSync(s, d);
+          }
+        }
+      }
+    }
     try {
       for (const sub of ["cache/meta", "cache/skills", "cache/sessions", "skills-fallback"]) {
-        const oldSub = path.join(OLD_CACHE_ROOT, sub);
-        const newSub = path.join(NEW_CACHE_ROOT, sub);
-        if (fs.existsSync(oldSub) && !fs.existsSync(newSub)) {
-          fs.mkdirSync(path.dirname(newSub), { recursive: true });
-          fs.renameSync(oldSub, newSub);
-        }
+        copyMissing(path.join(OLD_CACHE_ROOT, sub), path.join(NEW_CACHE_ROOT, sub));
       }
       console.log("✓ Merged legacy ~/.openscientist/ into ~/.researchskills/");
     } catch (err) {

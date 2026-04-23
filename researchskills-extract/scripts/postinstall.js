@@ -72,6 +72,22 @@ try {
   console.error("⚠ Codex: could not install —", err.message);
 }
 
+// --- Clean up legacy extract-knowhow command files ---
+const LEGACY_CC_COMMAND = path.join(os.homedir(), ".claude", "commands", "extract-knowhow.md");
+const LEGACY_CODEX_DIR = path.join(os.homedir(), ".codex", "skills", "extract-knowhow");
+try {
+  if (fs.existsSync(LEGACY_CC_COMMAND)) {
+    fs.unlinkSync(LEGACY_CC_COMMAND);
+    console.log("✓ Removed legacy ~/.claude/commands/extract-knowhow.md");
+  }
+  if (fs.existsSync(LEGACY_CODEX_DIR)) {
+    fs.rmSync(LEGACY_CODEX_DIR, { recursive: true, force: true });
+    console.log("✓ Removed legacy ~/.codex/skills/extract-knowhow/");
+  }
+} catch (err) {
+  console.warn("⚠ Could not clean up legacy files —", err.message);
+}
+
 // --- Migrate legacy cache from @openscientist/extract-knowhow ---
 const OLD_CACHE_ROOT = path.join(os.homedir(), ".openscientist");
 const NEW_CACHE_ROOT = path.join(os.homedir(), ".researchskills");

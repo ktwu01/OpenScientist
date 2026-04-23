@@ -32,7 +32,7 @@
 
 **ResearchSkills 在它消失之前把它留住。** 我们把全世界顶尖研究者的隐性知识 — 他们的技能、思维框架和原则 — 变成可复用的 AI agent 技能（兼容 **Claude Code** 和 **Codex**）。每一份贡献，都让现在和未来的每一个 AI 科学家变得更聪明，永久地。
 
-每个 Skill 编码了领域知识、工具、推理协议和常见陷阱。Skill 可以由领域专家手动撰写，也可以通过 `/extract-knowhow` **从你的科研对话中自动提取**。该命令从你的科研会话中提取三种认知记忆 — **程序性记忆**（应对科研困境的 IF-THEN 规则）、**语义记忆**（LLM 不知道的领域事实）和**情景记忆**（具体的科研经历）— 并将它们打包为可复用的 Skill。让 AI 调用一个 Skill，就能像领域专家一样思考。
+每个 Skill 编码了领域知识、工具、推理协议和常见陷阱。Skill 可以由领域专家手动撰写，也可以通过 `/researchskills-extract` **从你的科研对话中自动提取**。该命令从你的科研会话中提取三种认知记忆 — **程序性记忆**（应对科研困境的 IF-THEN 规则）、**语义记忆**（LLM 不知道的领域事实）和**情景记忆**（具体的科研经历）— 并将它们打包为可复用的 Skill。让 AI 调用一个 Skill，就能像领域专家一样思考。
 
 ---
 
@@ -54,7 +54,7 @@
 
 <h2 align="center">2. 如何贡献</h2>
 
-### 方式 A：用 `/extract-knowhow` 自动提取（推荐）
+### 方式 A：用 `/researchskills-extract` 自动提取（推荐）
 
 ```bash
 npm install -g @scienceintelligence/researchskills-extract
@@ -62,12 +62,12 @@ npm install -g @scienceintelligence/researchskills-extract
 
 **Claude Code:**
 ```
-/extract-knowhow
+/researchskills-extract
 ```
 
 **Codex:**
 ```
-$extract-knowhow
+$researchskills-extract
 ```
 
 > 💡 **为了最佳效果：** 使用最强模型 + 最高推理强度 — **Claude Code：** Opus 4.6 + max effort。**Codex：** GPT-5.4 + x-high。不必担心 token 消耗 — 对话会被充分压缩后再分析，每个会话的提取会交给较小的模型处理。你选的模型主要负责编排流水线。

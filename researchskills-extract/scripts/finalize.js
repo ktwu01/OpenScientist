@@ -2,7 +2,7 @@
 /**
  * finalize.js
  *
- * Project finalizer for /extract-knowhow. Given a project metadata file
+ * Project finalizer for /researchskills-extract. Given a project metadata file
  * describing which cached skills belong to one project, this script:
  *
  *   1. Collects validated skills  (validate-skills.js collect)

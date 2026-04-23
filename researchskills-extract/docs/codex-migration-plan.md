@@ -1,6 +1,6 @@
 # Codex Migration Plan
 
-> 从 Claude Code 迁移 extract-knowhow 到 Codex 的平台差异参考。
+> 从 Claude Code 迁移 researchskills-extract 到 Codex 的平台差异参考。
 > 内容与具体 JS 实现正交——无论 skills 脚本怎么改，这些平台事实不变。
 
 ---
@@ -221,8 +221,8 @@ git *               → git 操作（��弃）
 
 | 用途 | Claude Code | Codex |
 |------|------------|-----------|
-| Skill/Command 文件 | `~/.claude/commands/extract-knowhow.md` | `~/.codex/skills/extract-knowhow/SKILL.md` |
-| 辅助脚本 | `~/.claude/utils/` | `~/.codex/skills/extract-knowhow/scripts/` |
+| Skill/Command 文件 | `~/.claude/commands/researchskills-extract.md` | `~/.codex/skills/researchskills-extract/SKILL.md` |
+| 辅助脚本 | `~/.claude/utils/` | `~/.codex/skills/researchskills-extract/scripts/` |
 | Session 数据 | `~/.claude/projects/` | `~/.codex/sessions/` + `~/.codex/archived_sessions/` |
 | 共享缓存 | `~/.researchskills/cache/` | `~/.researchskills/cache/`（共用） |
 
@@ -268,24 +268,24 @@ codex exec --full-auto --ephemeral -o /tmp/result.txt "prompt here"
 
 ### Claude Code（当前）
 
-`~/.claude/commands/extract-knowhow.md` — 纯 Markdown，无需 frontmatter：
+`~/.claude/commands/researchskills-extract.md` — 纯 Markdown，无需 frontmatter：
 
 ```markdown
-# /extract-knowhow
+# /researchskills-extract
 
 Extract research skills from...
 ```
 
 ### Codex（需要 YAML frontmatter）
 
-`~/.codex/skills/extract-knowhow/SKILL.md`：
+`~/.codex/skills/researchskills-extract/SKILL.md`：
 
 ```yaml
 ---
-name: "extract-knowhow"
+name: "researchskills-extract"
 description: "Extract research skills from conversation history into ResearchSkills skill files."
 ---
-# /extract-knowhow
+# /researchskills-extract
 
 Extract research skills from...
 ```
@@ -395,6 +395,6 @@ Output:
 - [ ] 用真实 Codex session 文件测试解析
 
 ### Phase 3: 文档
-- [ ] 更新 `commands/extract-knowhow.md` 支持动态路径
+- [ ] 更新 `commands/researchskills-extract.md` 支持动态路径
 - [ ] 更新 `README.md` 双平台说明
 - [ ] 更新 `ResearchSkills/readme.md`

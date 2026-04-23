@@ -2,7 +2,7 @@
 /**
  * clean-skills.js
  *
- * Stage 4 of /extract-knowhow: review extracted skills.
+ * Stage 4 of /researchskills-extract: review extracted skills.
  * Spawns an AI instance (via platform.js) that directly
  * reads, deletes, edits, and merges skill files on disk.
  *

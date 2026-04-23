@@ -6,7 +6,7 @@
  * For each uncached session: format → call AI → validate.
  *
  * This script is the deterministic loop; Sonnet does the AI judgment.
- * The main /extract-knowhow agent calls this script once with Bash,
+ * The main /researchskills-extract agent calls this script once with Bash,
  * keeping its own context clean.
  *
  * Usage:

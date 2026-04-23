@@ -2,7 +2,7 @@
 /**
  * score-skills.js
  *
- * Stage 5 of /extract-knowhow: score cleaned skills.
+ * Stage 5 of /researchskills-extract: score cleaned skills.
  * Spawns an AI instance (via platform.js) that reads
  * each skill file and writes review_scores into the YAML frontmatter.
  *

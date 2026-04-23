@@ -2,7 +2,7 @@
 
 ## Context
 
-`/extract-knowhow` 当前的 pipeline 是 scan → classify → extract (Sonnet) → finalize → upload。Sonnet 提取的 skills 存在三类质量问题：
+`/researchskills-extract` 当前的 pipeline 是 scan → classify → extract (Sonnet) → finalize → upload。Sonnet 提取的 skills 存在三类质量问题：
 
 1. **工程类 skill 泄漏** — 如 Supabase auth deadlock、GitHub Rulesets UI 行为、可视化选型等纯工程内容通过了 tag 过滤
 2. **语义重复** — 名字不同但内容高度重叠的 skills（如 `claim-level-paper-chat-diffing` 和 `claim-level-paper-chat-diffing-for-tacit-knowledge`）
@@ -205,7 +205,7 @@ SCORE_RESULT: {"scored": 12, "scores": [{"name": "...", "procedural": 4, "semant
 
 ---
 
-## 对 extract-knowhow.md 命令文件的修改
+## 对 researchskills-extract.md 命令文件的修改
 
 ### Pipeline 更新
 
@@ -259,7 +259,7 @@ node ~/.claude/utils/score-skills.js \
 
 ```
 ═══════════════════════════════════════════════════════
-  /extract-knowhow Complete!
+  /researchskills-extract Complete!
 ═══════════════════════════════════════════════════════
 
 Extracted N skills from M sessions across P projects:
@@ -285,7 +285,7 @@ Review your skills:
 - `scripts/score-skills.js` — Stage 5 脚本
 
 ### 修改
-- `commands/extract-knowhow.md` — 插入 Stage 4、5，调整后续编号
+- `commands/researchskills-extract.md` — 插入 Stage 4、5，调整后续编号
 - `scripts/postinstall.js` — HELPER_SCRIPTS 数组新增两个脚本
 - `scripts/postuninstall.js` — 清理新增脚本（如有清理逻辑）
 
@@ -295,5 +295,5 @@ Review your skills:
 
 1. 在现有 cache 上运行 `clean-skills.js`，确认工程类 skills 被删除、PII 被修复、重复被合并
 2. 在清洗后的 cache 上运行 `score-skills.js`，确认每个 skill 的 YAML 中有 `review_scores` 字段
-3. 运行完整 `/extract-knowhow` 流程，确认 7 个 Stage 顺序正确，Terminal Summary 包含 review 统计
+3. 运行完整 `/researchskills-extract` 流程，确认 7 个 Stage 顺序正确，Terminal Summary 包含 review 统计
 4. 检查上传到 researchskills.ai 的 skills 是否携带 `review_scores`

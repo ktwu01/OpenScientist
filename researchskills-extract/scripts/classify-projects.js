@@ -122,7 +122,7 @@ Respond with EXACTLY this JSON (no markdown fences, no other text):
 - domain/subdomain: from the taxonomy list above. For engineering use "computer-science/software-engineering"
 - project_name: a short, descriptive name (3-8 words) summarizing the research topic of this project based on the session content. Do NOT use the folder name. Examples: "Protein Folding Simulation Pipeline", "Neural ODE Parameter Estimation", "Galaxy Merger Classification". For engineering projects, describe the tool/system being built.
 - reason: one sentence explaining classification
-- skip_patterns: substrings in first_prompt that indicate non-research sessions to skip (e.g. "extract-knowhow", "npm run build"). Empty array if none.`;
+- skip_patterns: substrings in first_prompt that indicate non-research sessions to skip (e.g. "researchskills-extract", "extract-knowhow", "npm run build"). Empty array if none.`;
 }
 
 // ---------------------------------------------------------------------------

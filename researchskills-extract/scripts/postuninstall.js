@@ -19,13 +19,13 @@ const HELPER_SCRIPTS = [
 ];
 
 // --- Claude Code ---
-const CC_COMMAND_TARGET = path.join(os.homedir(), ".claude", "commands", "extract-knowhow.md");
+const CC_COMMAND_TARGET = path.join(os.homedir(), ".claude", "commands", "researchskills-extract.md");
 const CC_UTILS_DIR = path.join(os.homedir(), ".claude", "utils");
 
 try {
   if (fs.existsSync(CC_COMMAND_TARGET)) {
     fs.unlinkSync(CC_COMMAND_TARGET);
-    console.log("✓ Claude Code: /extract-knowhow removed");
+    console.log("✓ Claude Code: /researchskills-extract removed");
   }
   for (const script of HELPER_SCRIPTS) {
     const p = path.join(CC_UTILS_DIR, script);
@@ -37,14 +37,14 @@ try {
 }
 
 // --- Codex ---
-const CODEX_SKILL_DIR = path.join(os.homedir(), ".codex", "skills", "extract-knowhow");
+const CODEX_SKILL_DIR = path.join(os.homedir(), ".codex", "skills", "researchskills-extract");
 const CODEX_SKILL_TARGET = path.join(CODEX_SKILL_DIR, "SKILL.md");
 const CODEX_SCRIPTS_DIR = path.join(CODEX_SKILL_DIR, "scripts");
 
 try {
   if (fs.existsSync(CODEX_SKILL_TARGET)) {
     fs.unlinkSync(CODEX_SKILL_TARGET);
-    console.log("✓ Codex: /extract-knowhow SKILL.md removed");
+    console.log("✓ Codex: /researchskills-extract SKILL.md removed");
   }
   for (const script of HELPER_SCRIPTS) {
     const p = path.join(CODEX_SCRIPTS_DIR, script);

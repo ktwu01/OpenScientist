@@ -32,7 +32,7 @@ This intuition lives in your head — the know-how, the heuristics, the reasonin
 
 **ResearchSkills captures it before it's lost.** We turn the tacit knowledge of the world's top researchers — their skills, thinking frameworks, and principles — into reusable AI agent skills (compatible with **Claude Code** and **Codex**). Every contribution makes every AI scientist — now and in the future — smarter, permanently.
 
-Each skill encodes the knowledge, tools, reasoning protocols, and common pitfalls of a scientific field. Skills can be written by domain experts or **auto-extracted from your research conversations** using `/extract-knowhow`. The command extracts three types of cognitive memory from your research sessions — **procedural** (IF-THEN rules for research impasses), **semantic** (facts LLMs don't know), and **episodic** (concrete research episodes) — then packages them as reusable skills. Point your AI agent at a skill, and it reasons like a domain expert.
+Each skill encodes the knowledge, tools, reasoning protocols, and common pitfalls of a scientific field. Skills can be written by domain experts or **auto-extracted from your research conversations** using `/researchskills-extract`. The command extracts three types of cognitive memory from your research sessions — **procedural** (IF-THEN rules for research impasses), **semantic** (facts LLMs don't know), and **episodic** (concrete research episodes) — then packages them as reusable skills. Point your AI agent at a skill, and it reasons like a domain expert.
 
 > **Note:** Applying a skill may trigger broad edits, long workflows, and significant token usage — review the expected scope before running one deeply.
 
@@ -56,7 +56,7 @@ Each skill encodes the knowledge, tools, reasoning protocols, and common pitfall
 
 <h2 align="center">2. How to Contribute</h2>
 
-### Method A: Auto-Extract with `/extract-knowhow` (Recommended)
+### Method A: Auto-Extract with `/researchskills-extract` (Recommended)
 
 ```bash
 npm install -g @scienceintelligence/researchskills-extract
@@ -64,12 +64,12 @@ npm install -g @scienceintelligence/researchskills-extract
 
 **Claude Code:**
 ```
-/extract-knowhow
+/researchskills-extract
 ```
 
 **Codex** (start with `codex -a never -s danger-full-access`):
 ```
-$extract-knowhow
+$researchskills-extract
 ```
 
 > 💡 **For best results:** use the most powerful model with the highest reasoning effort — **Claude Code:** Opus 4.6 + max effort. **Codex:** GPT-5.4 + x-high. Don't worry about token usage — conversations are heavily compressed before analysis, and the per-session extraction is delegated to lighter models behind the scenes. Your chosen model mainly orchestrates the pipeline.

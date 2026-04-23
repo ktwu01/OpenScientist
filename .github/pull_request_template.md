@@ -1,6 +1,6 @@
 ## Submission Type
 
-- [ ] **Decision Tree** — research trajectory extracted via `/extract-knowhow` or web prompt
+- [ ] **Decision Tree** — research trajectory extracted via `/researchskills-extract` or web prompt
 - [ ] **Skill** — manually written skill file
 
 ---

@@ -5,7 +5,7 @@ const fs = require("fs");
 const path = require("path");
 const os = require("os");
 
-const SOURCE_CC_COMMAND = path.join(__dirname, "..", "commands", "extract-knowhow.md");
+const SOURCE_CC_COMMAND = path.join(__dirname, "..", "commands", "researchskills-extract.md");
 const SOURCE_CODEX_SKILL = path.join(__dirname, "..", "commands", "SKILL.md");
 
 // Helper scripts that must be available at runtime
@@ -24,14 +24,14 @@ const HELPER_SCRIPTS = [
 
 // --- Claude Code ---
 const CC_COMMANDS_DIR = path.join(os.homedir(), ".claude", "commands");
-const CC_COMMAND_TARGET = path.join(CC_COMMANDS_DIR, "extract-knowhow.md");
+const CC_COMMAND_TARGET = path.join(CC_COMMANDS_DIR, "researchskills-extract.md");
 const CC_UTILS_DIR = path.join(os.homedir(), ".claude", "utils");
 
 try {
   fs.mkdirSync(CC_COMMANDS_DIR, { recursive: true });
   fs.mkdirSync(CC_UTILS_DIR, { recursive: true });
   fs.copyFileSync(SOURCE_CC_COMMAND, CC_COMMAND_TARGET);
-  console.log("✓ Claude Code: /extract-knowhow installed to ~/.claude/commands/");
+  console.log("✓ Claude Code: /researchskills-extract installed to ~/.claude/commands/");
 
   for (const script of HELPER_SCRIPTS) {
     const src = path.join(__dirname, script);
@@ -48,7 +48,7 @@ try {
 }
 
 // --- Codex ---
-const CODEX_SKILL_DIR = path.join(os.homedir(), ".codex", "skills", "extract-knowhow");
+const CODEX_SKILL_DIR = path.join(os.homedir(), ".codex", "skills", "researchskills-extract");
 const CODEX_SKILL_TARGET = path.join(CODEX_SKILL_DIR, "SKILL.md");
 const CODEX_SCRIPTS_DIR = path.join(CODEX_SKILL_DIR, "scripts");
 
@@ -56,7 +56,7 @@ try {
   fs.mkdirSync(CODEX_SKILL_DIR, { recursive: true });
   fs.mkdirSync(CODEX_SCRIPTS_DIR, { recursive: true });
   fs.copyFileSync(SOURCE_CODEX_SKILL, CODEX_SKILL_TARGET);
-  console.log("✓ Codex:   /extract-knowhow installed to ~/.codex/skills/extract-knowhow/");
+  console.log("✓ Codex:   /researchskills-extract installed to ~/.codex/skills/researchskills-extract/");
 
   for (const script of HELPER_SCRIPTS) {
     const src = path.join(__dirname, script);
@@ -67,7 +67,7 @@ try {
       console.warn(`⚠ Codex: ${script} not found in package, skipping`);
     }
   }
-  console.log(`✓ Codex:   ${HELPER_SCRIPTS.length} scripts installed to ~/.codex/skills/extract-knowhow/scripts/`);
+  console.log(`✓ Codex:   ${HELPER_SCRIPTS.length} scripts installed to ~/.codex/skills/researchskills-extract/scripts/`);
 } catch (err) {
   console.error("⚠ Codex: could not install —", err.message);
 }
@@ -171,4 +171,4 @@ try {
   console.error("⚠ Cache: could not prepare —", err.message);
 }
 
-console.log("\n  Usage: /extract-knowhow (Claude Code) or $extract-knowhow (Codex)");
+console.log("\n  Usage: /researchskills-extract (Claude Code) or $researchskills-extract (Codex)");

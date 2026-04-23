@@ -2,7 +2,7 @@
 
 This document defines the specification for ResearchSkills skill files (manually written skills).
 
-> **Skills extracted via /extract-knowhow** are now the primary contribution format. See [Skill Schema Design](../docs/superpowers/specs/2026-04-11-skill-schema-design.md) for the current schema. This document covers only the manual skill file format.
+> **Skills extracted via /researchskills-extract** are now the primary contribution format. See [Skill Schema Design](../docs/superpowers/specs/2026-04-11-skill-schema-design.md) for the current schema. This document covers only the manual skill file format.
 
 ---
 

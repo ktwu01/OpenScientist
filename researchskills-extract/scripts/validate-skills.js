@@ -2,7 +2,7 @@
 /**
  * validate-skills.js
  *
- * Helper for the /extract-knowhow AI phase. The AI reads a formatted
+ * Helper for the /researchskills-extract AI phase. The AI reads a formatted
  * session and extracts cognitive memory-type skills as markdown files.
  * This script validates the skill markdown (frontmatter + required
  * sections) and caches validated skills per session.

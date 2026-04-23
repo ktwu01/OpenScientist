@@ -7,7 +7,7 @@ const os = require("os");
 const { execFileSync } = require("child_process");
 
 const COMMANDS_DIR = path.join(os.homedir(), ".claude", "commands");
-const TARGET = path.join(COMMANDS_DIR, "extract-knowhow.md");
+const TARGET = path.join(COMMANDS_DIR, "researchskills-extract.md");
 const SCRIPT_DIR = path.join(__dirname, "..", "scripts");
 
 let passed = 0;
@@ -33,7 +33,7 @@ execFileSync(process.execPath, [path.join(SCRIPT_DIR, "postinstall.js")], { stdi
 assert(fs.existsSync(TARGET), "Command file exists after install");
 
 const content = fs.readFileSync(TARGET, "utf-8");
-assert(content.includes("extract-knowhow"), "Command file contains expected content");
+assert(content.includes("researchskills-extract"), "Command file contains expected content");
 assert(content.startsWith("#"), "Command file starts with markdown header");
 
 console.log("\nTest: consent gate");

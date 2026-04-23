@@ -16,7 +16,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ScienceIntelligence/ResearchSkills.git",
-    "directory": "extract-knowhow"
+    "directory": "researchskills-extract"
   },
   "publishConfig": {
     "access": "public"

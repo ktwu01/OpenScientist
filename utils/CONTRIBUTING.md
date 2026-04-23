@@ -2,7 +2,7 @@
 
 Thank you for contributing your expertise! There are two ways to contribute:
 
-1. **Research Skills (recommended):** Use `/extract-knowhow` to automatically extract research skills from AI conversation history. This is the primary contribution method.
+1. **Research Skills (recommended):** Use `/researchskills-extract` to automatically extract research skills from AI conversation history. This is the primary contribution method.
 2. **Skills (manual):** Write a skill file by hand following the template.
 
 ---
@@ -15,8 +15,8 @@ Thank you for contributing your expertise! There are two ways to contribute:
 npm install -g @scienceintelligence/researchskills-extract
 ```
 
-Then in Claude Code: `/extract-knowhow`
-Or in Codex: `$extract-knowhow`
+Then in Claude Code: `/researchskills-extract`
+Or in Codex: `$researchskills-extract`
 
 The tool scans your conversation history, extracts research skills (procedural, semantic, and episodic), and opens a browser review page. After reviewing, submit via GitHub.
 
@@ -106,7 +106,7 @@ Open a GitHub Discussion or reach out to the core team via issues.
 
 感谢你贡献专业知识！有两种贡献方式：
 
-1. **科研技能（推荐）：** 使用 `/extract-knowhow` 从 AI 对话历史中自动提取科研技能。这是主要的贡献方式。
+1. **科研技能（推荐）：** 使用 `/researchskills-extract` 从 AI 对话历史中自动提取科研技能。这是主要的贡献方式。
 2. **Skill（手动）：** 参照模板手动撰写 Skill 文件。
 
 ---
@@ -119,8 +119,8 @@ Open a GitHub Discussion or reach out to the core team via issues.
 npm install -g @scienceintelligence/researchskills-extract
 ```
 
-在 Claude Code 中运行: `/extract-knowhow`
-在 Codex 中运行: `$extract-knowhow`
+在 Claude Code 中运行: `/researchskills-extract`
+在 Codex 中运行: `$researchskills-extract`
 
 工具会扫描你的对话历史，提取科研技能（程序性、语义性和情景性），并在浏览器中打开审阅页面。审阅后通过 GitHub 提交。
 

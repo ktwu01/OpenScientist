@@ -6,7 +6,7 @@
  * mapping domain → sorted list of subdomains. This is the single source of
  * truth for the arXiv-aligned taxonomy used by:
  *   - webserver review page (subdomain dropdown)
- *   - extract-knowhow CLI (domain mapping)
+ *   - researchskills-extract CLI (domain mapping)
  *   - any future tooling that needs the list
  *
  * Usage (from repo root):

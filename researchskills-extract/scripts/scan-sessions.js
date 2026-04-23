@@ -2,7 +2,7 @@
 /**
  * scan-sessions.js
  *
- * Stage 1 + 2 of /extract-knowhow, as a single deterministic script.
+ * Stage 1 + 2 of /researchskills-extract, as a single deterministic script.
  *
  * Discovers Claude Code and Codex session files, extracts per-session
  * metadata, filters out garbage (too-small, too-short, sub-agent, duplicate),

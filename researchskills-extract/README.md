@@ -6,7 +6,7 @@
 
 When you use Claude Code or Codex for scientific research — data analysis, paper writing, experiment design, theoretical derivation — your conversations contain valuable tacit knowledge: judgment calls, abandoned approaches, tool choices, and reasoning patterns.
 
-`/extract-knowhow` extracts three types of cognitive memory from your research sessions:
+`/researchskills-extract` extracts three types of cognitive memory from your research sessions:
 
 - **Procedural memory:** IF-THEN rules for navigating research impasses (e.g., "IF gradient explodes THEN check learning rate before architecture")
 - **Semantic memory:** Domain facts that LLMs don't reliably know (e.g., calibration constants, undocumented tool behaviors)
@@ -19,19 +19,19 @@ npm install -g @scienceintelligence/researchskills-extract
 ```
 
 This installs the command automatically to both platforms:
-- **Claude Code** → `~/.claude/commands/extract-knowhow.md`
-- **Codex** → `~/.codex/skills/extract-knowhow/SKILL.md`
+- **Claude Code** → `~/.claude/commands/researchskills-extract.md`
+- **Codex** → `~/.codex/skills/researchskills-extract/SKILL.md`
 
 ## Usage
 
 **Claude Code:**
 ```
-/extract-knowhow
+/researchskills-extract
 ```
 
 **Codex** (start with `codex -a never -s danger-full-access`):
 ```
-$extract-knowhow
+$researchskills-extract
 ```
 
 > 💡 **For best results:** use the most powerful model with the highest reasoning effort — **Claude Code:** Opus 4.6 + max effort. **Codex:** GPT-5.4 + x-high. Don't worry about token usage — conversations are heavily compressed before analysis, and per-session extraction is delegated to lighter models behind the scenes. Your chosen model mainly orchestrates the pipeline.
